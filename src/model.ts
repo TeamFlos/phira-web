@@ -4,4 +4,6 @@ export type User = {
   avatar: string,
   name: string,
   email: string,
+  language: string,
+  bio: string | null,
 };

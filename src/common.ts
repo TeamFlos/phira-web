@@ -7,6 +7,22 @@ export function fileToURL(file: string) {
   return file.replace(/https:\/\/api.phira.cn\/files\//g, 'https://files-cf.phira.cn/');
 }
 
+export type FetchApi = (
+  path: string,
+  request?: RequestInitWithJson,
+  onSuccess?: (json: object, resp: Response) => void,
+  onError?: (json: object, resp?: Response) => boolean,
+) => object | null;
+
+export async function uploadFile(fetchApi: FetchApi, file: File): Promise<string> {
+  let resp =
+    await fetchApi('/upload/avatar', {
+      method: 'POST',
+      body: file,
+    }) as { id: string };
+  return resp.id;
+}
+
 let cookieListener: (() => void)[] = [];
 
 function triggerCookie() {
@@ -43,14 +59,14 @@ interface RequestInitWithJson extends RequestInit {
   json?: object,
 }
 
-export function useFetchApi() {
+export function useFetchApi(): FetchApi {
   const router = useRouter();
   return async function (
-  	path: string,
-  	request?: RequestInitWithJson,
-  	onSuccess?: (json: object, resp: Response) => void,
-  	onError?: (json: object, resp?: Response) => boolean,
-  ) {
+    path: string,
+    request?: RequestInitWithJson,
+    onSuccess?: (json: object, resp: Response) => void,
+    onError?: (json: object, resp?: Response) => boolean,
+  ): object | null {
     request = request || {};
     let headers = new Headers(request.headers);
     if (request && 'json' in request) {

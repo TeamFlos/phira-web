@@ -6,6 +6,8 @@ import { useRouter } from 'vue-router'
 import { toast } from './components/Toasts.vue'
 import { useFetchApi, setCookie } from './common';
 
+import LoadOr from './components/LoadOr.vue'
+
 const router = useRouter();
 
 const fetchApi = useFetchApi();
@@ -75,8 +77,7 @@ async function submit() {
         </div>
         <div class="form-control mt-6">
           <button class="btn glass text-white" :class="{ disabled: doingLogin }" @click="submit">
-            <span v-if="doingLogin" class="loading loading-spinner"></span>
-            <template v-if="!doingLogin">登录</template>
+            <LoadOr :loading="doingLogin">登录</LoadOr>
           </button>
         </div>
         <div class="divider">
