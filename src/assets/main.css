@@ -1,0 +1,31 @@
+
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'Halva';
+    font-style: normal;
+    font-weight: 400;
+    src: url('https://fonts.cdnfonts.com/s/47814/Halva-qZY3r.woff') format('woff');
+}
+@font-face {
+    font-family: 'Halva Medium';
+    font-style: normal;
+    font-weight: 400;
+    src: url('https://fonts.cdnfonts.com/s/47814/HalvamediumRegular-ALmwM.woff') format('woff');
+}
+
+@keyframes toast-out {
+  0%{
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100%{
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
