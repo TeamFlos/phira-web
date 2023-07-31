@@ -20,6 +20,12 @@ const router = createRouter({
     },
     {
       path: '/settings',
+      redirect: to => {
+        return '/settings/account'
+      }
+    },
+    {
+      path: '/settings/:category',
       name: 'settings',
       component: SettingsView,
     },

@@ -3,6 +3,8 @@ import { toast } from './components/Toasts.vue'
 
 import { useRouter } from 'vue-router'
 
+export { toast };
+
 export function fileToURL(file: string) {
   return file.replace(/https:\/\/api.phira.cn\/files\//g, 'https://files-cf.phira.cn/');
 }
@@ -13,6 +15,15 @@ export type FetchApi = (
   onSuccess?: (json: object, resp: Response) => void,
   onError?: (json: object, resp?: Response) => boolean,
 ) => object | null;
+
+export function validatePassword(password: string, repeat?: string) {
+  if (!password || password.length < 8) {
+    throw new Error('密码过短');
+  }
+  if (repeat && repeat !== password) {
+    throw new Error('两次输入的密码不一致');
+  }
+}
 
 export async function uploadFile(fetchApi: FetchApi, file: File): Promise<string> {
   let resp =

@@ -4,7 +4,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { toast } from './components/Toasts.vue'
-import { useFetchApi, setCookie } from './common';
+import { useFetchApi, setCookie, validatePassword } from './common';
 
 import LoadOr from './components/LoadOr.vue'
 
@@ -32,12 +32,7 @@ async function submit() {
     if (!(/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/).test(email.value)) {
       throw new Error('邮箱不合法');
     }
-    if (!password.value || password.value.length < 8) {
-      throw new Error('密码过短');
-    }
-    if (password.value !== password2.value) {
-      throw new Error('两次输入的密码不一致');
-    }
+    validatePassword(password.value, password2.value);
     let resp = await fetchApi('/register', {
       method: 'POST',
       json: {
