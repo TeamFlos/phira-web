@@ -5,8 +5,8 @@ import { ref, reactive } from 'vue'
 const container = ref<HTMLElement>(null);
 const toasts = reactive<Toast[]>([]);
 
-export function toast(message: string, className?: 'error' | 'info' | 'warning' | 'success') {
-  let toast = { message, className: 'alert-' + (className || 'info') };
+export function toast(message: string, kind?: 'error' | 'info' | 'warning' | 'success') {
+  let toast = { message, className: 'alert-' + (kind || 'info') };
   toasts.push(toast);
   setTimeout(
     () => {
