@@ -110,7 +110,7 @@ async function saveProfile() {
         <div class="label">
           <span class="label-text text-inherit">简介</span>
         </div>
-        <input type="text" placeholder="个人简介" class="input input-bordered" v-model="bio"/>
+        <textarea placeholder="个人简介" class="textarea textarea-bordered" v-model="bio"></textarea>
       </div>
       <div class="flex justify-end">
         <button class="btn btn-primary mt-2" @click="saveProfile">

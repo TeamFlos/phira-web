@@ -24,4 +24,4 @@ export type Chart = {
   illustration: string,
   preview: string,
   file: string,
-}
+};
