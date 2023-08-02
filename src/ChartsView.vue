@@ -25,7 +25,7 @@ const initPage = parseInt(String(init['page'])) || 1;
 
 const parameters = computed(() => {
   return {
-    page: String(pagination.value?.current ?? 1),
+    page: String(pagination.value?.current ?? initPage),
   };
 });
 
