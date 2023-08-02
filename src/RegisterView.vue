@@ -4,7 +4,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { toast } from './components/Toasts.vue'
-import { useFetchApi, setCookie, validatePassword } from './common';
+import { useFetchApi, setCookie, validateEmail, validatePassword } from './common';
 
 import LoadOr from './components/LoadOr.vue'
 
@@ -14,37 +14,36 @@ const fetchApi = useFetchApi();
 
 const doingRegister = ref(false);
 
-const email = ref<string>(null);
-const username = ref<string>(null);
-const password = ref<string>(null);
-const password2 = ref<string>(null);
+const email = ref<string>();
+const username = ref<string>();
+const password = ref<string>();
+const password2 = ref<string>();
 
-const errorMessage = ref<string>(null);
+const errorMessage = ref<string>();
 
 async function submit() {
   if (doingRegister.value) {
     toast('正在注册中', 'warning');
     return;
   }
-  errorMessage.value = null;
+  errorMessage.value = undefined;
   doingRegister.value = true;
   try {
-    if (!(/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/).test(email.value)) {
-      throw new Error('邮箱不合法');
-    }
-    validatePassword(password.value, password2.value);
+    validateEmail(email.value!);
+    let pwd = password.value!, pwd2 = password2.value!;
+    validatePassword(pwd, pwd2);
     let resp = await fetchApi('/register', {
       method: 'POST',
       json: {
-        email: email.value,
-        name: username.value,
-        password: password.value,
+        email: email.value!,
+        name: username.value!,
+        password: pwd,
       },
     });
     toast('注册成功');
     router.back();
   } catch (e) {
-    errorMessage.value = e.message;
+    errorMessage.value = (e instanceof Error)? e.message: String(e);
   } finally {
     doingRegister.value = false;
   }
@@ -86,7 +85,7 @@ async function submit() {
         </div>
         <div class="form-control mt-6">
           <button class="btn glass text-white" :class="{ disabled: doingRegister }" @click="submit">
-            <LoadOr :loading="doingLogin">注册</LoadOr>
+            <LoadOr :loading="doingRegister">注册</LoadOr>
           </button>
         </div>
       </div>

@@ -2,8 +2,8 @@
 
 import { ref } from 'vue'
 
-import { useFetchApi, toast, uploadFile, fileToURL } from '../common'
-import { User } from '../model'
+import { useFetchApi, toast, toastError, uploadFile, fileToURL } from '../common'
+import type { User } from '../model'
 
 import LoadOr from '../components/LoadOr.vue'
 
@@ -11,25 +11,25 @@ const fetchApi = useFetchApi();
 
 const user: User = await fetchApi('/me') as User;
 
-const avatarImage = ref<HTMLImageElement>(null);
-const updateAvatarButton = ref<HTMLElement>(null);
+const avatarImage = ref<HTMLImageElement>();
+const updateAvatarButton = ref<HTMLElement>();
 
-const avatarFile = ref<File>(null);
+const avatarFile = ref<File>();
 const updatingAvatar = ref(false);
 
 const username = ref(user.name);
 const language = ref(user.language);
-const bio = ref(user.bio);
+const bio = ref(user.bio ?? '');
 
 const savingProfile = ref(false);
 
 function onChangeAvatar(event: Event) {
-  updateAvatarButton.value.classList.remove('hidden');
+  updateAvatarButton.value!.classList.remove('hidden');
   let reader = new FileReader();
   reader.onload = function() {
-    avatarImage.value.src = reader.result as string;
+    avatarImage.value!.src = reader.result as string;
   };
-  avatarFile.value = (event.target as HTMLInputElement).files[0];
+  avatarFile.value = (event.target as HTMLInputElement).files![0];
   reader.readAsDataURL(avatarFile.value);
 }
 
@@ -37,15 +37,15 @@ async function updateAvatar() {
   if (updatingAvatar.value) return;
   updatingAvatar.value = true;
   try {
-    let id = await uploadFile(fetchApi, avatarFile.value);
+    let id = await uploadFile(fetchApi, avatarFile.value!);
     await fetchApi('/me', {
       method: 'PATCH',
       json: { avatar: id },
     });
     toast('头像已更新');
-    avatarFile.value = null;
+    avatarFile.value = undefined;
   } catch (e) {
-    toast(e.message, 'error');
+    toastError(e);
   } finally {
     updatingAvatar.value = false;
   }
@@ -65,7 +65,7 @@ async function saveProfile() {
     });
     toast('资料已更新');
   } catch (e) {
-    toast(e.message, 'error');
+    toastError(e);
   } finally {
     savingProfile.value = false;
   }

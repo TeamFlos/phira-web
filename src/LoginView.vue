@@ -4,7 +4,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { toast } from './components/Toasts.vue'
-import { useFetchApi, setCookie, validatePassword } from './common';
+import { useFetchApi, setCookie, validateEmail, validatePassword } from './common';
 
 import LoadOr from './components/LoadOr.vue'
 
@@ -14,35 +14,34 @@ const fetchApi = useFetchApi();
 
 const doingLogin = ref(false);
 
-const email = ref<string>(null);
-const password = ref<string>(null);
+const email = ref<string>();
+const password = ref<string>();
 
-const errorMessage = ref<string>(null);
+const errorMessage = ref<string>();
 
 async function submit() {
   if (doingLogin.value) {
     toast('正在登录中', 'warning');
     return;
   }
-  errorMessage.value = null;
+  errorMessage.value = undefined;
   doingLogin.value = true;
   try {
-    if (!(/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/).test(email.value)) {
-      throw new Error('邮箱不合法');
-    }
-    validatePassword(password.value);
+    validateEmail(email.value!);
+    let pwd = password.value!;
+    validatePassword(pwd);
     let resp = await fetchApi('/login', {
       method: 'POST',
       json: {
-        email: email.value,
-        password: password.value,
+        email: email.value!,
+        password: pwd,
       },
     }) as { token: string, expireAt: string };
     setCookie('access_token', resp.token, new Date(Date.parse(resp.expireAt)).toUTCString());
     toast('登录成功');
     router.back();
   } catch (e) {
-    errorMessage.value = e.message;
+    errorMessage.value = (e instanceof Error)? e.message: String(e);
   } finally {
     doingLogin.value = false;
   }

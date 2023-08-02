@@ -5,6 +5,10 @@ import { useRouter } from 'vue-router'
 
 export { toast };
 
+export function toastError(error: any) {
+  toast((error instanceof Error)? error.message: String(error), 'error');
+}
+
 export function fileToURL(file: string) {
   return file.replace(/https:\/\/api.phira.cn\/files\//g, 'https://files-cf.phira.cn/');
 }
@@ -15,6 +19,12 @@ export type FetchApi = (
   onSuccess?: (json: object, resp: Response) => void,
   onError?: (json: object, resp?: Response) => boolean,
 ) => object | null;
+
+export function validateEmail(email: string) {
+  if (!(/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/).test(email)) {
+    throw new Error('邮箱不合法');
+  }
+}
 
 export function validatePassword(password: string, repeat?: string) {
   if (!password || password.length < 8) {
@@ -77,7 +87,7 @@ export function useFetchApi(): FetchApi {
     request?: RequestInitWithJson,
     onSuccess?: (json: object, resp: Response) => void,
     onError?: (json: object, resp?: Response) => boolean,
-  ): object | null {
+  ): Promise<object | undefined> {
     request = request || {};
     let headers = new Headers(request.headers);
     if (request && 'json' in request) {
@@ -90,7 +100,7 @@ export function useFetchApi(): FetchApi {
     }
     request.headers = headers;
     try {
-      let resp = await fetch(__API_HOST__ + path, request);
+      let resp = await fetch('https://api.phira.cn' + path, request);
       let text = await resp.text();
       let json: any = { text };
       try {
@@ -101,7 +111,7 @@ export function useFetchApi(): FetchApi {
           // unauthorized
           logout();
           router.push('/login');
-          toast('请登录', 'alert-error');
+          toast('请登录', 'error');
         } else if (!onError || onError(json, resp)) {
           if (!onSuccess) throw new Error(json.error);
           toast(json.error, 'error');
@@ -114,7 +124,7 @@ export function useFetchApi(): FetchApi {
     } catch (e) {
       if (!onError || onError({})) {
         if (!onSuccess) throw e;
-        toast(e, 'error');
+        toastError(e);
       }
     }
   };

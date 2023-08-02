@@ -2,15 +2,15 @@
 
 import { ref } from 'vue'
 
-import { useFetchApi, toast, validatePassword } from '../common'
+import { useFetchApi, toast, toastError, validatePassword } from '../common'
 
 import LoadOr from '../components/LoadOr.vue'
 
 const fetchApi = useFetchApi();
 
-const password_old = ref(null);
-const password = ref(null);
-const password2 = ref(null);
+const password_old = ref<string>();
+const password = ref<string>();
+const password2 = ref<string>();
 
 const changingPassword = ref(false);
 
@@ -18,21 +18,25 @@ async function changePassword() {
   if (changingPassword.value) return;
   changingPassword.value = true;
   try {
-    validatePassword(password_old.value);
-    validatePassword(password.value, password2.value);
+    let
+      pwd_old = password_old.value!,
+      pwd = password.value!,
+      pwd2 = password2.value!;
+    validatePassword(pwd_old);
+    validatePassword(pwd, pwd2);
     await fetchApi('/edit/password', {
       method: 'POST',
       json: {
-        old: password_old.value,
-        new: password.value,
+        old: pwd_old,
+        new: pwd,
       }
     });
-    password_old.value = null;
-    password.value = null;
-    password2.value = null;
+    password_old.value = undefined;
+    password.value = undefined;
+    password2.value = undefined;
     toast('更改密码成功');
   } catch (e) {
-    toast(e, 'error');
+    toastError(e);
   } finally {
     changingPassword.value = false;
   }

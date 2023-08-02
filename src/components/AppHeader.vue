@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router'
 
 import { toast } from './Toasts.vue'
 import { useFetchApi, getCookie, addCookieListener, fileToURL, logout } from '../common'
-import { User } from '../model'
+import type { User } from '../model'
 
 import Loader from './Loader.vue'
 
@@ -13,12 +13,12 @@ const route = useRoute();
 
 const fetchApi = useFetchApi();
 
-const accessToken = ref<string>(null);
-const user = ref<User>(null);
+const accessToken = ref<string>();
+const user = ref<User>();
 
 addCookieListener(() => {
   accessToken.value = getCookie('access_token');
-  user.value = null;
+  user.value = undefined;
   if (accessToken.value) {
     fetchApi('/me', {}, (me) => {
       user.value = me as User;

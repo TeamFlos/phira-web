@@ -15,8 +15,5 @@ export default defineConfig(({ mode } ) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
-    define: {
-      __API_HOST__: JSON.stringify(process.env.VITE_API_HOST || 'https://api.phira.cn'),
-    },
   };
 })
