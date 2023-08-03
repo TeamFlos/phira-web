@@ -35,7 +35,8 @@ fetchApi(`/user/${chart.uploader}`, {}, (user) => { uploader.value = user as Use
           <div v-if="uploader" class="flex flex-col w-full items-center">
             <div class="avatar">
               <div class="w-24 mask mask-squircle">
-                <img v-if="uploader" :src="fileToURL(uploader.avatar)" />
+                <img v-if="uploader?.avatar" :src="fileToURL(uploader.avatar)" />
+                <img src="./assets/user.png" />
               </div>
             </div>
             <p class="font-black text-xl mt-2">{{ uploader.name }}</p>

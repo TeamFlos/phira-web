@@ -51,13 +51,13 @@ function triggerCookie() {
 }
 
 export function setCookie(key: string, value: string, expires: string) {
+  console.log(expires);
   document.cookie = `${key}=${value}; expires=${expires}; SameSite=None; Secure`;
   triggerCookie();
 }
 
 export function deleteCookie(key: string) {
   setCookie(key, '', new Date().toUTCString());
-  triggerCookie();
 }
 
 export function logout() {

@@ -37,8 +37,8 @@ function doLogout() {
 </script>
 
 <template>
-  <header>
-    <div class="navbar h-16">
+  <header class="relative">
+    <div class="navbar h-16 fixed top-0 backdrop-blur z-30">
       <div class="navbar-start">
         <router-link to="/" class="btn btn-ghost normal-case text-2xl">Phira</router-link>
         <div class="flex ms-8 gap-2">

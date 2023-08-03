@@ -8,8 +8,8 @@ import Toasts from './components/Toasts.vue'
 </script>
 
 <template>
-  <AppHeader/>
-  <div class="w-screen">
+  <AppHeader />
+  <div class="w-screen mt-20">
     <router-view v-slot="{ Component }">
       <Suspense timeout="0">
         <template #default>
@@ -22,6 +22,6 @@ import Toasts from './components/Toasts.vue'
         </template>
       </Suspense>
     </router-view>
-    <Toasts/>
+    <Toasts />
   </div>
 </template>

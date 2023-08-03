@@ -58,7 +58,7 @@ async function submit() {
           <div class="label">
             <span class="label-text text-inherit">邮箱</span>
           </div>
-          <input type="email" placeholder="邮箱地址" class="input input-bordered" v-model="email"/>
+          <input type="email" placeholder="邮箱地址" class="input input-bordered text-primary-content" v-model="email"/>
         </div>
         <div class="form-control">
           <div class="label">
