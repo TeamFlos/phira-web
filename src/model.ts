@@ -24,4 +24,13 @@ export type Chart = {
   illustration: string,
   preview: string,
   file: string,
+
+  uploader: number,
+
+  tags: string[],
+  rating?: number,
+
+  created: string,
+  updated: string,
+  chart_updated: string,
 };
