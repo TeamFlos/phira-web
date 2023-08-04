@@ -62,7 +62,8 @@ function Property(
                   <Property title="上传于" :value="moment(chart.created).fromNow()" />
                 </div>
                 <div class="divider"></div>
-                <p class="w-full">{{ chart.description }}</p>
+                <p v-if="chart.description.length" class="w-full">{{ chart.description }}</p>
+                <p v-if="!chart.description.length" class="w-full italic">该谱面没有简介。</p>
               </UserCard>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2">
                 <p>评分</p>
