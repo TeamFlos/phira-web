@@ -16,6 +16,11 @@ const fetchApi = useFetchApi();
 const accessToken = ref<string>();
 const user = ref<User>();
 
+import moment from 'moment'
+import 'moment/dist/locale/zh-cn'
+
+moment.locale('zh-cn');
+
 addCookieListener(() => {
   accessToken.value = getCookie('access_token');
   user.value = undefined;

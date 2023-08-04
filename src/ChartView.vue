@@ -1,10 +1,15 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
+import { ref, h } from 'vue'
 import { useRoute } from 'vue-router'
+
+import moment from 'moment'
 
 import { useFetchApi, fileToURL } from './common'
 import type { Chart, User } from './model'
+
+import Rating from './components/Rating.vue'
+import UserCard from './components/UserCard.vue'
 
 const fetchApi = useFetchApi();
 
@@ -13,33 +18,66 @@ const route = useRoute();
 const id = parseInt(String(route.params.id));
 const chart = await fetchApi(`/chart/${id}`) as Chart;
 
-const uploader = ref<User>();
-fetchApi(`/user/${chart.uploader}`, {}, (user) => { uploader.value = user as User; });
+const rating = ref<number>();
+
+function Property(
+  props: { title: string, value: string }
+) {
+  return h(
+    'div',
+    { 'class': 'flex flex-row text-lg' },
+    [
+      h('span', { 'class': 'grow' }, props.title),
+      h('span', { 'class': 'text-primary-content' }, props.value),
+    ]
+  );
+}
 
 </script>
 
 <template>
-  <div class="flex flex-col items-center mt-8">
-    <div class="mx-8 flex flex-col lg:flex-row lg:w-2/3 gap-8">
-      <div class="card lg:w-3/4 bg-base-100 shadow-xl">
-        <figure class="aspect-[8/5]"><div :style="{'background-image': 'url(' + fileToURL(chart.illustration) + ')'}" class="illustration w-full h-full"></div></figure>
-        <div class="card-body">
-          <h2 class="card-title">{{ chart.name }}</h2>
-        </div>
-      </div>
-      <div class="lg:w-1/4">
-        <div class="card bg-base-100 w-full p-4 flex-col items-center">
-          <div v-if="!uploader" class="flex w-16 justify-center items-center">
-            <div class="w-2/3 loading loading-spinner"></div>
-          </div>
-          <div v-if="uploader" class="flex flex-col w-full items-center">
-            <div class="avatar">
-              <div class="w-24 mask mask-squircle">
-                <img v-if="uploader?.avatar" :src="fileToURL(uploader.avatar)" />
-                <img src="./assets/user.png" />
+  <div class="relative">
+    <div :style="{'background-image': 'url(' + fileToURL(chart.illustration) + ')'}" class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-multiply bg-[#444444]">
+    </div>
+    <div class="w-full h-48 -mt-48 bg-gradient-to-b from-transparent to-base-200"></div>
+    <div class="flex flex-col items-center -mt-[35vh]">
+      <div class="px-8 w-full lg:px-0 lg:w-3/4 gap-8">
+        <div class="flex flex-col">
+          <h1>{{ chart.composer }}</h1>
+          <h1 class="text-5xl font-black">{{ chart.name }}</h1>
+          <div class="mt-16 flex flex-row-reverse gap-8">
+            <div class="flex flex-col w-1/4 gap-4">
+              <UserCard :id="chart.uploader">
+                <div class="divider"></div>
+                <div class="flex flex-col w-full gap-2">
+                  <Property title="曲师" :value="chart.composer" />
+                  <Property title="画师" :value="chart.illustrator" />
+                  <Property title="谱师" :value="chart.charter" />
+                  <Property title="难度" :value="`${chart.level} (${chart.difficulty.toFixed(1)})`" />
+                </div>
+                <div class="divider"></div>
+                <div class="flex flex-col w-full gap-2">
+                  <Property title="更新于" :value="moment(chart.updated).fromNow()" />
+                  <Property title="上传于" :value="moment(chart.created).fromNow()" />
+                </div>
+                <div class="divider"></div>
+                <p class="w-full">{{ chart.description }}</p>
+              </UserCard>
+              <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2">
+                <p>评分</p>
+                <Rating @change="(index) => { rating = index }" />
+                <button v-if="rating" class="btn btn-primary mt-2">提交评分</button>
               </div>
             </div>
-            <p class="font-black text-xl mt-2">{{ uploader.name }}</p>
+            <div class="grow -mt-8">
+              <div class="tabs">
+                <a class="tab tab-lifted tab-active">排行榜</a>
+                <a class="tab tab-lifted">评议记录</a>
+              </div>
+              <div class="card bg-base-100 shadow-xl p-4 rounded-s-none">
+                <p>哎呀，还没有写</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

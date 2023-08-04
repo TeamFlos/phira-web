@@ -11,6 +11,9 @@ dependencies:
   jquery:
     specifier: ^3.7.0
     version: 3.7.0
+  moment:
+    specifier: ^2.29.4
+    version: 2.29.4
   vue:
     specifier: ^3.3.4
     version: 3.3.4
@@ -1854,6 +1857,10 @@ packages:
     dependencies:
       brace-expansion: 2.0.1
     dev: true
+
+  /moment@2.29.4:
+    resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
+    dev: false
 
   /ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}

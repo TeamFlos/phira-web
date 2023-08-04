@@ -2,10 +2,12 @@
 
 import { ref, reactive } from 'vue'
 
+type ToastKind = 'error' | 'info' | 'warning' | 'success';
+
 interface Toast {
   id: number,
   message: string,
-  kind: string,
+  kind: ToastKind,
 }
 
 let counter = 0;
@@ -13,7 +15,7 @@ let counter = 0;
 const container = ref<HTMLElement>();
 const toasts = reactive<Toast[]>([]);
 
-export function toast(message: string, kind?: 'error' | 'info' | 'warning' | 'success') {
+export function toast(message: string, kind?: ToastKind) {
   let toast = { id: counter++, message, kind: kind ?? 'info' };
   toasts.push(toast);
   setTimeout(
@@ -49,7 +51,7 @@ const containerThis = container;
 </script>
 
 <template>
-  <div class="toast toast-top toast-end z-[32]" ref="containerThis">
+  <div class="toast toast-top toast-end z-[33]" ref="containerThis">
     <div v-for="toast in toasts" :key="toast.id" class="alert" :class="KIND_CLASS_NAME[toast.kind]">
       <span>{{ toast.message }}</span>
     </div>

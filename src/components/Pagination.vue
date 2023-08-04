@@ -3,10 +3,6 @@
 import { ref, defineComponent, h } from 'vue'
 import type { SetupContext } from 'vue'
 
-const emit = defineEmits<{
-  (e: 'goto', page: number): void
-}>();
-
 const props = defineProps<{ init?: number, total: number }>();
 
 const current = ref(props.init ?? 1);
