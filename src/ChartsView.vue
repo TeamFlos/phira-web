@@ -17,7 +17,7 @@ const fetchApi = useFetchApi();
 
 const pagination = ref<typeof Pagination>();
 
-const totalCount = ref<number>();
+const totalCount = ref(0);
 const charts = ref<Chart[]>();
 
 const init = router.currentRoute.value.query;

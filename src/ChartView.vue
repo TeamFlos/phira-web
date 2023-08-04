@@ -67,7 +67,7 @@ function Property(
               </UserCard>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p>评分</p>
-                <Rating :init="chart.rating * 5" @change="(index) => { rating = index }" />
+                <Rating :init="(chart.rating ?? 0) * 5" @change="(index) => { rating = index }" />
                 <button v-if="rating" class="btn btn-primary mt-2">提交评分</button>
               </div>
             </div>

@@ -20,7 +20,7 @@ const pagination = ref<typeof Pagination>();
 
 type RecordEx = Record & { rank?: number, playerName: string, playerAvatar?: string };
 
-const totalCount = ref<number>();
+const totalCount = ref(0);
 const records = ref<RecordEx[]>();
 
 const parameters = computed(() => {
@@ -35,7 +35,7 @@ async function fetchRecords() {
     chart: String(props.chart),
     pageNum: String(PAGE_NUM),
     includePlayer: String(true),
-    best: true,
+    best: String(true),
     ...parameters.value
   };
   const resp = await fetchApi('/record/query?' + new URLSearchParams(params)) as Page<RecordEx>;
@@ -106,6 +106,6 @@ onMounted(() => {
         <Loader />
       </div>
     </div>
-    <Pagination :total="pageCount(totalCount, 30)" ref="pagination" />
+    <Pagination :total="pageCount(totalCount, PAGE_NUM)" ref="pagination" />
   </div>
 </template>
