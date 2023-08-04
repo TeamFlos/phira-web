@@ -5,6 +5,10 @@ import { useRouter } from 'vue-router'
 
 export { toast };
 
+export function pageCount(count: number, pageNum: number) {
+  return count? (Math.floor((count - 1) / pageNum) + 1): 0;
+}
+
 export function toastError(error: any) {
   toast((error instanceof Error)? error.message: String(error), 'error');
 }

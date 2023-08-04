@@ -46,8 +46,8 @@ function Property(
         <div class="flex flex-col">
           <h1>{{ chart.composer }}</h1>
           <h1 class="text-5xl font-black">{{ chart.name }}</h1>
-          <div class="mt-16 flex flex-row-reverse gap-8">
-            <div class="flex flex-col w-1/4 gap-4">
+          <div class="mt-16 flex flex-col lg:flex-row-reverse gap-8">
+            <div class="flex flex-col lg:w-1/4 gap-4">
               <UserCard :id="chart.uploader">
                 <div class="divider"></div>
                 <div class="flex flex-col w-full gap-2">
@@ -71,7 +71,7 @@ function Property(
                 <button v-if="rating" class="btn btn-primary mt-2">提交评分</button>
               </div>
             </div>
-            <div class="grow -mt-8">
+            <div class="grow -mt-8 lg:w-3/4">
               <div class="tabs">
                 <a class="tab tab-lifted tab-active">排行榜</a>
                 <a class="tab tab-lifted">评议记录</a>

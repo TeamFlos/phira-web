@@ -3,7 +3,7 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { useFetchApi, fileToURL } from './common'
+import { useFetchApi, fileToURL, pageCount } from './common'
 import type { Chart, Page } from './model'
 
 import Loader from './components/Loader.vue'
@@ -91,6 +91,6 @@ onMounted(() => {
         <Loader class="m-8 loading-lg"/>
       </div>
     </div>
-    <Pagination :init="initPage" :total="totalCount? (Math.floor((totalCount - 1) / PAGE_NUM) + 1): 0" class="mt-8 mb-16" ref="pagination" />
+    <Pagination :init="initPage" :total="pageCount(totalCount, PAGE_NUM)" class="mt-8 mb-16" ref="pagination" />
   </div>
 </template>

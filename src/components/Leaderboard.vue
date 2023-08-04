@@ -1,34 +1,111 @@
 <script setup lang="ts">
 
-import { useFetchApi } from '../common'
+import { ref, computed, watch, onMounted } from 'vue'
+
+import { useFetchApi, fileToURL, pageCount } from '../common'
+import type { Page, Record } from '../model'
+
+const PAGE_NUM = 30;
+
+import Loader from './Loader.vue'
+import Pagination from './Pagination.vue'
+
+import moment from 'moment'
 
 const props = defineProps<{ chart: number }>();
 
 const fetchApi = useFetchApi();
 
-let resp = await fetchApi(`/record/query?chart=${props.chart}`);
+const pagination = ref<typeof Pagination>();
 
-const records = resp.results;
+type RecordEx = Record & { rank?: number, playerName: string, playerAvatar?: string };
+
+const totalCount = ref<number>();
+const records = ref<RecordEx[]>();
+
+const parameters = computed(() => {
+  return {
+    page: String(pagination.value?.current ?? 1),
+  };
+});
+
+async function fetchRecords() {
+  records.value = undefined;
+  let params = {
+    chart: String(props.chart),
+    pageNum: String(PAGE_NUM),
+    includePlayer: String(true),
+    best: true,
+    ...parameters.value
+  };
+  const resp = await fetchApi('/record/query?' + new URLSearchParams(params)) as Page<RecordEx>;
+  totalCount.value = resp.count;
+  for (let i = 0; i < resp.results.length; ++i) {
+    resp.results[i].rank = ((pagination.value?.current ?? 1) - 1) * PAGE_NUM + i + 1;
+  }
+  records.value = resp.results;
+}
+
+await fetchRecords();
+
+onMounted(() => {
+  watch(parameters, fetchRecords);
+});
 
 </script>
 
 <template>
-  <div class="overflow-x-auto">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>排名</th>
-          <th>玩家</th>
-          <th>分数</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(record, index) in records" class="hover">
-          <th>{{ index + 1 }}</th>
-          <td>{{ record.player }}</td>
-          <td>{{ record.score }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="overflow-x-auto flex flex-col items-end gap-2">
+    <div class="overflow-x-auto w-full">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>排名</th>
+            <th>玩家</th>
+            <th>分数</th>
+            <th>无瑕度</th>
+            <th>准度</th>
+            <th>Perfect</th>
+            <th>Good</th>
+            <th>Bad</th>
+            <th>Miss</th>
+            <th>时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="record in records" :key="record.id" class="hover text-lg">
+            <th class="text-center">
+              <i v-if="record.rank === 1" class="fa-solid fa-trophy text-[#ffd700]"></i>
+              <i v-if="record.rank === 2" class="fa-solid fa-trophy text-[#c0c0c0]"></i>
+              <i v-if="record.rank === 3" class="fa-solid fa-trophy text-[#cd7f32]"></i>
+              {{ record.rank }}
+            </th>
+            <td>
+              <div class="flex flex-row items-center gap-2">
+                <div class="avatar">
+                  <div class="w-8 rounded-xl">
+                    <img v-if="record.playerAvatar" :src="fileToURL(record.playerAvatar)" />
+                    <img v-if="!record.playerAvatar" src="../assets/user.png" />
+                  </div>
+                </div>
+                <span>{{ record.playerName }}</span>
+              </div>
+            </td>
+            <td class="font-black font-mono text-2xl">{{ record.score }}</td>
+            <td class="font-black font-mono text-2xl">{{ Math.floor(record.std_score) }}</td>
+            <td>{{ (record.accuracy * 100).toFixed(2) + '%' }}</td>
+            <td>{{ record.perfect }}</td>
+            <td>{{ record.good }}</td>
+            <td>{{ record.bad }}</td>
+            <td>{{ record.miss }}</td>
+            <td class="whitespace-nowrap">{{ moment(record.time).fromNow() }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-if="!records" class="w-full flex flex-row justify-center my-4">
+        <Loader />
+      </div>
+    </div>
+    <Pagination :total="pageCount(totalCount, 30)" ref="pagination" />
   </div>
 </template>

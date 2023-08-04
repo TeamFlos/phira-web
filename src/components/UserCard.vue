@@ -23,7 +23,7 @@ fetchApi(`/user/${props.id}`, {}, (u) => { user.value = u as User; });
       <div class="avatar">
         <div class="w-24 mask mask-squircle">
           <img v-if="user?.avatar" :src="fileToURL(user.avatar)" />
-          <img src="../assets/user.png" />
+          <img v-if="!user?.avatar" src="../assets/user.png" />
         </div>
       </div>
       <p class="font-black text-xl mt-2">{{ user.name }}</p>

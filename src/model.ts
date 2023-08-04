@@ -24,7 +24,7 @@ export type Chart = {
   difficulty: number,
   ranked: boolean,
   stable: boolean,
-  stable_request: boolean,
+  stableRequest: boolean,
 
   illustration: string,
   preview: string,
@@ -37,5 +37,27 @@ export type Chart = {
 
   created: string,
   updated: string,
-  chart_updated: string,
+  chartUpdated: string,
+};
+
+export type Record = {
+  id: number,
+  player: number,
+  chart: number,
+  score: number,
+  accuracy: number,
+  perfect: number,
+  good: number,
+  bad: number,
+  miss: number,
+  speed: number,
+  maxCombo: number,
+  mods: number,
+  fullCombo: boolean,
+  std: number,
+  std_score: number,
+
+  best: boolean,
+  best_std: boolean,
+  time: string,
 };
