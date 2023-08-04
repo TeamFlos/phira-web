@@ -41,7 +41,7 @@ function Property(
     <div :style="{'background-image': 'url(' + fileToURL(chart.illustration) + ')'}" class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-multiply bg-[#444444]">
     </div>
     <div class="w-full h-48 -mt-48 bg-gradient-to-b from-transparent to-base-200"></div>
-    <div class="flex flex-col items-center -mt-[35vh]">
+    <div class="flex flex-col items-center -mt-[35vh] mb-24">
       <div class="px-8 w-full lg:px-0 lg:w-3/4 gap-8">
         <div class="flex flex-col">
           <h1>{{ chart.composer }}</h1>
@@ -65,7 +65,7 @@ function Property(
                 <p v-if="chart.description.length" class="w-full">{{ chart.description }}</p>
                 <p v-if="!chart.description.length" class="w-full italic">该谱面没有简介。</p>
               </UserCard>
-              <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2">
+              <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p>评分</p>
                 <Rating :init="chart.rating * 5" @change="(index) => { rating = index }" />
                 <button v-if="rating" class="btn btn-primary mt-2">提交评分</button>
