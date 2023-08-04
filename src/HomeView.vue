@@ -1,5 +1,5 @@
 <template>
-  <div class="hero min-h-[calc(100vh-4rem)]">
+  <div class="hero min-h-[calc(100vh-5rem)]">
     <div class="hero-content justify-center flex-col lg:flex-row">
       <img class="shadow-2xl rounded-lg lg:me-14" src="./assets/icon.png"/>
       <div class="flex-col text-center">
