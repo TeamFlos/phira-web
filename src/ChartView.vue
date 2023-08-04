@@ -8,6 +8,7 @@ import moment from 'moment'
 import { useFetchApi, fileToURL } from './common'
 import type { Chart, User } from './model'
 
+import Leaderboard from './components/Leaderboard.vue'
 import Rating from './components/Rating.vue'
 import UserCard from './components/UserCard.vue'
 
@@ -65,7 +66,7 @@ function Property(
               </UserCard>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2">
                 <p>评分</p>
-                <Rating @change="(index) => { rating = index }" />
+                <Rating :init="chart.rating * 5" @change="(index) => { rating = index }" />
                 <button v-if="rating" class="btn btn-primary mt-2">提交评分</button>
               </div>
             </div>
@@ -75,7 +76,7 @@ function Property(
                 <a class="tab tab-lifted">评议记录</a>
               </div>
               <div class="card bg-base-100 shadow-xl p-4 rounded-s-none">
-                <p>哎呀，还没有写</p>
+                <Leaderboard :chart="chart.id" />
               </div>
             </div>
           </div>

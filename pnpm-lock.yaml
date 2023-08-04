@@ -8,12 +8,12 @@ dependencies:
   '@fortawesome/fontawesome-svg-core':
     specifier: ^6.4.0
     version: 6.4.0
-  jquery:
-    specifier: ^3.7.0
-    version: 3.7.0
   moment:
     specifier: ^2.29.4
     version: 2.29.4
+  phira-web:
+    specifier: 'link:'
+    version: 'link:'
   vue:
     specifier: ^3.3.4
     version: 3.3.4
@@ -1748,10 +1748,6 @@ packages:
     resolution: {integrity: sha512-oVhqoRDaBXf7sjkll95LHVS6Myyyb1zaunVwk4Z0+WPSW4gjS0pl01zYKHScTuyEhQsFxV5L4DR5r+YqSyqyyg==}
     hasBin: true
     dev: true
-
-  /jquery@3.7.0:
-    resolution: {integrity: sha512-umpJ0/k8X0MvD1ds0P9SfowREz2LenHsQaxSohMZ5OMNEU2r0tf8pdeEFTHMFxWVxKNyU9rTtK3CWzUCTKJUeQ==}
-    dev: false
 
   /js-yaml@4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}

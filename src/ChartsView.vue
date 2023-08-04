@@ -4,7 +4,7 @@ import { ref, watch, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useFetchApi, fileToURL } from './common'
-import type { Chart } from './model'
+import type { Chart, Page } from './model'
 
 import Loader from './components/Loader.vue'
 import Pagination from './components/Pagination.vue'
@@ -35,9 +35,9 @@ async function fetchCharts() {
     pageNum: String(PAGE_NUM),
     ...parameters.value
   };
-  const { count, results } = await fetchApi('/chart?' + new URLSearchParams(params)) as { count: number, results: Chart[] };
-  totalCount.value = count;
-  charts.value = results;
+  const resp = await fetchApi('/chart?' + new URLSearchParams(params)) as Page<Chart>;
+  totalCount.value = resp.count;
+  charts.value = resp.results;
 }
 
 await fetchCharts();

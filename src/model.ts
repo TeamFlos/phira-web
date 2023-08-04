@@ -1,4 +1,9 @@
 
+export type Page<T> = {
+  count: number,
+  results: T[],
+};
+
 export type User = {
   id: number,
   avatar: string,
