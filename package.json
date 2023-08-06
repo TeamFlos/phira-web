@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
+    "@tailwindcss/typography": "^0.5.9",
     "moment": "^2.29.4",
     "phira-web": "link:",
     "vue": "^3.3.4",

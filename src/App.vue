@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+import AppFooter from './components/AppFooter.vue'
 import AppHeader from './components/AppHeader.vue'
 import Loader from './components/Loader.vue'
 
@@ -24,4 +25,5 @@ import Toasts from './components/Toasts.vue'
     </router-view>
     <Toasts />
   </div>
+  <AppFooter />
 </template>

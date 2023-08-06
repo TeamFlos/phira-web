@@ -1,5 +1,6 @@
 
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -16,6 +17,12 @@
     font-style: normal;
     font-weight: 400;
     src: url('https://fonts.cdnfonts.com/s/47814/HalvamediumRegular-ALmwM.woff') format('woff');
+}
+
+@layer base {
+  html {
+    font-family: ubuntu, system-ui;
+  }
 }
 
 @keyframes toast-out {
