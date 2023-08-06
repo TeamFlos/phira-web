@@ -65,6 +65,8 @@ export type Record = {
 export type StbHistory = {
   id: number,
   reviewer?: number,
+  reviewerName?: string,
+  reviewerAvatar?: string,
   chart: number,
   approve: boolean,
   comment?: string,
