@@ -10,7 +10,9 @@ import type { Chart, User } from './model'
 
 import Leaderboard from './components/Leaderboard.vue'
 import Rating from './components/Rating.vue'
+import StbHistory from './components/StbHistory.vue'
 import UserCard from './components/UserCard.vue'
+import Loader from './components/Loader.vue'
 
 const fetchApi = useFetchApi();
 
@@ -33,6 +35,8 @@ function Property(
     ]
   );
 }
+
+const contentTab = ref('ldb');
 
 </script>
 
@@ -73,11 +77,21 @@ function Property(
             </div>
             <div class="grow -mt-8 lg:w-3/4">
               <div class="tabs">
-                <a class="tab tab-lifted tab-active">排行榜</a>
-                <a class="tab tab-lifted">评议记录</a>
+                <a class="tab tab-lifted" :class="{ 'tab-active': contentTab === 'ldb' }" @click="contentTab = 'ldb'">排行榜</a>
+                <a class="tab tab-lifted" :class="{ 'tab-active': contentTab === 'stb' }" @click="contentTab = 'stb'">评议记录</a>
               </div>
-              <div class="card bg-base-100 shadow-xl p-4 rounded-s-none">
-                <Leaderboard :chart="chart.id" />
+              <div class="card bg-base-100 shadow-xl p-4 rounded-t-none">
+                <Leaderboard v-if="contentTab === 'ldb'" :chart="chart.id" />
+                <Suspense v-if="contentTab === 'stb'" timeout="0">
+                  <template #default>
+                    <StbHistory :chart="chart.id" :uploader="chart.uploader" />
+                  </template>
+                  <template #fallback>
+                    <div class="flex justify-center my-2">
+                      <Loader/>
+                    </div>
+                  </template>
+                </Suspense>
               </div>
             </div>
           </div>

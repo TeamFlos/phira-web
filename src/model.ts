@@ -61,3 +61,12 @@ export type Record = {
   best_std: boolean,
   time: string,
 };
+
+export type StbHistory = {
+  id: number,
+  reviewer?: number,
+  chart: number,
+  approve: boolean,
+  comment?: string,
+  time: string,
+};
