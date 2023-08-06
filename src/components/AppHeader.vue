@@ -68,7 +68,8 @@ function doLogout() {
           <div v-if="user" class="dropdown dropdown-end">
             <label tabindex="0" class="btn btn-ghost btn-circle avatar">
               <div class="w-10 rounded-full">
-                <img :src="fileToURL(user.avatar)" />
+                <img v-if="user.avatar" :src="fileToURL(user.avatar)" />
+                <img v-if="!user.avatar" src="../assets/user.png" />
               </div>
             </label>
             <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40">
