@@ -25,3 +25,13 @@ China</pre>
     </article>
   </div>
 </template>
+
+<style scoped>
+article * {
+  @apply my-2;
+}
+
+article a {
+  font-style: italic;
+}
+</style>

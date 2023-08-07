@@ -11,6 +11,7 @@ import ChartView from '../ChartView.vue'
 import SettingsView from '../SettingsView.vue'
 
 import DMCA from '../DMCA.vue'
+import PrivacyPolicy from '../PrivacyPolicy.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,6 +28,7 @@ const router = createRouter({
     { path: '/settings/:category', name: 'settings', component: SettingsView },
 
     { path: '/dmca', name: 'DMCA', component: DMCA },
+    { path: '/privacy-policy', name: 'privacy policy', component: PrivacyPolicy },
   ]
 });
 
