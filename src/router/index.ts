@@ -12,6 +12,7 @@ import SettingsView from '../SettingsView.vue'
 
 import DMCA from '../DMCA.vue'
 import PrivacyPolicy from '../PrivacyPolicy.vue'
+import TermsOfUse from '../TermsOfUse.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +30,7 @@ const router = createRouter({
 
     { path: '/dmca', name: 'DMCA', component: DMCA },
     { path: '/privacy-policy', name: 'privacy policy', component: PrivacyPolicy },
+    { path: '/terms-of-use', name: 'terms of use', component: TermsOfUse },
   ]
 });
 

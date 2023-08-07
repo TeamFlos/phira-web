@@ -26,8 +26,8 @@
         <li>You have expressly made information public.</li>
         <li>According to relevant legal provisions or upon requests from administrative or judicial authorities, we have to disclose to third parties or administrative/judicial bodies.</li>
         <li>In cases of any violations of relevant People's Republic of China's laws, regulations, Phira's <router-link to="/terms-of-use">Terms of Use</router-link>, or related rules, and it's necessary to disclose your data to third parties.</li>
+        <li>When such action is necessary to enforce Phira terms of use.</li>
       </ol>
-      <h2>Storage</h2>
       <h2>Cookies</h2>
       <p>We use cookies to maintain your sessions state. We won't track your online activities using cookies.</p>
       <h2>Data security</h2>

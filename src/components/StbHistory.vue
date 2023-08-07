@@ -16,7 +16,7 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
 
 <template>
   <div class="px-4">
-    <ol class="relative border-l border-gray-200 dark:border-gray-700 p-2">
+    <ol v-if="history.length" class="relative border-l border-gray-200 dark:border-gray-700 p-2">
       <li v-for="item in history" v-bind:key="item.id" class="mb-10 ml-4">
         <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 bg-base-100 ring-8 ring-base-100">
           <img v-if="item?.reviewerAvatar" class="rounded-full shadow-lg" :src="fileToURL(item.reviewerAvatar)"/>
@@ -33,5 +33,8 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
         <p v-if="item.reviewer && !item.comment" class="mb-4 italic">{{ item.reviewerName }} {{ item.approve? '通过': '拒绝' }}了谱面</p>
       </li>
     </ol>
+    <div v-if="!history.length" class="text-center italic py-8">
+      暂无评议记录
+    </div>
   </div>
 </template>
