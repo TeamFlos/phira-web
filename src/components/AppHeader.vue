@@ -73,6 +73,7 @@ function doLogout() {
               </div>
             </label>
             <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40">
+              <li><router-link :to="`/user/${user.id}`" @click="blur">主页</router-link></li>
               <li><router-link to="/settings" @click="blur">设置</router-link></li>
               <li><a @click="doLogout">登出</a></li>
             </ul>
