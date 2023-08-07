@@ -27,6 +27,8 @@ fetchApi(`/user/${props.id}`, {}, (u) => { user.value = u as User; });
         </div>
       </div>
       <p class="font-black text-xl mt-2">{{ user.name }}</p>
+      <p v-if="user.bio" class="text-sm text-gray-500">{{ user.bio }}</p>
+      <p v-if="!user.bio" class="text-sm italic text-gray-500">该用户还没有简介</p>
       <slot />
     </div>
   </div>
