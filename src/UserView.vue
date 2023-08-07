@@ -58,7 +58,7 @@ const stats = await fetchApi(`/user/${id}/stats`) as {
           <div class="flex flex-col w-full gap-2">
             <Property title="上次登录于" :value="detailedTime(user.last_login)" />
             <Property title="注册于" :value="detailedTime(user.joined)" />
-            <Property title="语言" :value="LANGUAGES[user.language]" />
+            <Property title="语言" :value="LANGUAGES[user.language as (keyof typeof LANGUAGES)]" />
           </div>
         </div>
       </div>
