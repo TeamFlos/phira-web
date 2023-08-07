@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, h } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import moment from 'moment'
@@ -9,10 +9,11 @@ import { useFetchApi, fileToURL } from './common'
 import type { Chart, User } from './model'
 
 import Leaderboard from './components/Leaderboard.vue'
+import Loader from './components/Loader.vue'
+import Property from './components/Property.vue'
 import Rating from './components/Rating.vue'
 import StbHistory from './components/StbHistory.vue'
 import UserCard from './components/UserCard.vue'
-import Loader from './components/Loader.vue'
 
 const fetchApi = useFetchApi();
 
@@ -23,27 +24,13 @@ const chart = await fetchApi(`/chart/${id}`) as Chart;
 
 const rating = ref<number>();
 
-function Property(
-  props: { title: string, value: string }
-) {
-  return h(
-    'div',
-    { 'class': 'flex flex-row text-lg' },
-    [
-      h('span', { 'class': 'grow' }, props.title),
-      h('span', { 'class': 'text-primary-content' }, props.value),
-    ]
-  );
-}
-
 const contentTab = ref('ldb');
 
 </script>
 
 <template>
   <div class="relative">
-    <div :style="{'background-image': 'url(' + fileToURL(chart.illustration) + ')'}" class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-multiply bg-[#444444]">
-    </div>
+    <div :style="{'background-image': 'url(' + fileToURL(chart.illustration) + ')'}" class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-multiply bg-[#444444]"></div>
     <div class="w-full h-48 -mt-48 bg-gradient-to-b from-transparent to-base-200"></div>
     <div class="flex flex-col items-center -mt-[35vh] mb-24">
       <div class="px-8 w-full lg:px-0 lg:w-3/4 gap-8">

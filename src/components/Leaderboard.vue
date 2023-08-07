@@ -2,10 +2,10 @@
 
 import { ref, computed, watch, onMounted } from 'vue'
 
-import { useFetchApi, fileToURL, pageCount } from '../common'
+import { useFetchApi, fileToURL, pageCount, userNameClass } from '../common'
 import type { Page, Record } from '../model'
 
-const PAGE_NUM = 30;
+const PAGE_NUM = 20;
 
 import Loader from './Loader.vue'
 import Pagination from './Pagination.vue'
@@ -18,7 +18,12 @@ const fetchApi = useFetchApi();
 
 const pagination = ref<typeof Pagination>();
 
-type RecordEx = Record & { rank?: number, playerName: string, playerAvatar?: string };
+type RecordEx = Record & {
+  rank?: number,
+  playerName: string,
+  playerAvatar?: string,
+  playerBadges: string[],
+};
 
 const totalCount = ref(0);
 const records = ref<RecordEx[]>();
@@ -81,15 +86,15 @@ onMounted(() => {
               {{ record.rank }}
             </th>
             <td>
-              <div class="flex flex-row items-center gap-2">
+              <router-link :to="`/user/${record.player}`" class="flex flex-row items-center gap-2 group">
                 <div class="avatar">
                   <div class="w-8 rounded-xl">
                     <img v-if="record.playerAvatar" :src="fileToURL(record.playerAvatar)" />
                     <img v-if="!record.playerAvatar" src="../assets/user.png" />
                   </div>
                 </div>
-                <span>{{ record.playerName }}</span>
-              </div>
+                <span :class="[userNameClass(record.playerBadges)]" class="group-hover:link">{{ record.playerName }}</span>
+              </router-link>
             </td>
             <td class="font-black font-mono text-2xl">{{ record.score }}</td>
             <td class="font-black font-mono text-2xl">{{ Math.floor(record.std_score) }}</td>

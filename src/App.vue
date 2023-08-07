@@ -1,3 +1,22 @@
+<script lang="ts">
+
+import { ref, watch } from 'vue'
+
+const onLoaded = ref<() => void>();
+const component = ref();
+
+watch(component, (comp) => {
+  if (comp && onLoaded.value) onLoaded.value();
+});
+
+export function useOnLoaded() {
+  return onLoaded;
+}
+
+export default {}
+
+</script>
+
 <script setup lang="ts">
 
 import AppFooter from './components/AppFooter.vue'
@@ -14,7 +33,7 @@ import Toasts from './components/Toasts.vue'
     <router-view v-slot="{ Component }">
       <Suspense timeout="0">
         <template #default>
-          <component :is="Component"/>
+          <component :is="Component" ref="component" />
         </template>
         <template #fallback>
           <div class="flex justify-center">

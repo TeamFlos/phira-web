@@ -1,3 +1,4 @@
+
 import { createRouter, createWebHistory } from 'vue-router'
 
 import HomeView from '../HomeView.vue'
@@ -8,11 +9,17 @@ import RegisterView from '../RegisterView.vue'
 import ChartsView from '../ChartsView.vue'
 import ChartView from '../ChartView.vue'
 
+import UserView from '../UserView.vue'
+
 import SettingsView from '../SettingsView.vue'
 
 import DMCA from '../DMCA.vue'
 import PrivacyPolicy from '../PrivacyPolicy.vue'
 import TermsOfUse from '../TermsOfUse.vue'
+
+import { useOnLoaded } from '../App.vue'
+
+const onLoaded = useOnLoaded();
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,13 +32,22 @@ const router = createRouter({
     { path: '/chart', name: 'charts', component: ChartsView },
     { path: '/chart/:id(\\d+)', name: 'chart', component: ChartView },
 
+    { path: '/user/:id(\\d+)', name: 'user', component: UserView },
+
     { path: '/settings', redirect: to => '/settings/account' },
     { path: '/settings/:category', name: 'settings', component: SettingsView },
 
     { path: '/dmca', name: 'DMCA', component: DMCA },
     { path: '/privacy-policy', name: 'privacy policy', component: PrivacyPolicy },
     { path: '/terms-of-use', name: 'terms of use', component: TermsOfUse },
-  ]
+  ],
+  scrollBehavior (to, from, savedPosition) {
+    return new Promise((resolve, reject) => {
+      onLoaded.value = () => {
+        resolve(savedPosition? savedPosition: { top: 0 });
+      };
+    })
+  },
 });
 
 export default router

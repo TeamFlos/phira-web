@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { useFetchApi, fileToURL } from '../common'
+import { useFetchApi, fileToURL, detailedTime } from '../common'
 import type { StbHistory, User } from '../model'
 
 import moment from 'moment'
@@ -23,7 +23,7 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
           <img v-if="(!item?.reviewerAvatar) && uploader.avatar" class="rounded-full shadow-lg" :src="fileToURL(uploader.avatar)"/>
           <img v-if="(!item?.reviewerAvatar) && !uploader.avatar" class="rounded-full shadow-lg" src="../assets/user.png" />
         </span>
-        <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ moment(item.time).fromNow() + ' (' + moment(item.time).format('lll') + ')' }}</time>
+        <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ detailedTime(item.time) }}</time>
         <br/>
         <div v-if="!item.reviewer" class="italic">{{ uploader.name }} 提交了上架申请</div>
         <div v-if="item.reviewer && item.comment" class="mb-4">

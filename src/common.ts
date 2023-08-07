@@ -5,6 +5,27 @@ import { useRouter } from 'vue-router'
 
 export { toast };
 
+import type { User } from './model'
+
+import moment from 'moment'
+
+export const LANGUAGES = {
+  'zh-CN': '简体中文',
+  'zh-TW': '繁體中文',
+  'en-US': 'English',
+};
+
+export function detailedTime(time: string): string {
+  let m = moment(time);
+  return m.fromNow() + ' (' + m.format('lll') + ')';
+}
+
+export function userNameClass(badges: string[]): 'text-[#673ab7]' | 'text-[#ff7043]' | 'text-base-content' {
+  if (badges.includes('admin')) return 'text-[#673ab7]';
+  if (badges.includes('sponsor')) return 'text-[#ff7043]';
+  return 'text-base-content';
+}
+
 export function pageCount(count: number, pageNum: number) {
   return count? (Math.floor((count - 1) / pageNum) + 1): 0;
 }

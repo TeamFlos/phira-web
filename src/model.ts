@@ -11,6 +11,10 @@ export type User = {
   email: string,
   language: string,
   bio: string | null,
+  badges: string[],
+
+  joined: string,
+  last_login: string,
 };
 
 export type Chart = {

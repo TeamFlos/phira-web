@@ -2,7 +2,7 @@
 
 import { ref } from 'vue'
 
-import { useFetchApi, fileToURL } from '../common'
+import { useFetchApi, fileToURL, userNameClass } from '../common'
 import type { User } from '../model'
 
 const props = defineProps<{ id: number }>();
@@ -20,13 +20,15 @@ fetchApi(`/user/${props.id}`, {}, (u) => { user.value = u as User; });
       <div class="w-2/3 loading loading-spinner"></div>
     </div>
     <div v-if="user" class="flex flex-col w-full items-center">
-      <div class="avatar">
-        <div class="w-24 mask mask-squircle">
-          <img v-if="user?.avatar" :src="fileToURL(user.avatar)" />
-          <img v-if="!user?.avatar" src="../assets/user.png" />
+      <router-link :to="`/user/${user.id}`" class="group flex flex-col items-center">
+        <div class="avatar">
+          <div class="w-24 mask mask-squircle">
+            <img v-if="user?.avatar" :src="fileToURL(user.avatar)" />
+            <img v-if="!user?.avatar" src="../assets/user.png" />
+          </div>
         </div>
-      </div>
-      <p class="font-black text-xl mt-2">{{ user.name }}</p>
+        <p class="font-black text-xl group-hover:link mt-2" :class="[userNameClass(user.badges)]">{{ user.name }}</p>
+      </router-link>
       <p v-if="user.bio" class="text-sm text-gray-500">{{ user.bio }}</p>
       <p v-if="!user.bio" class="text-sm italic text-gray-500">该用户还没有简介</p>
       <slot />
