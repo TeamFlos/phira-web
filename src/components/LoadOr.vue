@@ -8,5 +8,5 @@ defineProps<{
 
 <template>
   <span v-if="loading" class="loading loading-spinner"></span>
-  <slot v-if="!loading" />
+  <slot v-else />
 </template>

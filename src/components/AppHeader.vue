@@ -63,13 +63,13 @@ function doLogout() {
       </div>
       <div class="navbar-end">
         <router-link v-if="!accessToken" to="/login" class="btn">登录</router-link>
-        <template v-if="accessToken">
+        <template v-else>
           <Loader v-if="!user"/>
-          <div v-if="user" class="dropdown dropdown-end">
+          <div v-else class="dropdown dropdown-end">
             <label tabindex="0" class="btn btn-ghost btn-circle avatar">
               <div class="w-10 rounded-full">
                 <img v-if="user.avatar" :src="fileToURL(user.avatar)" />
-                <img v-if="!user.avatar" src="../assets/user.png" />
+                <img v-else src="../assets/user.png" />
               </div>
             </label>
             <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40">

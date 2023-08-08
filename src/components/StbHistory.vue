@@ -20,17 +20,17 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
       <li v-for="item in history" v-bind:key="item.id" class="mb-10 ml-4">
         <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 bg-base-100 ring-8 ring-base-100">
           <img v-if="item?.reviewerAvatar" class="rounded-full shadow-lg" :src="fileToURL(item.reviewerAvatar)"/>
-          <img v-if="(!item?.reviewerAvatar) && uploader.avatar" class="rounded-full shadow-lg" :src="fileToURL(uploader.avatar)"/>
-          <img v-if="(!item?.reviewerAvatar) && !uploader.avatar" class="rounded-full shadow-lg" src="../assets/user.png" />
+          <img v-else-if="uploader.avatar" class="rounded-full shadow-lg" :src="fileToURL(uploader.avatar)"/>
+          <img v-else class="rounded-full shadow-lg" src="../assets/user.png" />
         </span>
         <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ detailedTime(item.time) }}</time>
         <br/>
         <div v-if="!item.reviewer" class="italic">{{ uploader.name }} 提交了上架申请</div>
-        <div v-if="item.reviewer && item.comment" class="mb-4">
+        <div v-else-if="item.comment || item.comment === ''" class="mb-4">
           <span class="text-gray-400 italic">{{ item.reviewerName }} 评论：</span>
           {{ item.comment }}
         </div>
-        <p v-if="item.reviewer && !item.comment" class="mb-4 italic">{{ item.reviewerName }} {{ item.approve? '通过': '拒绝' }}了谱面</p>
+        <p v-else class="mb-4 italic">{{ item.reviewerName }} {{ item.approve? '通过': '拒绝' }}了谱面</p>
       </li>
     </ol>
     <div v-if="!history.length" class="text-center italic py-8">

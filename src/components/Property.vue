@@ -11,7 +11,7 @@ withDefaults(defineProps<{ title: string, value: string, multi?: boolean }>(), {
     <span class="grow">{{ title }}</span>
     <span class="ml-4 text-primary-content">{{ value }}</span>
   </div>
-  <div v-if="multi" class="flex flex-col">
+  <div v-else class="flex flex-col">
     <span class="text-sm">{{ title }}</span>
     <span class="text-primary-content">{{ value }}</span>
   </div>

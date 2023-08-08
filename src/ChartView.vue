@@ -72,7 +72,7 @@ function switchTab(s: string) {
                 </div>
                 <div class="divider"></div>
                 <p v-if="chart.description.length" class="w-full">{{ chart.description }}</p>
-                <p v-if="!chart.description.length" class="w-full italic">该谱面没有简介。</p>
+                <p v-else class="w-full italic">该谱面没有简介。</p>
               </UserCard>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p>评分</p>

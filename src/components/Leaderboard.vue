@@ -90,7 +90,7 @@ onMounted(() => {
                 <div class="avatar">
                   <div class="w-8 rounded-xl">
                     <img v-if="record.playerAvatar" :src="fileToURL(record.playerAvatar)" />
-                    <img v-if="!record.playerAvatar" src="../assets/user.png" />
+                    <img v-else src="../assets/user.png" />
                   </div>
                 </div>
                 <span :class="[userNameClass(record.playerBadges)]" class="group-hover:link">{{ record.playerName }}</span>

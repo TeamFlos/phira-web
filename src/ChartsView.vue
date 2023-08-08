@@ -252,7 +252,7 @@ function saveFilters() {
           </div>
         </router-link>
       </div>
-      <div v-if="!charts" class="flex flex-col items-center w-full h-16 mb-8">
+      <div v-else class="flex flex-col items-center w-full h-16 mb-8">
         <Loader class="m-8 loading-lg"/>
       </div>
     </div>

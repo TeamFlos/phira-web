@@ -52,13 +52,13 @@ async function ban() {
             <div class="avatar lg:ml-6 -mt-14">
               <div class="w-32 mask mask-squircle">
                 <img v-if="user?.avatar" :src="fileToURL(user.avatar)" />
-                <img v-if="!user?.avatar" src="./assets/user.png" />
+                <img v-else src="./assets/user.png" />
               </div>
             </div>
             <div class="flex flex-col items-center mt-3 lg:mt-0 lg:ml-4 lg:items-start grow">
               <p class="font-black text-3xl" :class="[userNameClass(user.badges)]">{{ user.name }}</p>
               <p v-if="user.bio" class="whitespace-nowrap">{{ user.bio }}</p>
-              <p v-if="!user.bio" class="text-sm italic text-gray-500">该用户还没有简介</p>
+              <p v-else class="text-sm italic text-gray-500">该用户还没有简介</p>
             </div>
             <div class="flex flex-row lg:-mt-4">
               <div class="stat">

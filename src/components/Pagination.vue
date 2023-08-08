@@ -30,7 +30,6 @@ defineExpose({ current });
 <template>
   <div class="join">
     <button class="join-item btn" :class="{ 'btn-disabled': current === 1 }">«</button>
-    <!-- <button class="join-item btn" v-if="current >= 4">1</button> -->
     <PageButton v-if="current >= 4" :page="1" />
     <button class="join-item btn btn-disabled" v-if="current >= 6">…</button>
     <PageButton v-if="current === 5" :page="2" />

@@ -44,12 +44,12 @@ watch(() => props.params, fetchRecords);
       <div class="card-body flex flex-row items-center justify-start p-4 gap-0 group min-h-0 min-w-0">
         <p class="font-tektur text-7xl text-center flex-none mx-2 w-12" :class="{ '-mt-4': record.score >= 1000000, 'drop-shadow-[0_0_4px_#1e7fff]': 960000 <= record.score && record.score < 1000000 && record.full_combo, 'drop-shadow-[0_0_4px_#fffc14]': record.score >= 1000000 }">
           <span v-if="record.score < 700000">F</span>
-          <span v-if="700000 <= record.score && record.score < 820000">C</span>
-          <span v-if="820000 <= record.score && record.score < 880000">B</span>
-          <span v-if="880000 <= record.score && record.score < 920000">A</span>
-          <span v-if="920000 <= record.score && record.score < 960000">S</span>
-          <span v-if="960000 <= record.score && record.score < 1000000" :class="{ 'text-[#1e7fff]': record.full_combo }">V</span>
-          <span v-if="record.score >= 1000000" class="text-[#fffc14] -ml-1">φ</span>
+          <span v-else-if="record.score < 820000">C</span>
+          <span v-else-if="record.score < 880000">B</span>
+          <span v-else-if="record.score < 920000">A</span>
+          <span v-else-if="record.score < 960000">S</span>
+          <span v-else-if="record.score < 1000000" :class="{ 'text-[#1e7fff]': record.full_combo }">V</span>
+          <span v-else class="text-[#fffc14] -ml-1">φ</span>
         </p>
         <div class="grow min-w-0">
           <p class="group-hover:link truncate w-auto">{{ record?.chartDetail?.name }}</p>
