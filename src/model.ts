@@ -72,11 +72,12 @@ export class Roles {
   private roles: number;
 
 
-  constructor(role: Role, ...rest: Role[]) {
-    this.roles = role;
-    rest.forEach((r) => {
-      this.roles |= r;
-    });
+  constructor(roles: number) {
+    this.roles = roles;
+  }
+
+  static from(roles: number) {
+    return new Roles(roles);
   }
 
   has(role: Role): boolean {
