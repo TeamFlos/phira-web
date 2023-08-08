@@ -179,9 +179,9 @@ export type PlayRecord = {
   bad: number,
   miss: number,
   speed: number,
-  maxCombo: number,
+  max_combo: number,
   mods: number,
-  fullCombo: boolean,
+  full_combo: boolean,
   std: number,
   std_score: number,
 

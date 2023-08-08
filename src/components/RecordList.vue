@@ -13,7 +13,7 @@ const fetchApi = useFetchApi();
 
 type PlayRecordEx = PlayRecord & { chartDetail?: Chart };
 
-const records = ref<ReturnType<typeof reactive<PlayRecordEx>>[]>([]);
+const records = ref<ReturnType<typeof reactive<PlayRecordEx>>[]>();
 
 async function fetchRecords() {
   records.value = undefined;

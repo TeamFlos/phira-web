@@ -15,6 +15,10 @@ export const LANGUAGES = {
   'en-US': 'English',
 };
 
+export function isString(s: unknown): s is string {
+  return typeof s === 'string';
+}
+
 export function detailedTime(time: string): string {
   let m = moment(time);
   return m.fromNow() + ' (' + m.format('lll') + ')';

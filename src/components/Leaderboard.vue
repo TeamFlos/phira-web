@@ -3,7 +3,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 
 import { useFetchApi, fileToURL, pageCount, userNameClass } from '../common'
-import type { Page, Record } from '../model'
+import type { Page, PlayRecord } from '../model'
 
 const PAGE_NUM = 20;
 
@@ -18,7 +18,7 @@ const fetchApi = useFetchApi();
 
 const pagination = ref<typeof Pagination>();
 
-type RecordEx = Record & {
+type RecordEx = PlayRecord & {
   rank?: number,
   playerName: string,
   playerAvatar?: string,

@@ -83,7 +83,7 @@ async function ban() {
         </div>
         <div class="card bg-base-100 shadow-xl grow p-4">
           <h2 class="text-2xl">最近游玩记录</h2>
-          <RecordList class="mt-2" :params="{ player: user.id.toString() }" :limit="12" />
+          <RecordList class="mt-2" :params="{ player: String(user.id) }" :limit="12" />
         </div>
       </div>
     </div>

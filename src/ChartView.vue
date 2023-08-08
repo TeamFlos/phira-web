@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import moment from 'moment'
@@ -23,7 +23,12 @@ const router = useRouter();
 const id = parseInt(String(route.params.id));
 const chart = await fetchApi(`/chart/${id}`) as Chart;
 
+const chartRating = ref<typeof Rating>();
 const rating = ref<number>();
+
+onMounted(() => {
+  watch(() => chartRating.value?.selected, (r) => rating.value = r);
+});
 
 const contentTab = ref('ldb');
 watch(
@@ -35,7 +40,7 @@ watch(
   { immediate: true }
 );
 
-function switchTab(s) {
+function switchTab(s: string) {
   router.replace({ path: route.path, hash: '#' + s });
 }
 
@@ -71,7 +76,7 @@ function switchTab(s) {
               </UserCard>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p>评分</p>
-                <Rating :init="(chart.rating ?? 0) * 5" @change="(index) => { rating = index }" />
+                <Rating name="chart-rating" :init="(chart.rating ?? 0) * 10" ref="chartRating" />
                 <button v-if="rating" class="btn btn-primary mt-2">提交评分</button>
               </div>
             </div>
