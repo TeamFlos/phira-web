@@ -1,15 +1,15 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useFetchApi, fileToURL, userNameClass, detailedTime, LANGUAGES, toast, toastError, getCookie } from './common'
 import { Permission, Roles, type User } from './model'
 
+import LoadOr from './components/LoadOr.vue'
 import Property from './components/Property.vue'
-import UserCard from './components/UserCard.vue'
 import RecordList from './components/RecordList.vue'
-import { reactive } from 'vue'
+import UserCard from './components/UserCard.vue'
 
 const route = useRoute();
 
@@ -17,6 +17,8 @@ const fetchApi = useFetchApi();
 
 const id = parseInt(String(route.params.id));
 const user = reactive(await fetchApi(`/user/${id}`) as User);
+
+const confirmDeleteDialog = ref<HTMLDialogElement>();
 
 const me = ref<User>();
 
@@ -29,15 +31,22 @@ const stats = await fetchApi(`/user/${id}/stats`) as {
   avgAccuracy: number,
 };
 
+let banning = ref(false);
 async function ban() {
+  banning.value = true;
   try {
     await fetchApi(`/user/${id}/ban`, { method: 'POST' });
     toast('已封禁');
     user.banned = true;
-  }
-  catch (e) {
+    confirmDeleteDialog.value!.close();
+  } catch (e) {
     toastError(e);
+  } finally {
+    banning.value = false;
   }
+}
+function tryCloseBan() {
+  if (!banning.value) confirmDeleteDialog.value!.close();
 }
 
 </script>
@@ -83,7 +92,7 @@ async function ban() {
             </div>
           </div>
           <div v-if="me && (new Roles(me.roles)).permissions(me.banned).has(Permission.BAN_USER)" class="card">
-            <button v-if="!user.banned" class="btn btn-error mt-2 w-full" @click="ban">封禁用户</button>
+            <button v-if="!user.banned" class="btn btn-error mt-2 w-full" @click="confirmDeleteDialog!.showModal()">封禁用户</button>
             <button v-else class="btn btn-disabled mt-2 w-full">封禁用户</button>
           </div>
         </div>
@@ -94,4 +103,19 @@ async function ban() {
       </div>
     </div>
   </div>
+  <dialog class="modal modal-bottom sm:modal-middle" ref="confirmDeleteDialog" @close.prevent="tryCloseBan">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg">警告</h3>
+      <p class="py-4">你确定要封禁该用户吗？</p>
+      <div class="modal-action">
+        <button class="btn btn-neutral" :disabled="banning" @click="tryCloseBan">取消</button>
+        <button class="btn btn-error" @click="ban">
+          <LoadOr :loading="banning">确定</LoadOr>
+        </button>
+      </div>
+    </div>
+    <div class="modal-backdrop">
+      <button class="cursor-default" @click="tryCloseBan"></button>
+    </div>
+  </dialog>
 </template>
