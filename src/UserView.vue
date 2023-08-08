@@ -76,14 +76,14 @@ async function ban() {
               <Property title="语言" :value="LANGUAGES[user.language as (keyof typeof LANGUAGES)]" multi />
             </div>
           </div>
-          <div v-if="(new Roles(me.roles)).permissions(me.banned).has(Permission.BAN_USER)">
-            <button v-if="!user.banned" class="btn btn-primary mt-2" @click="ban">封禁用户</button>
-            <button v-else class="btn btn-disabled mt-2">封禁用户</button>
+          <div v-if="(new Roles(me.roles)).permissions(me.banned).has(Permission.BAN_USER)" class="card">
+            <button v-if="!user.banned" class="btn btn-primary mt-2 w-full" @click="ban">封禁用户</button>
+            <button v-else class="btn btn-disabled mt-2 w-full">封禁用户</button>
           </div>
         </div>
         <div class="card bg-base-100 shadow-xl grow p-4">
           <h2 class="text-2xl">最近游玩记录</h2>
-          <RecordList class="mt-2" :params="{ player: user.id }" :limit="12" />
+          <RecordList class="mt-2" :params="{ player: user.id.toString() }" :limit="12" />
         </div>
       </div>
     </div>
