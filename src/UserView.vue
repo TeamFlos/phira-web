@@ -8,13 +8,14 @@ import { Permission, Roles, type User } from './model'
 import Property from './components/Property.vue'
 import UserCard from './components/UserCard.vue'
 import RecordList from './components/RecordList.vue'
+import { reactive } from 'vue'
 
 const route = useRoute();
 
 const fetchApi = useFetchApi();
 
 const id = parseInt(String(route.params.id));
-const user = await fetchApi(`/user/${id}`) as User;
+const user = reactive(await fetchApi(`/user/${id}`) as User);
 
 const me = await fetchApi(`/me`) as User;
 
