@@ -1,3 +1,4 @@
+
 export enum Permission {
   NONE = 0x00000000,
   ALL = 0xFFFFFFFF,
@@ -12,7 +13,7 @@ export enum Permission {
   DELETE_STABLE = 0x00000100,
   SEE_ALL_EVENTS = 0x00000200,
   BAN_USER = 0x00000400
-}
+};
 
 class Permissions {
   private permissions: number;
@@ -27,7 +28,7 @@ class Permissions {
   /**
    * check if the `Permissions` object has the permission
    * @param permission single permission
-   * @returns 
+   * @returns
    */
   has(permission: Permission): boolean {
     return (this.permissions & permission) === permission;
@@ -58,15 +59,13 @@ class Permissions {
   }
 }
 
-
 export enum Role {
   USER = 0x0000,
   ADMIN = 0x0001,
   REVIEWER = 0x0002,
   SUPERVISOR = 0x0004,
   HEAD_SUPERVISOR = 0x0008
-}
-
+};
 
 export class Roles {
 
@@ -99,7 +98,7 @@ export class Roles {
         Permission.DELETE_STABLE,
         Permission.REVIEW,
         Permission.EDIT_TAGS,
-        Permission.BAN_USER
+        Permission.BAN_USER,
       );
     }
     if (this.has(Role.SUPERVISOR)) {
@@ -107,13 +106,13 @@ export class Roles {
         Permission.SEE_UNREVIEWED,
         Permission.SEE_STABLE_REQ,
         Permission.STABILIZE_CHART,
-        Permission.EDIT_TAGS
+        Permission.EDIT_TAGS,
       );
     }
     if (this.has(Role.HEAD_SUPERVISOR)) {
       perms.grant(
         Permission.STABILIZE_JUDGE,
-        Permission.DELETE_STABLE
+        Permission.DELETE_STABLE,
       );
     }
     return perms;

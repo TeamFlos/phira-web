@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { useFetchApi, fileToURL, userNameClass, detailedTime, LANGUAGES, toast, toastError } from './common'
+import { useFetchApi, fileToURL, userNameClass, detailedTime, LANGUAGES, toast, toastError, getCookie } from './common'
 import { Permission, Roles, type User } from './model'
 
 import Property from './components/Property.vue'
@@ -17,7 +18,11 @@ const fetchApi = useFetchApi();
 const id = parseInt(String(route.params.id));
 const user = reactive(await fetchApi(`/user/${id}`) as User);
 
-const me = await fetchApi(`/me`) as User;
+const me = ref<User>();
+
+if (getCookie('access_token')) {
+  fetchApi('/me', {}, (user) => me.value = user as User);
+}
 
 const stats = await fetchApi(`/user/${id}/stats`) as {
   numRecords: number,
@@ -77,8 +82,8 @@ async function ban() {
               <Property title="语言" :value="LANGUAGES[user.language as (keyof typeof LANGUAGES)]" multi />
             </div>
           </div>
-          <div v-if="(new Roles(me.roles)).permissions(me.banned).has(Permission.BAN_USER)" class="card">
-            <button v-if="!user.banned" class="btn btn-primary mt-2 w-full" @click="ban">封禁用户</button>
+          <div v-if="me && (new Roles(me.roles)).permissions(me.banned).has(Permission.BAN_USER)" class="card">
+            <button v-if="!user.banned" class="btn btn-error mt-2 w-full" @click="ban">封禁用户</button>
             <button v-else class="btn btn-disabled mt-2 w-full">封禁用户</button>
           </div>
         </div>

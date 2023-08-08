@@ -4,6 +4,8 @@ import { ref, watch, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useFetchApi, fileToURL, pageCount, isString, getCookie } from './common'
+
+import { Permission, Roles } from './model'
 import type { Chart, Page, User } from './model'
 
 import Loader from './components/Loader.vue'
@@ -260,10 +262,10 @@ function saveFilters() {
     <div class="modal-box">
       <h3 class="font-bold text-lg">过滤条件</h3>
       <div class="flex flex-col gap-4 mt-4">
-        <div class="grid grid-cols-3 gap-2">
-          <button class="btn btn-neutral btn-outline" :class="{ 'btn-active': tempFromMe }" @click="tempFromMe = !tempFromMe">我上传的</button>
-          <button class="btn btn-neutral btn-outline" :class="{ 'btn-active': tempOnlyUnreviewed }" @click="() => { if (tempOnlyUnreviewed = !tempOnlyUnreviewed) tempOnlyStableRequest = false; }">只看未审核</button>
-          <button class="btn btn-neutral btn-outline" :class="{ 'btn-active': tempOnlyStableRequest }" @click="() => { if (tempOnlyStableRequest = !tempOnlyStableRequest) tempOnlyUnreviewed = false; }">只看上架申请</button>
+        <div class="flex flex-row gap-2">
+          <button v-if="user" class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempFromMe }" @click="tempFromMe = !tempFromMe">我上传的</button>
+          <button v-if="user && (new Roles(user.roles)).permissions(user.banned).has(Permission.SEE_UNREVIEWED)" class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempOnlyUnreviewed }" @click="() => { if (tempOnlyUnreviewed = !tempOnlyUnreviewed) tempOnlyStableRequest = false; }">只看未审核</button>
+          <button class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempOnlyStableRequest }" @click="() => { if (tempOnlyStableRequest = !tempOnlyStableRequest) tempOnlyUnreviewed = false; }">只看上架申请</button>
         </div>
         <div class="divider my-0"></div>
         <div>
@@ -293,4 +295,3 @@ function saveFilters() {
     </form>
   </dialog>
 </template>
-sss
