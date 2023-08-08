@@ -1,12 +1,16 @@
 <script setup lang="ts">
 
-defineProps<{ title: string, value: string }>();
+defineProps<{ title: string, value: string, multi: boolean }>();
 
 </script>
 
 <template>
-  <div class="flex flex-row">
+  <div v-if="!multi" class="flex flex-row">
     <span class="grow">{{ title }}</span>
-    <span class="ml-4 text-primary-content whitespace-nowrap">{{ value }}</span>
+    <span class="ml-4 text-primary-content">{{ value }}</span>
+  </div>
+  <div v-if="multi" class="flex flex-col">
+    <span class="text-sm">{{ title }}</span>
+    <span class="text-primary-content">{{ value }}</span>
   </div>
 </template>

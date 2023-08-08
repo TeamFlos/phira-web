@@ -9,8 +9,9 @@ export default {
   theme: {
     fontFamily: {
       'halva': ['Halva', 'sans-serif'],
-      'mono': defaultTheme.fontFamily.mono,
-      'ubuntu': ['Ubuntu'],
+      'mono': ['Roboto Mono', ...defaultTheme.fontFamily.mono],
+      'ubuntu': ['Ubuntu', 'sans-serif'],
+      'tektur': ['Tektur'],
     },
   },
   plugins: [

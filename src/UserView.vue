@@ -7,6 +7,7 @@ import type { User } from './model'
 
 import Property from './components/Property.vue'
 import UserCard from './components/UserCard.vue'
+import RecordList from './components/RecordList.vue'
 
 const route = useRoute();
 
@@ -53,13 +54,19 @@ const stats = await fetchApi(`/user/${id}/stats`) as {
           </div>
         </div>
       </div>
-      <div class="flex flex-row mt-4">
-        <div class="card bg-base-100 shadow-xl lg:w-1/4 p-4">
-          <div class="flex flex-col w-full gap-2">
-            <Property title="上次登录于" :value="detailedTime(user.last_login)" />
-            <Property title="注册于" :value="detailedTime(user.joined)" />
-            <Property title="语言" :value="LANGUAGES[user.language as (keyof typeof LANGUAGES)]" />
+      <div class="flex flex-col lg:flex-row mt-4 gap-4">
+        <div class="lg:w-1/4">
+          <div class="card bg-base-100 shadow-xl p-4">
+            <div class="flex flex-col w-full gap-2">
+              <Property title="上次登录于" :value="detailedTime(user.last_login)" multi />
+              <Property title="注册于" :value="detailedTime(user.joined)" multi />
+              <Property title="语言" :value="LANGUAGES[user.language as (keyof typeof LANGUAGES)]" multi />
+            </div>
           </div>
+        </div>
+        <div class="card bg-base-100 shadow-xl grow p-4">
+          <h2 class="text-2xl">最近游玩记录</h2>
+          <RecordList class="mt-2" :params="{ player: user.id }" :limit="12" />
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Tektur:wght@600&family=Ubuntu:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -41,4 +41,13 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.interactive-card {
+  animation: button-pop var(--animation-btn, 0.25s) ease-out;
+}
+
+.interactive-card:active:hover, .chart-card:active:focus {
+  animation: button-press 0.25s ease-out;
+  transform: scale(0.97);
 }

@@ -44,7 +44,7 @@ export type Chart = {
   chartUpdated: string,
 };
 
-export type Record = {
+export type PlayRecord = {
   id: number,
   player: number,
   chart: number,

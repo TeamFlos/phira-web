@@ -23,6 +23,7 @@
       <h2>Disclosures of your personal data</h2>
       <p>We don't disclose your personal data without your consent, with the following exceptions:</p>
       <ol>
+        <li>Your username, locale, play records, registration time and login time.</li>
         <li>You have expressly made information public.</li>
         <li>According to relevant legal provisions or upon requests from administrative or judicial authorities, we have to disclose to third parties or administrative/judicial bodies.</li>
         <li>In cases of any violations of relevant People's Republic of China's laws, regulations, Phira's <router-link to="/terms-of-use">Terms of Use</router-link>, or related rules, and it's necessary to disclose your data to third parties.</li>
