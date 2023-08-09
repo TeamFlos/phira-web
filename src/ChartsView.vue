@@ -158,6 +158,7 @@ await fetchCharts();
 
 onMounted(() => {
   watch(parameters, (params) => {
+
     fetchCharts(); // do not wait
     router.push({ query: params });
   });
@@ -165,8 +166,8 @@ onMounted(() => {
 
 function saveFilters() {
   filterDialog.value!.close();
-  wantedTags.value = wantedTagsEl.value!.tags;
-  unwantedTags.value = unwantedTagsEl.value!.tags;
+  wantedTags.value = [...wantedTagsEl.value!.tags];
+  unwantedTags.value = [...unwantedTagsEl.value!.tags];
   fromMe.value = tempFromMe.value;
   onlyUnreviewed.value = tempOnlyUnreviewed.value;
   onlyStableRequest.value = tempOnlyStableRequest.value;
