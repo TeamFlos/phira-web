@@ -86,15 +86,14 @@ watch(
     if (isString(q.uploader)) {
       fromMe.value = user !== null && q.uploader === String(user.id);
     }
-    if (isString(q.ratingLower)) {
-      try {
-        initRatingLower = Math.max(0, Math.min(10, Math.round(parseInt(q.ratingLower))));
-      } catch (e) {}
-    }
-    if (isString(q.ratingUpper)) {
-      try {
-        initRatingUpper = Math.max(0, Math.min(10, Math.round(parseInt(q.ratingUpper))));
-      } catch (e) {}
+    if (isString(q.rating)) {
+      let r = q.rating.split(',');
+      if (r.length === 2) {
+        try {
+          initRatingLower = Math.max(0, Math.min(10, Math.round(parseFloat(r[0]) * 10)));
+          initRatingUpper = Math.max(0, Math.min(10, Math.round(parseFloat(r[1]) * 10)));
+        } catch (e) {}
+      }
     }
     onlyUnreviewed.value = q.reviewed === 'false';
     onlyStableRequest.value = q.stableRequest === 'true';
