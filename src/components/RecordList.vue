@@ -40,8 +40,8 @@ watch(() => props.params, fetchRecords);
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
     <Loader v-if="!records" />
     <router-link v-for="record in records" v-bind:key="record.id" :to="`/chart/${record.chart}`" class="group card relative image-full bg-base-100 shadow-xl illustration interactive-card aspect-[4/1] lg:aspect-[8/3] min-h-0 min-w-0">
-      <figure v-if="record?.chartDetail"><img class="w-full" :src="fileToURL(record?.chartDetail?.illustration) + '.thumbnail'" /></figure>
-      <div class="card-body flex flex-row items-center justify-start p-4 gap-0 group min-h-0 min-w-0">
+      <figure v-if="record?.chartDetail"><img class="w-full aspect-[4/1] lg:aspect-[8/3]" :src="fileToURL(record?.chartDetail?.illustration) + '.thumbnail'" /></figure>
+      <div class="card-body flex flex-row items-center justify-start p-4 gap-0 group aspect-[4/1] lg:aspect-[8/3] min-h-0 min-w-0">
         <p class="font-tektur text-7xl text-center flex-none mx-2 w-12" :class="{ '-mt-4': record.score >= 1000000, 'drop-shadow-[0_0_4px_#1e7fff]': 960000 <= record.score && record.score < 1000000 && record.full_combo, 'drop-shadow-[0_0_4px_#fffc14]': record.score >= 1000000 }">
           <span v-if="record.score < 700000">F</span>
           <span v-else-if="record.score < 820000">C</span>

@@ -243,7 +243,7 @@ function saveFilters() {
       </div>
       <div v-if="charts" class="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-0 min-w-0">
         <router-link v-for="chart in charts" :key="chart.id" :to="`/chart/${chart.id}`" class="group card relative image-full bg-base-100 shadow-xl aspect-[8/5] illustration chart-card min-h-0 min-w-0">
-          <figure><img class="w-full" :src="fileToURL(chart.illustration) + '.thumbnail'" /></figure>
+          <figure><img class="w-full aspect-[8/5]" :src="fileToURL(chart.illustration) + '.thumbnail'" /></figure>
           <div class="absolute right-0 badge badge-primary z-[11] m-2 text-lg p-3">{{ chart.level }}</div>
           <div class="card-body flex-col justify-end p-4 gap-0 min-h-0 min-w-0">
             <p class="flex-none text-sm">{{ chart.composer }}</p>
