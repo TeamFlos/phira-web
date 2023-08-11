@@ -5,8 +5,8 @@ import { useRoute, useRouter } from 'vue-router'
 
 import moment from 'moment'
 
-import { useFetchApi, fileToURL } from './common'
-import type { Chart, User } from './model'
+import { useFetchApi, fileToURL, toast, toastError, getCookie } from './common'
+import { Permission, Roles, type Chart, type User } from './model'
 
 import Leaderboard from './components/Leaderboard.vue'
 import Loader from './components/Loader.vue'
@@ -22,6 +22,12 @@ const router = useRouter();
 
 const id = parseInt(String(route.params.id));
 const chart = await fetchApi(`/chart/${id}`) as Chart;
+
+const me = ref<User>();
+
+if (getCookie('access_token')) {
+  fetchApi('/me', {}, (user) => me.value = user as User);
+}
 
 const chartRating = ref<typeof Rating>();
 const rating = ref<number>();
@@ -44,11 +50,22 @@ function switchTab(s: string) {
   router.replace({ path: route.path, hash: '#' + s });
 }
 
+async function setRanked(ranked: boolean) {
+  try {
+    await fetchApi(`/chart/${id}/set-ranked`, { method: 'POST', json: { 'ranked': ranked } });
+    toast('分区更新成功');
+    chart.ranked = ranked;
+  } catch (e) {
+    toastError(e);
+  }
+}
+
 </script>
 
 <template>
   <div class="relative">
-    <div :style="{'background-image': 'url(' + fileToURL(chart.illustration) + ')'}" class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-multiply bg-[#444444]"></div>
+    <div :style="{ 'background-image': 'url(' + fileToURL(chart.illustration) + ')' }"
+      class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-multiply bg-[#444444]"></div>
     <div class="w-full h-48 -mt-48 bg-gradient-to-b from-transparent to-base-200"></div>
     <div class="flex flex-col items-center -mt-[35vh] mb-24">
       <div class="px-8 w-full lg:px-0 lg:w-3/4 gap-8">
@@ -74,6 +91,11 @@ function switchTab(s: string) {
                 <p v-if="chart.description.length" class="w-full">{{ chart.description }}</p>
                 <p v-else class="w-full italic">该谱面没有简介。</p>
               </UserCard>
+              <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_RANKED) && chart.stable"
+                class="card">
+                <button v-if="chart.ranked" class="btn btn-accent mt-2 w-full" @click="setRanked(false)">设置为特殊</button>
+                <button v-else class="btn btn-accent mt-2 w-full" @click="setRanked(true)">设置为常规</button>
+              </div>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p>评分</p>
                 <Rating name="chart-rating" :init="(chart.rating ?? 0) * 10" ref="chartRating" />
@@ -82,8 +104,10 @@ function switchTab(s: string) {
             </div>
             <div class="grow -mt-8 lg:w-3/4">
               <div class="tabs">
-                <a class="tab tab-lifted" :class="{ 'tab-active': contentTab === 'ldb' }" @click="switchTab('ldb')">排行榜</a>
-                <a class="tab tab-lifted" :class="{ 'tab-active': contentTab === 'stb' }" @click="switchTab('stb')">评议记录</a>
+                <a class="tab tab-lifted" :class="{ 'tab-active': contentTab === 'ldb' }"
+                  @click="switchTab('ldb')">排行榜</a>
+                <a class="tab tab-lifted" :class="{ 'tab-active': contentTab === 'stb' }"
+                  @click="switchTab('stb')">评议记录</a>
               </div>
               <div class="card bg-base-100 shadow-xl p-4 rounded-t-none">
                 <Leaderboard v-if="contentTab === 'ldb'" :chart="chart.id" />
@@ -93,7 +117,7 @@ function switchTab(s: string) {
                   </template>
                   <template #fallback>
                     <div class="flex justify-center my-2">
-                      <Loader/>
+                      <Loader />
                     </div>
                   </template>
                 </Suspense>

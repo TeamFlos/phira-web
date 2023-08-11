@@ -45,6 +45,7 @@ async function ban() {
     banning.value = false;
   }
 }
+
 function tryCloseBan() {
   if (!banning.value) confirmDeleteDialog.value!.close();
 }
@@ -92,7 +93,8 @@ function tryCloseBan() {
             </div>
           </div>
           <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)" class="card">
-            <button v-if="!user.banned" class="btn btn-error mt-2 w-full" @click="confirmDeleteDialog!.showModal()">封禁用户</button>
+            <button v-if="!user.banned" class="btn btn-error mt-2 w-full"
+              @click="confirmDeleteDialog!.showModal()">封禁用户</button>
             <button v-else class="btn btn-disabled mt-2 w-full">封禁用户</button>
           </div>
         </div>

@@ -12,7 +12,8 @@ export enum Permission {
   STABILIZE_JUDGE = 0x00000080,
   DELETE_STABLE = 0x00000100,
   SEE_ALL_EVENTS = 0x00000200,
-  BAN_USER = 0x00000400
+  BAN_USER = 0x00000400,
+  SET_RANKED = 0x00000800,
 };
 
 class Permissions {
@@ -85,7 +86,7 @@ export class Roles {
   }
 
   permissions(banned: boolean): Permissions {
-    let perms = new Permissions(Permission.NONE);
+    const perms = new Permissions(Permission.NONE);
     if (!banned) {
       perms.grant(Permission.UPLOAD_CHART);
     }
@@ -114,11 +115,12 @@ export class Roles {
       perms.grant(
         Permission.STABILIZE_JUDGE,
         Permission.DELETE_STABLE,
+        Permission.SET_RANKED,
       );
     }
     return perms;
   }
-}
+};
 
 
 export type Page<T> = {
