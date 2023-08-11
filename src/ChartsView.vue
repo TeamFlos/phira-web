@@ -237,7 +237,7 @@ function saveFilters() {
         </button>
         <div class="ml-auto join w-full lg:w-auto">
           <input class="input input-bordered join-item rounded-l-full w-full" placeholder="搜索" v-model="tempSearchValue" @keyup.enter="pagination!.current = 1; searchValue = tempSearchValue!" />
-          <button class="btn btn-secondary join-item rounded-r-full" @keyup.enter="pagination!.current = 1; searchValue = tempSearchValue!">
+          <button class="btn btn-secondary join-item rounded-r-full" @click="pagination!.current = 1; searchValue = tempSearchValue!">
             <i class="fa-solid fa-search"></i>
           </button>
         </div>
