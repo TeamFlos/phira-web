@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import moment from 'moment'
@@ -21,7 +21,7 @@ const route = useRoute();
 const router = useRouter();
 
 const id = parseInt(String(route.params.id));
-const chart = await fetchApi(`/chart/${id}`) as Chart;
+const chart = reactive(await fetchApi(`/chart/${id}`) as Chart);
 
 const me = ref<User>();
 
