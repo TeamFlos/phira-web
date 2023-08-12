@@ -93,9 +93,9 @@ function tryCloseBan() {
             </div>
           </div>
           <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)" class="card">
-            <button v-if="!user.banned" class="btn btn-error mt-2 w-full"
+            <button v-if="!user.banned" class="btn btn-error w-full"
               @click="confirmDeleteDialog!.showModal()">封禁用户</button>
-            <button v-else class="btn btn-disabled mt-2 w-full">封禁用户</button>
+            <button v-else class="btn btn-disabled w-full">封禁用户</button>
           </div>
         </div>
         <div class="card bg-base-100 shadow-xl grow p-4">
