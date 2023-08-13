@@ -113,9 +113,9 @@ async function setRanked(ranked: boolean) {
             </div>
             <div class="grow -mt-8 lg:w-3/4">
               <div class="tabs">
-                <a class="tab tab-lifted" :class="{ 'tab-active': contentTab === 'ldb' }"
+                <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': contentTab === 'ldb' }"
                   @click="switchTab('ldb')">排行榜</a>
-                <a class="tab tab-lifted" :class="{ 'tab-active': contentTab === 'stb' }"
+                <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': contentTab === 'stb' }"
                   @click="switchTab('stb')">评议记录</a>
               </div>
               <div class="card bg-base-100 shadow-xl p-4 rounded-t-none">

@@ -3,6 +3,8 @@
 import { useFetchApi, fileToURL, detailedTime } from '../common'
 import type { StbHistory, User } from '../model'
 
+import UserAvatar from './UserAvatar.vue'
+
 const props = defineProps<{ chart: number, uploader: number }>();
 
 const fetchApi = useFetchApi();
@@ -17,9 +19,7 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
     <ol v-if="history.length" class="relative border-l border-gray-200 dark:border-gray-700 p-2">
       <li v-for="item in history" v-bind:key="item.id" class="mb-10 ml-4">
         <span v-if="item.approve === null || item.reviewer !== null" class="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 bg-base-100 ring-8 ring-base-100">
-          <img v-if="item?.reviewerAvatar" class="rounded-full shadow-lg" :src="fileToURL(item.reviewerAvatar)"/>
-          <img v-else-if="uploader.avatar" class="rounded-full shadow-lg" :src="fileToURL(uploader.avatar)"/>
-          <img v-else class="rounded-full shadow-lg" src="../assets/user.png" />
+          <UserAvatar class="rounded-full shadow-lg" :url="item.reviewerAvatar ?? uploader.avatar"/>
         </span>
         <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ detailedTime(item.time) }}</time>
         <br/>

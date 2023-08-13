@@ -9,6 +9,7 @@ import { Permission, Roles, type User } from './model'
 import LoadOr from './components/LoadOr.vue'
 import PropItem from './components/PropItem.vue'
 import RecordList from './components/RecordList.vue'
+import UserAvatar from './UserAvatar.vue'
 
 const route = useRoute();
 
@@ -60,8 +61,7 @@ function tryCloseBan() {
           <div class="flex flex-col lg:flex-row items-center lg:items-start">
             <div class="avatar lg:ml-6 -mt-14">
               <div class="w-32 mask mask-squircle">
-                <img v-if="user?.avatar" :src="fileToURL(user.avatar)" />
-                <img v-else src="./assets/user.png" />
+                <UserAvatar :url="user.avatar" />
               </div>
             </div>
             <div class="flex flex-col items-center mt-3 lg:mt-0 lg:ml-4 lg:items-start grow">

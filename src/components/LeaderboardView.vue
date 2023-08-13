@@ -9,6 +9,7 @@ const PAGE_NUM = 20;
 
 import LoadView from './LoadView.vue'
 import PageIndicator from './PageIndicator.vue'
+import UserAvatar from './UserAvatar.vue'
 
 import moment from 'moment'
 
@@ -88,8 +89,7 @@ onMounted(() => {
               <router-link :to="`/user/${record.player}`" class="flex flex-row items-center gap-2 group">
                 <div class="avatar">
                   <div class="w-8 rounded-xl">
-                    <img v-if="record.playerAvatar" :src="fileToURL(record.playerAvatar)" />
-                    <img v-else src="../assets/user.png" />
+                    <UserAvatar :url="record.playerAvatar" />
                   </div>
                 </div>
                 <span :class="[userNameClass(record.playerBadges)]" class="group-hover:link">{{ record.playerName }}</span>

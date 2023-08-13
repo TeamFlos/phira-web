@@ -5,6 +5,8 @@ import { ref } from 'vue'
 import { useFetchApi, fileToURL, userNameClass } from '../common'
 import type { User } from '../model'
 
+import UserAvatar from './UserAvatar.vue'
+
 const props = defineProps<{ id: number }>();
 
 const fetchApi = useFetchApi();
@@ -23,8 +25,7 @@ fetchApi(`/user/${props.id}`, {}, (u) => { user.value = u as User; });
       <router-link :to="`/user/${user.id}`" class="group flex flex-col items-center">
         <div class="avatar">
           <div class="w-24 mask mask-squircle">
-            <img v-if="user?.avatar" :src="fileToURL(user.avatar)" />
-            <img v-else src="../assets/user.png" />
+            <UserAvatar :url="user.avatar" />
           </div>
         </div>
         <p class="font-black text-xl group-hover:link mt-2" :class="[userNameClass(user.badges)]">{{ user.name }}</p>

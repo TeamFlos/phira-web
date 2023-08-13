@@ -4,10 +4,11 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { toast } from './ToastsView.vue'
-import { useFetchApi, getCookie, addCookieListener, fileToURL, logout } from '../common'
+import { useFetchApi, getCookie, addCookieListener, logout } from '../common'
 import type { User } from '../model'
 
 import LoadView from './LoadView.vue'
+import UserAvatar from './UserAvatar.vue'
 
 const darkTheme = ref((() => {
   let theme = localStorage.getItem('data-theme');
@@ -87,8 +88,7 @@ function doLogout() {
           <div v-else class="dropdown dropdown-end">
             <label tabindex="0" class="btn btn-ghost btn-circle avatar">
               <div class="w-10 rounded-full">
-                <img v-if="user.avatar" :src="fileToURL(user.avatar)" />
-                <img v-else src="../assets/user.png" />
+                <UserAvatar :url="user.avatar" />
               </div>
             </label>
             <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40">

@@ -236,7 +236,7 @@ function saveFilters() {
             <option value="-name">名字倒序</option>
           </select>
         </div>
-        <button class="btn btn-neutral" @click="filterDialog!.showModal()">
+        <button class="btn bg-base-100 btn-outline" @click="filterDialog!.showModal()">
           <i class="fa-solid fa-filter"></i>
         </button>
         <div class="ml-auto join w-full lg:w-auto">
