@@ -52,30 +52,30 @@ async function submit() {
 
 <template>
   <div class="flex justify-center items-center p-8">
-    <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-gradient-to-r from-sky-400 to-blue-500 mt-16 text-white">
+    <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-gradient-to-r from-sky-400 to-blue-500 mt-16">
       <div class="card-body">
-        <h2 class="card-title">注册</h2>
+        <h2 class="card-title text-white">注册</h2>
         <div class="form-control">
           <div class="label">
-            <span class="label-text text-inherit">邮箱</span>
+            <span class="label-text text-inherit text-white">邮箱</span>
           </div>
           <input type="email" placeholder="邮箱地址" class="input input-bordered" v-model="email"/>
         </div>
         <div class="form-control">
           <div class="label">
-            <span class="label-text text-inherit">用户名</span>
+            <span class="label-text text-inherit text-white">用户名</span>
           </div>
           <input type="text" placeholder="名字" class="input input-bordered" v-model="username"/>
         </div>
         <div class="form-control">
           <div class="label">
-            <span class="label-text text-inherit">密码</span>
+            <span class="label-text text-inherit text-white">密码</span>
           </div>
           <input type="password" placeholder="密码" class="input input-bordered" v-model="password"/>
         </div>
         <div class="form-control">
           <div class="label">
-            <span class="label-text text-inherit">重复密码</span>
+            <span class="label-text text-inherit text-white">重复密码</span>
           </div>
           <input type="password" placeholder="密码" class="input input-bordered" v-model="password2"/>
         </div>
