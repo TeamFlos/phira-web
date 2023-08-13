@@ -91,7 +91,7 @@ function tryCloseBan() {
               <PropItem title="语言" :value="LANGUAGES[user.language as (keyof typeof LANGUAGES)]" multi />
             </div>
           </div>
-          <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)" class="card">
+          <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)" class="card mt-2">
             <button v-if="!user.banned" class="btn btn-error w-full"
               @click="confirmDeleteDialog!.showModal()">封禁用户</button>
             <button v-else class="btn btn-disabled w-full">封禁用户</button>
