@@ -7,8 +7,8 @@ import type { Page, PlayRecord } from '../model'
 
 const PAGE_NUM = 20;
 
-import Loader from './Loader.vue'
-import Pagination from './Pagination.vue'
+import LoadView from './LoadView.vue'
+import PageIndicator from './PageIndicator.vue'
 
 import moment from 'moment'
 
@@ -16,7 +16,7 @@ const props = defineProps<{ chart: number }>();
 
 const fetchApi = useFetchApi();
 
-const pagination = ref<typeof Pagination>();
+const pagination = ref<typeof PageIndicator>();
 
 type RecordEx = PlayRecord & {
   rank?: number,
@@ -107,9 +107,9 @@ onMounted(() => {
         </tbody>
       </table>
       <div v-if="!records" class="w-full flex flex-row justify-center my-4">
-        <Loader />
+        <LoadView />
       </div>
     </div>
-    <Pagination :total="pageCount(totalCount, PAGE_NUM)" ref="pagination" />
+    <PageIndicator :total="pageCount(totalCount, PAGE_NUM)" ref="pagination" />
   </div>
 </template>

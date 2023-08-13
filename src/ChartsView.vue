@@ -8,10 +8,10 @@ import { useFetchApi, fileToURL, pageCount, isString, getCookie } from './common
 import { Permission, Roles } from './model'
 import type { Chart, Page, User } from './model'
 
-import Loader from './components/Loader.vue'
-import Pagination from './components/Pagination.vue'
-import Rating from './components/Rating.vue'
-import Tags from './components/Tags.vue'
+import LoadView from './components/LoadView.vue'
+import PageIndicator from './components/PageIndicator.vue'
+import RatingBar from './components/RatingBar.vue'
+import TagList from './components/TagList.vue'
 
 const PAGE_NUM = 28;
 
@@ -26,7 +26,7 @@ if (getCookie('access_token')) {
   user = await fetchApi('/me') as User;
 }
 
-const pagination = ref<typeof Pagination>();
+const pagination = ref<typeof PageIndicator>();
 
 const totalCount = ref(0);
 const charts = ref<Chart[]>();
@@ -35,8 +35,8 @@ let initPage = 1;
 const searchValue = ref(''), tempSearchValue = ref<string>();
 const division = ref('regular');
 const order = ref('-updated');
-const wantedTagsEl = ref<typeof Tags>(), unwantedTagsEl = ref<typeof Tags>();
-const ratingLowerEl = ref<typeof Rating>(), ratingUpperEl = ref<typeof Rating>();
+const wantedTagsEl = ref<typeof TagList>(), unwantedTagsEl = ref<typeof TagList>();
+const ratingLowerEl = ref<typeof RatingBar>(), ratingUpperEl = ref<typeof RatingBar>();
 const fromMe = ref(false), onlyUnreviewed = ref(false), onlyStableRequest = ref(false);
 
 let initWanted: string[] = [], initUnwanted: string[] = [];
@@ -53,7 +53,9 @@ watch(
       let page = 1;
       try {
         page = parseInt(q.page as string);
-      } catch (e) {}
+      } catch (e) {
+        // empty
+      }
       if (pagination.value) {
         pagination.value.current = page;
       } else {
@@ -92,7 +94,9 @@ watch(
         try {
           initRatingLower = Math.max(0, Math.min(10, Math.round(parseFloat(r[0]) * 10)));
           initRatingUpper = Math.max(0, Math.min(10, Math.round(parseFloat(r[1]) * 10)));
-        } catch (e) {}
+        } catch (e) {
+          // empty
+        }
       }
     }
     onlyUnreviewed.value = q.reviewed === 'false';
@@ -253,10 +257,10 @@ function saveFilters() {
         </router-link>
       </div>
       <div v-else class="flex flex-col items-center w-full h-16 mb-8">
-        <Loader class="m-8 loading-lg"/>
+        <LoadView class="m-8 loading-lg"/>
       </div>
     </div>
-    <Pagination :init="initPage" :total="pageCount(totalCount, PAGE_NUM)" class="mt-8 mb-16" ref="pagination" />
+    <PageIndicator :init="initPage" :total="pageCount(totalCount, PAGE_NUM)" class="mt-8 mb-16" ref="pagination" />
   </div>
   <dialog class="modal" ref="filterDialog">
     <div class="modal-box">
@@ -270,20 +274,20 @@ function saveFilters() {
         <div class="divider my-0"></div>
         <div>
           <p>想包含的标签</p>
-          <Tags class="mt-2" ref="wantedTagsEl" :init="initWanted" />
+          <TagList class="mt-2" ref="wantedTagsEl" :init="initWanted" />
         </div>
         <div>
           <p>不想包含的标签</p>
-          <Tags class="mt-2" ref="unwantedTagsEl" :init="initUnwanted" />
+          <TagList class="mt-2" ref="unwantedTagsEl" :init="initUnwanted" />
         </div>
         <div class="divider my-0"></div>
         <div class="flex flex-col">
           <p>评分下界</p>
-          <Rating name="rating-lower" :init="initRatingLower" ref="ratingLowerEl" canBeZero />
+          <RatingBar name="rating-lower" :init="initRatingLower" ref="ratingLowerEl" canBeZero />
         </div>
         <div class="flex flex-col mt-2">
           <p>评分上界</p>
-          <Rating name="rating-upper" :init="initRatingUpper" ref="ratingUpperEl" canBeZero />
+          <RatingBar name="rating-upper" :init="initRatingUpper" ref="ratingUpperEl" canBeZero />
         </div>
         <div class="flex flew-row justify-end">
           <button class="btn btn-primary" @click="saveFilters">确定</button>

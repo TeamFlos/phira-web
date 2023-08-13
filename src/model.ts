@@ -14,7 +14,7 @@ export enum Permission {
   SEE_ALL_EVENTS = 0x00000200,
   BAN_USER = 0x00000400,
   SET_RANKED = 0x00000800,
-};
+}
 
 class Permissions {
   private permissions: number;
@@ -66,7 +66,7 @@ export enum Role {
   REVIEWER = 0x0002,
   SUPERVISOR = 0x0004,
   HEAD_SUPERVISOR = 0x0008
-};
+}
 
 export class Roles {
 
@@ -120,7 +120,7 @@ export class Roles {
     }
     return perms;
   }
-};
+}
 
 
 export type Page<T> = {

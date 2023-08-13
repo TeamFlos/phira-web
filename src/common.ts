@@ -1,11 +1,9 @@
 
-import { toast } from './components/Toasts.vue'
+import { toast } from './components/ToastsView.vue'
 
 import { useRouter } from 'vue-router'
 
 export { toast };
-
-import type { User } from './model'
 
 import moment from 'moment'
 
@@ -20,7 +18,7 @@ export function isString(s: unknown): s is string {
 }
 
 export function detailedTime(time: string): string {
-  let m = moment(time);
+  const m = moment(time);
   return m.fromNow() + ' (' + m.format('lll') + ')';
 }
 
@@ -65,7 +63,7 @@ export function validatePassword(password: string, repeat?: string) {
 }
 
 export async function uploadFile(fetchApi: FetchApi, file: File): Promise<string> {
-  let resp =
+  const resp =
     await fetchApi('/upload/avatar', {
       method: 'POST',
       body: file,
@@ -73,10 +71,10 @@ export async function uploadFile(fetchApi: FetchApi, file: File): Promise<string
   return resp.id;
 }
 
-let cookieListener: (() => void)[] = [];
+const cookieListener: (() => void)[] = [];
 
 function triggerCookie() {
-  for (let listener of cookieListener) listener();
+  for (const listener of cookieListener) listener();
 }
 
 export function setCookie(key: string, value: string, expires: string) {
@@ -118,23 +116,25 @@ export function useFetchApi(): FetchApi {
     onError?: (json: object, resp?: Response) => boolean,
   ): Promise<object | undefined> {
     request = request || {};
-    let headers = new Headers(request.headers);
+    const headers = new Headers(request.headers);
     if (request && 'json' in request) {
       request.body = JSON.stringify(request.json);
       headers.set('Content-Type', 'application/json');
     }
-    let access_token = getCookie('access_token');
+    const access_token = getCookie('access_token');
     if (access_token) {
       headers.set('Authorization', 'Bearer ' + access_token);
     }
     request.headers = headers;
     try {
-      let resp = await fetch('https://api.phira.cn' + path, request);
-      let text = await resp.text();
+      const resp = await fetch('https://api.phira.cn' + path, request);
+      const text = await resp.text();
       let json: any = { text };
       try {
         json = JSON.parse(text);
-      } catch (e) {}
+      } catch (e) {
+        // empty
+      }
       if (!resp.ok) {
         if (resp.status == 401) {
           // unauthorized

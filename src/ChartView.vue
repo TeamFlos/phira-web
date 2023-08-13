@@ -8,11 +8,11 @@ import moment from 'moment'
 import { useFetchApi, fileToURL, toast, toastError, getCookie } from './common'
 import { Permission, Roles, type Chart, type User } from './model'
 
-import Leaderboard from './components/Leaderboard.vue'
-import Loader from './components/Loader.vue'
+import LeaderboardView from './components/LeaderboardView.vue'
 import LoadOr from './components/LoadOr.vue'
-import Property from './components/Property.vue'
-import Rating from './components/Rating.vue'
+import LoadView from './components/LoadView.vue'
+import PropItem from './components/PropItem.vue'
+import RatingBar from './components/RatingBar.vue'
 import StbHistory from './components/StbHistory.vue'
 import UserCard from './components/UserCard.vue'
 
@@ -30,7 +30,7 @@ if (getCookie('access_token')) {
   fetchApi('/me', {}, (user) => me.value = user as User);
 }
 
-const chartRating = ref<typeof Rating>();
+const chartRating = ref<typeof RatingBar>();
 const rating = ref<number>();
 
 onMounted(() => {
@@ -82,15 +82,15 @@ async function setRanked(ranked: boolean) {
               <UserCard :id="chart.uploader">
                 <div class="divider"></div>
                 <div class="flex flex-col w-full gap-2">
-                  <Property title="曲师" :value="chart.composer" />
-                  <Property title="画师" :value="chart.illustrator" />
-                  <Property title="谱师" :value="chart.charter" />
-                  <Property title="难度" :value="`${chart.level} (${chart.difficulty.toFixed(1)})`" />
+                  <PropItem title="曲师" :value="chart.composer" />
+                  <PropItem title="画师" :value="chart.illustrator" />
+                  <PropItem title="谱师" :value="chart.charter" />
+                  <PropItem title="难度" :value="`${chart.level} (${chart.difficulty.toFixed(1)})`" />
                 </div>
                 <div class="divider"></div>
                 <div class="flex flex-col w-full gap-2">
-                  <Property title="更新于" :value="moment(chart.updated).fromNow()" />
-                  <Property title="上传于" :value="moment(chart.created).fromNow()" />
+                  <PropItem title="更新于" :value="moment(chart.updated).fromNow()" />
+                  <PropItem title="上传于" :value="moment(chart.created).fromNow()" />
                 </div>
                 <div class="divider"></div>
                 <p v-if="chart.description.length" class="w-full">{{ chart.description }}</p>
@@ -107,7 +107,7 @@ async function setRanked(ranked: boolean) {
               </div>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p>评分</p>
-                <Rating name="chart-rating" :init="(chart.rating ?? 0) * 10" ref="chartRating" />
+                <RatingBar name="chart-rating" :init="(chart.rating ?? 0) * 10" ref="chartRating" />
                 <button v-if="rating" class="btn btn-primary mt-2">提交评分</button>
               </div>
             </div>
@@ -119,14 +119,14 @@ async function setRanked(ranked: boolean) {
                   @click="switchTab('stb')">评议记录</a>
               </div>
               <div class="card bg-base-100 shadow-xl p-4 rounded-t-none">
-                <Leaderboard v-if="contentTab === 'ldb'" :chart="chart.id" />
+                <LeaderboardView v-if="contentTab === 'ldb'" :chart="chart.id" />
                 <Suspense v-if="contentTab === 'stb'" timeout="0">
                   <template #default>
                     <StbHistory :chart="chart.id" :uploader="chart.uploader" />
                   </template>
                   <template #fallback>
                     <div class="flex justify-center my-2">
-                      <Loader />
+                      <LoadView />
                     </div>
                   </template>
                 </Suspense>

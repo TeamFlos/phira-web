@@ -34,15 +34,15 @@ const router = createRouter({
 
     { path: '/user/:id(\\d+)', name: 'user', component: UserView },
 
-    { path: '/settings', redirect: to => '/settings/account' },
+    { path: '/settings', redirect: () => '/settings/account' },
     { path: '/settings/:category', name: 'settings', component: SettingsView },
 
     { path: '/dmca', name: 'DMCA', component: DMCA },
     { path: '/privacy-policy', name: 'privacy policy', component: PrivacyPolicy },
     { path: '/terms-of-use', name: 'terms of use', component: TermsOfUse },
   ],
-  scrollBehavior (to, from, savedPosition) {
-    return new Promise((resolve, reject) => {
+  scrollBehavior (_to, from, savedPosition) {
+    return new Promise((resolve) => {
       onLoaded.value = () => {
         resolve(savedPosition? savedPosition: { top: 0 });
       };

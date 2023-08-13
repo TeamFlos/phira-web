@@ -5,7 +5,7 @@ import { ref, reactive, watch } from 'vue'
 import { useFetchApi, fileToURL } from '../common'
 import type { Chart, PlayRecord } from '../model'
 
-import Loader from './Loader.vue'
+import LoadView from './LoadView.vue'
 
 const props = defineProps<{ params?: Record<string, string>, limit?: number }>();
 
@@ -38,7 +38,7 @@ watch(() => props.params, fetchRecords);
 
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
-    <Loader v-if="!records" />
+    <LoadView v-if="!records" />
     <router-link v-for="record in records" v-bind:key="record.id" :to="`/chart/${record.chart}`" class="group card relative image-full bg-base-100 shadow-xl illustration interactive-card aspect-[4/1] lg:aspect-[8/3] min-h-0 min-w-0">
       <figure v-if="record?.chartDetail"><img class="w-full aspect-[4/1] lg:aspect-[8/3]" :src="fileToURL(record?.chartDetail?.illustration) + '.thumbnail'" /></figure>
       <div class="card-body flex flex-row items-center justify-start p-4 gap-0 group aspect-[4/1] lg:aspect-[8/3] min-h-0 min-w-0">

@@ -7,9 +7,8 @@ import { useFetchApi, fileToURL, userNameClass, detailedTime, LANGUAGES, toast, 
 import { Permission, Roles, type User } from './model'
 
 import LoadOr from './components/LoadOr.vue'
-import Property from './components/Property.vue'
+import PropItem from './components/PropItem.vue'
 import RecordList from './components/RecordList.vue'
-import UserCard from './components/UserCard.vue'
 
 const route = useRoute();
 
@@ -87,9 +86,9 @@ function tryCloseBan() {
         <div class="lg:w-1/4">
           <div class="card bg-base-100 shadow-xl p-4">
             <div class="flex flex-col w-full gap-2">
-              <Property title="上次登录于" :value="detailedTime(user.last_login)" multi />
-              <Property title="注册于" :value="detailedTime(user.joined)" multi />
-              <Property title="语言" :value="LANGUAGES[user.language as (keyof typeof LANGUAGES)]" multi />
+              <PropItem title="上次登录于" :value="detailedTime(user.last_login)" multi />
+              <PropItem title="注册于" :value="detailedTime(user.joined)" multi />
+              <PropItem title="语言" :value="LANGUAGES[user.language as (keyof typeof LANGUAGES)]" multi />
             </div>
           </div>
           <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)" class="card">

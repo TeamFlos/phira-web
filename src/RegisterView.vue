@@ -3,8 +3,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { toast } from './components/Toasts.vue'
-import { useFetchApi, setCookie, validateEmail, validatePassword } from './common';
+import { useFetchApi, validateEmail, validatePassword, toast } from './common';
 
 import LoadOr from './components/LoadOr.vue'
 
@@ -32,7 +31,7 @@ async function submit() {
     validateEmail(email.value!);
     let pwd = password.value!, pwd2 = password2.value!;
     validatePassword(pwd, pwd2);
-    let resp = await fetchApi('/register', {
+    await fetchApi('/register', {
       method: 'POST',
       json: {
         email: email.value!,

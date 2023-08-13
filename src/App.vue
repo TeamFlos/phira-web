@@ -21,9 +21,9 @@ export default {}
 
 import AppFooter from './components/AppFooter.vue'
 import AppHeader from './components/AppHeader.vue'
-import Loader from './components/Loader.vue'
+import LoadView from './components/LoadView.vue'
 
-import Toasts from './components/Toasts.vue'
+import ToastsView from './components/ToastsView.vue'
 
 </script>
 
@@ -37,12 +37,12 @@ import Toasts from './components/Toasts.vue'
         </template>
         <template #fallback>
           <div class="flex justify-center">
-            <Loader/>
+            <LoadView/>
           </div>
         </template>
       </Suspense>
     </router-view>
-    <Toasts />
+    <ToastsView />
   </div>
   <AppFooter />
 </template>

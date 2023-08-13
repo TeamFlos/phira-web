@@ -3,11 +3,11 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { toast } from './Toasts.vue'
+import { toast } from './ToastsView.vue'
 import { useFetchApi, getCookie, addCookieListener, fileToURL, logout } from '../common'
 import type { User } from '../model'
 
-import Loader from './Loader.vue'
+import LoadView from './LoadView.vue'
 
 const route = useRoute();
 
@@ -64,7 +64,7 @@ function doLogout() {
       <div class="navbar-end">
         <router-link v-if="!accessToken" to="/login" class="btn">登录</router-link>
         <template v-else>
-          <Loader v-if="!user"/>
+          <LoadView v-if="!user"/>
           <div v-else class="dropdown dropdown-end">
             <label tabindex="0" class="btn btn-ghost btn-circle avatar">
               <div class="w-10 rounded-full">

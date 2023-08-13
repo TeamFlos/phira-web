@@ -3,8 +3,8 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import Account from './settings/Account.vue'
-import Security from './settings/Security.vue'
+import AccountTab from './settings/AccountTab.vue'
+import SecurityTab from './settings/SecurityTab.vue'
 
 const route = useRoute();
 const category = computed(() => {
@@ -24,8 +24,8 @@ const category = computed(() => {
         </ul>
       </div>
       <div class="flex flex-col grow card bg-base-100 min-h-12 p-8">
-        <Account v-if="category === 'account'" />
-        <Security v-if="category === 'security'" />
+        <AccountTab v-if="category === 'account'" />
+        <SecurityTab v-if="category === 'security'" />
       </div>
     </div>
   </div>

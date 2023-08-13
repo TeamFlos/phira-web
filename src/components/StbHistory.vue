@@ -3,8 +3,6 @@
 import { useFetchApi, fileToURL, detailedTime } from '../common'
 import type { StbHistory, User } from '../model'
 
-import moment from 'moment'
-
 const props = defineProps<{ chart: number, uploader: number }>();
 
 const fetchApi = useFetchApi();

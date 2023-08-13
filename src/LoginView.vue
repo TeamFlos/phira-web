@@ -3,8 +3,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { toast } from './components/Toasts.vue'
-import { useFetchApi, setCookie, validateEmail, validatePassword } from './common';
+import { useFetchApi, setCookie, validateEmail, validatePassword, toast } from './common';
 
 import LoadOr from './components/LoadOr.vue'
 
