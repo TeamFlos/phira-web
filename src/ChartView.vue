@@ -70,7 +70,7 @@ async function setRanked(ranked: boolean) {
 <template>
   <div class="relative">
     <div :style="{ 'background-image': 'url(' + fileToURL(chart.illustration) + ')' }"
-      class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-multiply bg-[#444444]"></div>
+      class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-overlay bg-[#bbbbbb] dark:bg-[#000000bb]" style="transition: background-color 0.5s;"></div>
     <div class="w-full h-48 -mt-48 bg-gradient-to-b from-transparent to-base-200"></div>
     <div class="flex flex-col items-center -mt-[35vh] mb-24">
       <div class="px-8 w-full lg:px-0 lg:w-3/4 gap-8">

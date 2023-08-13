@@ -2,6 +2,7 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 export default {
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
@@ -12,6 +13,9 @@ export default {
       'mono': ['Roboto Mono', ...defaultTheme.fontFamily.mono],
       'ubuntu': ['Ubuntu', 'sans-serif'],
       'tektur': ['Tektur'],
+    },
+    data: {
+      light: 'theme~="light"',
     },
   },
   plugins: [

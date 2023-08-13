@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { toast } from './ToastsView.vue'
@@ -8,6 +8,20 @@ import { useFetchApi, getCookie, addCookieListener, fileToURL, logout } from '..
 import type { User } from '../model'
 
 import LoadView from './LoadView.vue'
+
+const darkTheme = ref((() => {
+  let theme = localStorage.getItem('data-theme');
+  return theme === 'dark'? true: theme !== 'light';
+})());
+watch(
+  darkTheme,
+  (dark) => {
+    let theme = dark? 'dark': 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('data-theme', theme);
+  },
+  { immediate: true }
+);
 
 const route = useRoute();
 
@@ -62,6 +76,11 @@ function doLogout() {
         </div>
       </div>
       <div class="navbar-end">
+        <label class="swap swap-rotate text-2xl mr-4">
+          <input type="checkbox" v-model="darkTheme" />
+          <i class="fa-solid fa-moon swap-on fill-current"></i>
+          <i class="fa-solid fa-sun swap-off fill-current"></i>
+        </label>
         <router-link v-if="!accessToken" to="/login" class="btn">登录</router-link>
         <template v-else>
           <LoadView v-if="!user"/>
