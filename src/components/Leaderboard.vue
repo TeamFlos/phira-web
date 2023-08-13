@@ -37,13 +37,12 @@ const parameters = computed(() => {
 async function fetchRecords() {
   records.value = undefined;
   let params = {
-    chart: String(props.chart),
     pageNum: String(PAGE_NUM),
     includePlayer: String(true),
     best: String(true),
     ...parameters.value
   };
-  const resp = await fetchApi('/record/query?' + new URLSearchParams(params)) as Page<RecordEx>;
+  const resp = await fetchApi('/record/query/' + props.chart + '?' + new URLSearchParams(params)) as Page<RecordEx>;
   totalCount.value = resp.count;
   for (let i = 0; i < resp.results.length; ++i) {
     resp.results[i].rank = ((pagination.value?.current ?? 1) - 1) * PAGE_NUM + i + 1;
