@@ -26,7 +26,7 @@ defineExpose({ current });
 </script>
 
 <template>
-  <div class="join">
+  <div class="join flex-wrap justify-center">
     <button class="join-item btn" :class="{ 'btn-disabled': current === 1 }">«</button>
     <PageButton v-if="current >= 4" :page="1" />
     <button class="join-item btn btn-disabled" v-if="current >= 6">…</button>
