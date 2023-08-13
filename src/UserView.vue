@@ -9,7 +9,7 @@ import { Permission, Roles, type User } from './model'
 import LoadOr from './components/LoadOr.vue'
 import PropItem from './components/PropItem.vue'
 import RecordList from './components/RecordList.vue'
-import UserAvatar from './UserAvatar.vue'
+import UserAvatar from './components/UserAvatar.vue'
 
 const route = useRoute();
 
