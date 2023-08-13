@@ -27,7 +27,7 @@ defineExpose({ current });
 
 <template>
   <div class="join flex-wrap justify-center">
-    <button class="join-item btn" :class="{ 'btn-disabled': current === 1 }">«</button>
+    <button class="join-item btn" :class="{ 'btn-disabled': current === 1 }" @click="current--">«</button>
     <PageButton v-if="current >= 4" :page="1" />
     <button class="join-item btn btn-disabled" v-if="current >= 6">…</button>
     <PageButton v-if="current === 5" :page="2" />
@@ -39,6 +39,6 @@ defineExpose({ current });
     <button class="join-item btn btn-disabled" v-if="current + 5 <= total">…</button>
     <PageButton v-if="current + 4 === total" :page="current + 3" />
     <PageButton v-if="current + 3 <= total && total > 1" :page="total" />
-    <button class="join-item btn" :class="{ 'btn-disabled': current >= total }">»</button>
+    <button class="join-item btn" :class="{ 'btn-disabled': current >= total }" @click="current++">»</button>
   </div>
 </template>
