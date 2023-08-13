@@ -4,6 +4,7 @@
       <router-link to="/dmca" class="link link-hover">DMCA</router-link>
       <router-link to="/terms-of-use" class="link link-hover">Terms of Use</router-link>
       <router-link to="/privacy-policy" class="link link-hover">Privacy Policy</router-link>
+      <a href="https://status.phira.cn/" target="_blank" class="link link-hover">Server Status</a>
       <a href="mailto:contact@phira.cn" class="link link-hover">Contact Us</a>
     </div>
     <div>
