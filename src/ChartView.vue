@@ -97,7 +97,7 @@ async function setRanked(ranked: boolean) {
                 <p v-else class="w-full italic">该谱面没有简介。</p>
               </UserCard>
               <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_RANKED) && chart.stable"
-                class="card">
+                class="card shadow-xl">
                 <button v-if="chart.ranked" class="btn btn-neutral btn-active w-full" @click="setRanked(false)">
                   <LoadOr :loading="settingRanked">设置为特殊</LoadOr>
                 </button>

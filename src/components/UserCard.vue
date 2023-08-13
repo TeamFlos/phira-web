@@ -15,7 +15,7 @@ fetchApi(`/user/${props.id}`, {}, (u) => { user.value = u as User; });
 </script>
 
 <template>
-  <div class="card bg-base-100 p-4 flex-col items-center">
+  <div class="card bg-base-100 p-4 shadow-xl flex-col items-center">
     <div v-if="!user" class="flex w-16 justify-center items-center">
       <div class="w-2/3 loading loading-spinner"></div>
     </div>
