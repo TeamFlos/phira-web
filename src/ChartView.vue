@@ -10,6 +10,7 @@ import { Permission, Roles, type Chart, type User } from './model'
 
 import Leaderboard from './components/Leaderboard.vue'
 import Loader from './components/Loader.vue'
+import LoadOr from './components/LoadOr.vue'
 import Property from './components/Property.vue'
 import Rating from './components/Rating.vue'
 import StbHistory from './components/StbHistory.vue'
@@ -50,13 +51,17 @@ function switchTab(s: string) {
   router.replace({ path: route.path, hash: '#' + s });
 }
 
+const settingRanked = ref(false);
 async function setRanked(ranked: boolean) {
+  settingRanked.value = true;
   try {
     await fetchApi(`/chart/${id}/set-ranked`, { method: 'POST', json: { 'ranked': ranked } });
     toast('分区更新成功');
     chart.ranked = ranked;
   } catch (e) {
     toastError(e);
+  } finally {
+    settingRanked.value = false;
   }
 }
 
@@ -93,8 +98,12 @@ async function setRanked(ranked: boolean) {
               </UserCard>
               <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_RANKED) && chart.stable"
                 class="card">
-                <button v-if="chart.ranked" class="btn btn-neutral btn-active w-full" @click="setRanked(false)">设置为特殊</button>
-                <button v-else class="btn btn-accent w-full" @click="setRanked(true)">设置为常规</button>
+                <button v-if="chart.ranked" class="btn btn-neutral btn-active w-full" @click="setRanked(false)">
+                  <LoadOr :loading="settingRanked">设置为特殊</LoadOr>
+                </button>
+                <button v-else class="btn btn-accent w-full" @click="setRanked(true)">
+                  <LoadOr :loading="settingRanked">设置为常规</LoadOr>
+                </button>
               </div>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p>评分</p>
