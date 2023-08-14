@@ -2,6 +2,9 @@
 
 import { ref } from 'vue'
 
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n();
+
 import { useFetchApi, toast, toastError, validatePassword } from '../common'
 
 import LoadOr from '../components/LoadOr.vue'
@@ -22,8 +25,8 @@ async function changePassword() {
       pwd_old = password_old.value!,
       pwd = password.value!,
       pwd2 = password2.value!;
-    validatePassword(pwd_old);
-    validatePassword(pwd, pwd2);
+    validatePassword(t, pwd_old);
+    validatePassword(t, pwd, pwd2);
     await fetchApi('/edit/password', {
       method: 'POST',
       json: {
