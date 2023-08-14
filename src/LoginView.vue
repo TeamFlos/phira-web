@@ -28,7 +28,8 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n();
 
-import { useFetchApi, setCookie, validateEmail, validatePassword, toast } from './common';
+import { useFetchApi, setCookie, validateEmail, validatePassword, toast, changeLocale } from './common';
+import type { User } from './model'
 
 import LoadOr from './components/LoadOr.vue'
 
@@ -64,6 +65,9 @@ async function submit() {
     setCookie('access_token', resp.token, new Date(Date.parse(resp.expireAt)).toUTCString());
     toast(t('logged-in'));
     router.back();
+    fetchApi('/me', {}, (me) => {
+      changeLocale((me as User).language);
+    });
   } catch (e) {
     errorMessage.value = (e instanceof Error)? e.message: String(e);
   } finally {

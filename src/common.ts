@@ -3,9 +3,12 @@ import { useRouter } from 'vue-router'
 
 import { toast } from './components/ToastsView.vue'
 
+import { SUPPORTED_LOCALES, i18n } from './main'
+
 import moment from 'moment'
 
-import { useI18n } from 'vue-i18n'
+import 'moment/dist/locale/zh-cn'
+import 'moment/dist/locale/zh-hk'
 
 export { toast };
 
@@ -14,6 +17,19 @@ export const LANGUAGES = {
   'zh-TW': '繁體中文',
   'en-US': 'English',
 };
+
+export function changeLocale(locale: string) {
+  if (locale.startsWith('en')) locale = 'en';
+  if (!SUPPORTED_LOCALES.includes(locale)) locale = 'en';
+  i18n.global.locale.value = locale === 'zh-TW'? 'zh-CN': locale;
+  localStorage.setItem('locale', locale);
+  let momentLocale = {
+    'zh-CN': 'zh-cn',
+    'zh-TW': 'zh-hk',
+    'en': 'en-us',
+  }[locale] ?? 'en-us';
+  moment.locale(momentLocale);
+}
 
 export function isString(s: unknown): s is string {
   return typeof s === 'string';
@@ -80,13 +96,12 @@ function triggerCookie() {
 }
 
 export function setCookie(key: string, value: string, expires: string) {
-  console.log(expires);
   document.cookie = `${key}=${value}; expires=${expires}; SameSite=None; Secure`;
   triggerCookie();
 }
 
 export function deleteCookie(key: string) {
-  setCookie(key, '', new Date().toUTCString());
+  setCookie(key, 'test', 'Thu, 01 Jan 1970 00:00:01 GMT');
 }
 
 export function logout() {
@@ -109,7 +124,6 @@ interface RequestInitWithJson extends RequestInit {
   json?: object,
 }
 
-import { i18n } from './main'
 export function useFetchApi(): FetchApi {
   const router = useRouter();
   return async function (

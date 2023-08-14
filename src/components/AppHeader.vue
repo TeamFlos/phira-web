@@ -62,11 +62,8 @@ const accessToken = ref<string>();
 const user = ref<User>();
 
 import moment from 'moment'
-import 'moment/dist/locale/zh-cn'
 
 const drawerOpened = ref(false);
-
-moment.locale('zh-cn');
 
 addCookieListener(() => {
   accessToken.value = getCookie('access_token');

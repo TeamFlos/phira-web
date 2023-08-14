@@ -23,7 +23,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError, uploadFile, fileToURL, LANGUAGES } from '../common'
+import { useFetchApi, toast, toastError, uploadFile, fileToURL, LANGUAGES, changeLocale } from '../common'
 import type { User } from '../model'
 
 import LoadOr from '../components/LoadOr.vue'
@@ -84,6 +84,7 @@ async function saveProfile() {
         bio: bio.value.length? bio.value: null,
       }
     });
+    changeLocale(language.value);
     toast(t('profile-updated'));
   } catch (e) {
     toastError(e);
