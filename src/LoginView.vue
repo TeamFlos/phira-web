@@ -1,7 +1,32 @@
+<i18n lang="yml" src="@/locales/form.yml"></i18n>
+<i18n>
+en:
+  logging-in: Logging in
+  logged-in: Logged in
+
+  forget-password: 'Forgot password?'
+  new-user:
+    prompt: 'New to Phira?'
+    action: Register
+
+zh-CN:
+  logging-in: 正在登录中
+  logged-in: 登录成功
+
+  forget-password: 忘记密码？
+  new-user:
+    prompt: 没有账户？
+    action: 注册账号
+
+</i18n>
+
 <script setup lang="ts">
 
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n();
 
 import { useFetchApi, setCookie, validateEmail, validatePassword, toast } from './common';
 
@@ -20,15 +45,15 @@ const errorMessage = ref<string>();
 
 async function submit() {
   if (doingLogin.value) {
-    toast('正在登录中', 'warning');
+    toast(t('logging-in'), 'warning');
     return;
   }
   errorMessage.value = undefined;
   doingLogin.value = true;
   try {
-    validateEmail(email.value!);
+    validateEmail(t, email.value!);
     let pwd = password.value!;
-    validatePassword(pwd);
+    validatePassword(t, pwd);
     let resp = await fetchApi('/login', {
       method: 'POST',
       json: {
@@ -37,7 +62,7 @@ async function submit() {
       },
     }) as { token: string, expireAt: string };
     setCookie('access_token', resp.token, new Date(Date.parse(resp.expireAt)).toUTCString());
-    toast('登录成功');
+    toast(t('logged-in'));
     router.back();
   } catch (e) {
     errorMessage.value = (e instanceof Error)? e.message: String(e);
@@ -52,20 +77,20 @@ async function submit() {
   <div class="flex justify-center items-center p-8">
     <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-gradient-to-r from-sky-400 to-blue-500 mt-16">
       <div class="card-body">
-        <h2 class="card-title text-white">登录</h2>
+        <h2 class="card-title text-white" v-t="'login'"></h2>
         <div class="form-control">
           <div class="label">
-            <span class="label-text text-inherit text-white">邮箱</span>
+            <span class="label-text text-inherit text-white" v-t="'email.label'"></span>
           </div>
-          <input type="email" placeholder="邮箱地址" class="input input-bordered" v-model="email"/>
+          <input type="email" :placeholder="t('email.hint')" class="input input-bordered" v-model="email"/>
         </div>
         <div class="form-control">
           <div class="label">
-            <span class="label-text text-inherit text-white">密码</span>
+            <span class="label-text text-inherit text-white" v-t="'password.label'"></span>
           </div>
-          <input type="password" placeholder="密码" class="input input-bordered" v-model="password"/>
+          <input type="password" :placeholder="t('password.hint')" class="input input-bordered" v-model="password"/>
           <label class="label">
-            <a href="https://api.phira.cn/reset-password" target="_blank" class="label-text-alt link link-hover" style="color: white !important">忘记密码？</a>
+            <a href="https://api.phira.cn/reset-password" target="_blank" class="label-text-alt link link-hover" style="color: white !important" v-t="'forget-password'"></a>
           </label>
         </div>
         <div class="form-control">
@@ -73,12 +98,12 @@ async function submit() {
         </div>
         <div class="form-control mt-6">
           <button class="btn glass text-white" :class="{ disabled: doingLogin }" @click="submit">
-            <LoadOr :loading="doingLogin">登录</LoadOr>
+            <LoadOr :loading="doingLogin">{{ t('login') }}</LoadOr>
           </button>
         </div>
         <div class="divider text-white">
-          没有账号？
-          <router-link to="/register" class="link link-hover">请注册账号</router-link>
+          {{ t('new-user.prompt') }}
+          <router-link to="/register" class="link link-hover" v-t="'new-user.action'"></router-link>
         </div>
       </div>
     </div>

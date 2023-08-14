@@ -1,7 +1,77 @@
+<i18n>
+en:
+  division:
+    label: Division
+    regular: Regular
+    troll: Troll
+    plain: Plain
+    visual: Visual
+  order:
+    label: Order by
+    time: Time desc.
+    time-rev: Time asc.
+    rating: Rating desc.
+    rating-rev: Rating asc.
+    name: Name asc.
+    name-rev: Name desc.
+
+  search: Search
+
+  filter-opts: Filter options
+  filters:
+    uploaded-by-me: Uploaded by me
+    unreviewed-only: Unreviewed only
+    stb-req-only: Stb. requests only
+
+  tags:
+    wanted: Wanted tags
+    unwanted: Unwanted tags
+
+  rating:
+    lower: Lowest rating
+    upper: Highest rating
+
+zh-CN:
+  division:
+    label: 谱面分区
+    regular: 常规
+    troll: 整活
+    plain: 纯配置
+    visual: 观赏
+  order:
+    label: 排序方式
+    time: 时间顺序
+    time-rev: 时间倒序
+    rating: 评分顺序
+    rating-rev: 评分倒序
+    name: 名字正序
+    name-rev: 名字倒序
+
+  search: 搜索
+
+  filter-opts: 过滤条件
+  filters:
+    uploaded-by-me: 我上传的
+    unreviewed-only: 只看未审核的
+    stb-req-only: 只看上架申请
+
+  tags:
+    wanted: 想包含的标签
+    unwanted: 不想包含的标签
+
+  rating:
+    lower: 评分下界
+    upper: 评分上界
+
+</i18n>
+
 <script setup lang="ts">
 
 import { ref, watch, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n();
 
 import { useFetchApi, fileToURL, pageCount, isString, getCookie } from './common'
 
@@ -211,36 +281,36 @@ function saveFilters() {
         <div class="form-control">
           <label class="label">
             <span class="label-text">
-              谱面分区<i class="fa-solid fa-grip ml-2"></i>
+              {{ t('division.label') }}<i class="fa-solid fa-grip ml-2"></i>
             </span>
           </label>
           <select class="select select-bordered" v-model="division" @change="pagination!.current = 1">
-            <option value="regular">常规</option>
-            <option value="troll">整活</option>
-            <option value="plain">纯配置</option>
-            <option value="visual">观赏</option>
+            <option value="regular" v-t="'division.regular'"></option>
+            <option value="troll" v-t="'division.troll'"></option>
+            <option value="plain" v-t="'division.plain'"></option>
+            <option value="visual" v-t="'division.visual'"></option>
           </select>
         </div>
         <div class="form-control">
           <label class="label">
             <span class="label-text">
-              排序方式<i class="fa-solid fa-arrow-up-wide-short ml-2"></i>
+              {{ t('order.label') }}<i class="fa-solid fa-arrow-up-wide-short ml-2"></i>
             </span>
           </label>
           <select class="select select-bordered" v-model="order">
-            <option value="-updated">时间顺序</option>
-            <option value="updated">时间倒序</option>
-            <option value="-rating">评分顺序</option>
-            <option value="rating">评分倒序</option>
-            <option value="name">名字正序</option>
-            <option value="-name">名字倒序</option>
+            <option value="-updated" v-t="'order.time'"></option>
+            <option value="updated" v-t="'order.time-rev'"></option>
+            <option value="-rating" v-t="'order.rating'"></option>
+            <option value="rating" v-t="'order.rating-rev'"></option>
+            <option value="name" v-t="'order.name'"></option>
+            <option value="-name" v-t="'order.name-rev'"></option>
           </select>
         </div>
         <button class="btn bg-base-100 btn-outline" @click="filterDialog!.showModal()">
           <i class="fa-solid fa-filter"></i>
         </button>
         <div class="ml-auto join w-full lg:w-auto">
-          <input class="input input-bordered join-item rounded-l-full w-full" placeholder="搜索" v-model="tempSearchValue" @keyup.enter="pagination!.current = 1; searchValue = tempSearchValue!" />
+          <input class="input input-bordered join-item rounded-l-full w-full" :placeholder="t('search')" v-model="tempSearchValue" @keyup.enter="pagination!.current = 1; searchValue = tempSearchValue!" />
           <button class="btn btn-secondary join-item rounded-r-full" @click="pagination!.current = 1; searchValue = tempSearchValue!">
             <i class="fa-solid fa-search"></i>
           </button>
@@ -264,33 +334,33 @@ function saveFilters() {
   </div>
   <dialog class="modal" ref="filterDialog">
     <div class="modal-box">
-      <h3 class="font-bold text-lg">过滤条件</h3>
+      <h3 class="font-bold text-lg" v-t="'filter-opts'"></h3>
       <div class="flex flex-col gap-4 mt-4">
         <div class="flex flex-row gap-2">
-          <button v-if="user" class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempFromMe }" @click="tempFromMe = !tempFromMe">我上传的</button>
-          <button v-if="user && Roles.from(user.roles).permissions(user.banned).has(Permission.SEE_UNREVIEWED)" class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempOnlyUnreviewed }" @click="() => { if (tempOnlyUnreviewed = !tempOnlyUnreviewed) tempOnlyStableRequest = false; }">只看未审核</button>
-          <button class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempOnlyStableRequest }" @click="() => { if (tempOnlyStableRequest = !tempOnlyStableRequest) tempOnlyUnreviewed = false; }">只看上架申请</button>
+          <button v-if="user" class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempFromMe }" @click="tempFromMe = !tempFromMe" v-t="'filters.uploaded-by-me'"></button>
+          <button v-if="user && Roles.from(user.roles).permissions(user.banned).has(Permission.SEE_UNREVIEWED)" class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempOnlyUnreviewed }" @click="() => { if (tempOnlyUnreviewed = !tempOnlyUnreviewed) tempOnlyStableRequest = false; }" v-t="'filters.unreviewed-only'"></button>
+          <button class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempOnlyStableRequest }" @click="() => { if (tempOnlyStableRequest = !tempOnlyStableRequest) tempOnlyUnreviewed = false; }" v-t="'filters.stb-req-only'"></button>
         </div>
         <div class="divider my-0"></div>
         <div>
-          <p>想包含的标签</p>
+          <p v-t="'tags.wanted'"></p>
           <TagList class="mt-2" ref="wantedTagsEl" :init="initWanted" />
         </div>
         <div>
-          <p>不想包含的标签</p>
+          <p v-t="'tags.unwanted'"></p>
           <TagList class="mt-2" ref="unwantedTagsEl" :init="initUnwanted" />
         </div>
         <div class="divider my-0"></div>
         <div class="flex flex-col">
-          <p>评分下界</p>
+          <p v-t="'rating.lower'"></p>
           <RatingBar name="rating-lower" :init="initRatingLower" ref="ratingLowerEl" canBeZero />
         </div>
         <div class="flex flex-col mt-2">
-          <p>评分上界</p>
+          <p v-t="'rating.upper'"></p>
           <RatingBar name="rating-upper" :init="initRatingUpper" ref="ratingUpperEl" canBeZero />
         </div>
         <div class="flex flew-row justify-end">
-          <button class="btn btn-primary" @click="saveFilters">确定</button>
+          <button class="btn btn-primary" @click="saveFilters" v-t="'confirm'"></button>
         </div>
       </div>
     </div>

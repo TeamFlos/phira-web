@@ -1,7 +1,55 @@
+<i18n>
+en:
+  composer: Composer
+  illustartor: Illustrator
+  charter: Charter
+  difficulty: Difficulty
+
+  updated-at: Updated at
+  created-at: Created at
+
+  leaderboard: Leaderboard
+  stb-history: Stb. History
+
+  description-empty: This chart doesn't have description.
+
+  set-ranked: Set ranked
+  set-special: Set special
+  div-updated: Division updated
+
+  rating: Rating
+  submit-rating: Submit
+
+zh-CN:
+  composer: 曲师
+  illustartor: 画师
+  charter: 谱师
+  difficulty: 难度
+
+  updated-at: 更新于
+  created-at: 上传于
+
+  leaderboard: 排行榜
+  stb-history: 评议记录
+
+  description-empty: 该谱面没有简介。
+
+  set-ranked: 设置为常规
+  set-special: 设置为特殊
+  div-updated: 分区已更新
+
+  rating: 评分
+  submit-rating: 提交评分
+
+</i18n>
+
 <script setup lang="ts">
 
 import { ref, watch, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n();
 
 import moment from 'moment'
 
@@ -56,7 +104,7 @@ async function setRanked(ranked: boolean) {
   settingRanked.value = true;
   try {
     await fetchApi(`/chart/${id}/set-ranked`, { method: 'POST', json: { 'ranked': ranked } });
-    toast('分区更新成功');
+    toast(t('div-updated'));
     chart.ranked = ranked;
   } catch (e) {
     toastError(e);
@@ -82,41 +130,41 @@ async function setRanked(ranked: boolean) {
               <UserCard :id="chart.uploader">
                 <div class="divider"></div>
                 <div class="flex flex-col w-full gap-2">
-                  <PropItem title="曲师" :value="chart.composer" />
-                  <PropItem title="画师" :value="chart.illustrator" />
-                  <PropItem title="谱师" :value="chart.charter" />
-                  <PropItem title="难度" :value="`${chart.level} (${chart.difficulty.toFixed(1)})`" />
+                  <PropItem :title="t('composer')" :value="chart.composer" />
+                  <PropItem :title="t('illustrator')" :value="chart.illustrator" />
+                  <PropItem :title="t('charter')" :value="chart.charter" />
+                  <PropItem :title="t('difficulty')" :value="`${chart.level} (${chart.difficulty.toFixed(1)})`" />
                 </div>
                 <div class="divider"></div>
                 <div class="flex flex-col w-full gap-2">
-                  <PropItem title="更新于" :value="moment(chart.updated).fromNow()" />
-                  <PropItem title="上传于" :value="moment(chart.created).fromNow()" />
+                  <PropItem :title="t('updated-at')" :value="moment(chart.updated).fromNow()" />
+                  <PropItem :title="t('created-at')" :value="moment(chart.created).fromNow()" />
                 </div>
                 <div class="divider"></div>
                 <p v-if="chart.description.length" class="w-full">{{ chart.description }}</p>
-                <p v-else class="w-full italic">该谱面没有简介。</p>
+                <p v-else class="w-full italic" v-t="'description-empty'"></p>
               </UserCard>
               <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_RANKED) && chart.stable"
                 class="card shadow-xl">
                 <button v-if="chart.ranked" class="btn btn-neutral btn-active w-full" @click="setRanked(false)">
-                  <LoadOr :loading="settingRanked">设置为特殊</LoadOr>
+                  <LoadOr :loading="settingRanked">{{ t('set-special') }}</LoadOr>
                 </button>
                 <button v-else class="btn btn-accent w-full" @click="setRanked(true)">
-                  <LoadOr :loading="settingRanked">设置为常规</LoadOr>
+                  <LoadOr :loading="settingRanked">{{ t('set-ranked') }}</LoadOr>
                 </button>
               </div>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
-                <p>评分</p>
+                <p v-t="'rating'"></p>
                 <RatingBar name="chart-rating" :init="(chart.rating ?? 0) * 10" ref="chartRating" />
-                <button v-if="rating" class="btn btn-primary mt-2">提交评分</button>
+                <button v-if="rating" class="btn btn-primary mt-2" v-t="'submit-rating'"></button>
               </div>
             </div>
             <div class="grow -mt-8 lg:w-3/4">
               <div class="tabs">
                 <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': contentTab === 'ldb' }"
-                  @click="switchTab('ldb')">排行榜</a>
+                  @click="switchTab('ldb')" v-t="'leaderboard'"></a>
                 <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': contentTab === 'stb' }"
-                  @click="switchTab('stb')">评议记录</a>
+                  @click="switchTab('stb')" v-t="'stb-history'"></a>
               </div>
               <div class="card bg-base-100 shadow-xl p-4 rounded-t-none">
                 <LeaderboardView v-if="contentTab === 'ldb'" :chart="chart.id" />

@@ -14,9 +14,6 @@ export default {
       'ubuntu': ['Ubuntu', 'sans-serif'],
       'tektur': ['Tektur'],
     },
-    data: {
-      light: 'theme~="light"',
-    },
   },
   plugins: [
     require("@tailwindcss/typography"),

@@ -1,0 +1,35 @@
+en:
+  email:
+    label: Email
+    hint: Email Address
+  password:
+    label: Password
+    hint: Password
+  password-confirm:
+    label: Confirm Password
+    hint: Password
+  username:
+    label: Username
+    hint: Username
+  invalid-email: Invalid email
+  password-short: Password is too short
+  password-inconsistent: Inconsistent passwords
+  please-login: Please login
+
+zh-CN:
+  email:
+    label: 邮箱
+    hint: 邮箱地址
+  password:
+    label: 密码
+    hint: 密码
+  password-confirm:
+    label: 重复密码
+    hint: 密码
+  username:
+    label: 用户名
+    hint: 名字
+  invalid-email: 邮箱不合法
+  password-short: 密码过短
+  password-inconsistent: 两次输入的密码不一致
+  please-login: 请登录

@@ -1,7 +1,37 @@
+<i18n>
+en:
+  logged-out: Logged out
+
+  chart: Charts
+  event: Events
+  user: Users
+
+  me:
+    profile: Profile
+    settings: Settings
+    logout: Logout
+
+zh-CN:
+  logged-out: 已登出
+
+  chart: 谱面
+  event: 活动
+  user: 用户
+
+  me:
+    profile: 主页
+    settings: 设置
+    logout: 登出
+
+</i18n>
+
 <script setup lang="ts">
 
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n();
 
 import { toast } from './ToastsView.vue'
 import { useFetchApi, getCookie, addCookieListener, logout } from '../common'
@@ -53,7 +83,7 @@ function blur() { (document.activeElement as HTMLElement).blur(); }
 function doLogout() {
   blur();
   logout();
-  toast('已登出');
+  toast(t('logged-out'));
 }
 
 </script>
@@ -72,15 +102,15 @@ function doLogout() {
           <div class="ms-8 gap-2 hidden md:flex">
             <router-link to="/chart" class="btn btn-ghost normal-case text-lg" :class="{ 'btn-active': route.path.startsWith('/chart') }">
               <i class="fa-solid fa-book"></i>
-              谱面
+              {{ t('chart') }}
             </router-link>
             <router-link to="/" class="btn btn-ghost normal-case text-lg">
               <i class="fa-solid fa-star"></i>
-              活动
+              {{ t('event') }}
             </router-link>
             <router-link to="/" class="btn btn-ghost normal-case text-lg">
               <i class="fa-solid fa-user"></i>
-              用户
+              {{ t('user') }}
             </router-link>
           </div>
         </div>
@@ -90,7 +120,7 @@ function doLogout() {
             <i class="fa-solid fa-moon swap-on fill-current"></i>
             <i class="fa-solid fa-sun swap-off fill-current"></i>
           </label>
-          <router-link v-if="!accessToken" to="/login" class="btn">登录</router-link>
+          <router-link v-if="!accessToken" to="/login" class="btn" v-t="'login'"></router-link>
           <template v-else>
             <LoadView v-if="!user"/>
             <div v-else class="dropdown dropdown-end">
@@ -100,9 +130,9 @@ function doLogout() {
                 </div>
               </label>
               <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40">
-                <li><router-link :to="`/user/${user.id}`" @click="blur">主页</router-link></li>
-                <li><router-link to="/settings" @click="blur">设置</router-link></li>
-                <li><a @click="doLogout">登出</a></li>
+                <li><router-link :to="`/user/${user.id}`" @click="blur" v-t="'me.profile'"></router-link></li>
+                <li><router-link to="/settings" @click="blur" v-t="'me.settings'"></router-link></li>
+                <li><a @click="doLogout" v-t="'me.logout'"></a></li>
               </ul>
             </div>
           </template>
@@ -114,15 +144,15 @@ function doLogout() {
       <ul class="menu p-4 w-80 h-full bg-base-200 gap-2">
         <router-link to="/chart" class="btn btn-ghost normal-case text-lg justify-start" :class="{ 'btn-active': route.path.startsWith('/chart') }" @click="drawerOpened = false">
           <i class="fa-solid fa-book w-8"></i>
-          谱面
+          {{ t('chart') }}
         </router-link>
         <router-link to="/" class="btn btn-ghost normal-case text-lg justify-start" @click="drawerOpened = false">
           <i class="fa-solid fa-star w-8"></i>
-          活动
+          {{ t('event') }}
         </router-link>
         <router-link to="/" class="btn btn-ghost normal-case text-lg justify-start" @click="drawerOpened = false">
           <i class="fa-solid fa-user w-8"></i>
-          用户
+          {{ t('user') }}
         </router-link>
       </ul>
     </div>

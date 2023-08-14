@@ -1,4 +1,30 @@
+<i18n>
+en:
+  stb-request: '{0} requested to stabilize the chart'
+  stb-action:
+    approve: '{0} approved the request'
+    deny: '{0} denied the request'
+  stb-result:
+    approve: Stabilization approved
+    deny: Stabilization denied
+  comment: '{0} commented: {1}'
+
+zh-CN:
+  stb-request: '{0} 提交了上架申请'
+  stb-action:
+    approve: '{0} 通过了谱面'
+    deny: '{0} 拒绝了谱面'
+  stb-result:
+    approve: 谱面上架申请通过
+    deny: 谱面上架申请被拒
+  comment: '{0} 评论：{1}'
+
+</i18n>
+
 <script setup lang="ts">
+
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n();
 
 import { useFetchApi, fileToURL, detailedTime } from '../common'
 import type { StbHistory, User } from '../model'
@@ -24,15 +50,21 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
         <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ detailedTime(item.time) }}</time>
         <br/>
         <div v-if="!item.reviewer" class="italic">
-          <p v-if="item.approve === null"><router-link :to="`/user/${uploader.id}`" class="link link-hover">{{ uploader.name }}</router-link> 提交了上架申请</p>
-          <p v-else-if="item.approve">谱面上架申请通过</p>
-          <p v-else>谱面上架申请被拒</p>
+          <i18n-t v-if="item.approve === null" tag="p" keypath="stb-request">
+            <router-link :to="`/user/${uploader.id}`" class="link link-hover">{{ uploader.name }}</router-link>
+          </i18n-t>
+          <p v-else-if="item.approve" v-t="'stb-result.approve'"></p>
+          <p v-else v-t="'stb-result.deny'"></p>
         </div>
         <div v-else-if="item.comment || item.comment === ''" class="mb-4">
-          <span class="text-gray-400 italic"><router-link :to="`/user/${item.reviewer}`" class="link link-hover">{{ item.reviewerName }}</router-link> 评论：</span>
-          {{ item.comment }}
+          <i18n-t tag="span" keypath="comment" class="text-gray-400 italic">
+            <router-link :to="`/user/${item.reviewer}`" class="link link-hover">{{ item.reviewerName }}</router-link>
+            <span class="not-italic">{{ item.comment }}</span>
+          </i18n-t>
         </div>
-        <p v-else class="mb-4 italic"><router-link :to="`/user/${item.reviewer}`" class="link link-hover">{{ item.reviewerName }}</router-link> {{ item.approve? '通过': '拒绝' }}了谱面</p>
+        <i18n-t v-else tag="p" :keypath="item.approve? 'stb-action.approve': 'stb-action.deny'" class="mb-4 italic">
+          <router-link :to="`/user/${item.reviewer}`" class="link link-hover">{{ item.reviewerName }}</router-link>
+        </i18n-t>
       </li>
     </ol>
     <div v-if="!history.length" class="text-center italic py-8">

@@ -2,6 +2,9 @@
 
 import { ref } from 'vue'
 
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n();
+
 import { useFetchApi, fileToURL, userNameClass } from '../common'
 import type { User } from '../model'
 
@@ -31,7 +34,7 @@ fetchApi(`/user/${props.id}`, {}, (u) => { user.value = u as User; });
         <p class="font-black text-xl group-hover:link mt-2" :class="[userNameClass(user.badges)]">{{ user.name }}</p>
       </router-link>
       <p v-if="user.bio" class="text-sm text-gray-500">{{ user.bio }}</p>
-      <p v-else class="text-sm italic text-gray-500">该用户还没有简介</p>
+      <p v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></p>
       <slot />
     </div>
   </div>

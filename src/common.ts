@@ -1,11 +1,13 @@
 
-import { toast } from './components/ToastsView.vue'
-
 import { useRouter } from 'vue-router'
 
-export { toast };
+import { toast } from './components/ToastsView.vue'
 
 import moment from 'moment'
+
+import { useI18n } from 'vue-i18n'
+
+export { toast };
 
 export const LANGUAGES = {
   'zh-CN': '简体中文',
@@ -47,18 +49,18 @@ export type FetchApi = (
   onError?: (json: object, resp?: Response) => boolean,
 ) => object | null;
 
-export function validateEmail(email: string) {
+export function validateEmail(t: any, email: string) {
   if (!(/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/).test(email)) {
-    throw new Error('邮箱不合法');
+    throw new Error(t('invalid-email'));
   }
 }
 
-export function validatePassword(password: string, repeat?: string) {
+export function validatePassword(t: any, password: string, repeat?: string) {
   if (!password || password.length < 8) {
-    throw new Error('密码过短');
+    throw new Error(t('password-short'));
   }
   if (repeat && repeat !== password) {
-    throw new Error('两次输入的密码不一致');
+    throw new Error(t('password-inconsistent'));
   }
 }
 
@@ -140,7 +142,7 @@ export function useFetchApi(): FetchApi {
           // unauthorized
           logout();
           router.push('/login');
-          toast('请登录', 'error');
+          toast(t('please-login'), 'error');
         } else if (!onError || onError(json, resp)) {
           if (!onSuccess) throw new Error(json.error);
           toast(json.error, 'error');

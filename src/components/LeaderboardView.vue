@@ -1,6 +1,36 @@
+<i18n>
+en:
+  rank: Rank
+  player: Player
+  score: Score
+  purity: Purity
+  accuracy: Accuracy
+  perfect: Perfect
+  good: Good
+  bad: Bad
+  miss: Miss
+  time: Time
+
+zh-CN:
+  rank: 排名
+  player: 玩家
+  score: 分数
+  purity: 无瑕度
+  accuracy: 准度
+  perfect: Perfect
+  good: Good
+  bad: Bad
+  miss: Miss
+  time: 时间
+
+</i18n>
+
 <script setup lang="ts">
 
 import { ref, computed, watch, onMounted } from 'vue'
+
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n();
 
 import { useFetchApi, fileToURL, pageCount, userNameClass } from '../common'
 import type { Page, PlayRecord } from '../model'
@@ -65,16 +95,16 @@ onMounted(() => {
       <table class="table">
         <thead>
           <tr>
-            <th>排名</th>
-            <th>玩家</th>
-            <th>分数</th>
-            <th>无瑕度</th>
-            <th>准度</th>
-            <th>Perfect</th>
-            <th>Good</th>
-            <th>Bad</th>
-            <th>Miss</th>
-            <th>时间</th>
+            <th v-t="'rank'"></th>
+            <th v-t="'player'"></th>
+            <th v-t="'score'"></th>
+            <th v-t="'purity'"></th>
+            <th v-t="'accuracy'"></th>
+            <th v-t="'perfect'"></th>
+            <th v-t="'good'"></th>
+            <th v-t="'bad'"></th>
+            <th v-t="'miss'"></th>
+            <th v-t="'time'"></th>
           </tr>
         </thead>
         <tbody>
