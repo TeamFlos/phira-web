@@ -37,6 +37,11 @@ const i18n = createI18n({
       'bio-empty': 'This user does not have bio',
 
       'please-login': 'Please login',
+
+      'title-default': 'Phira',
+      'title-charts': 'Charts',
+      'title-users': 'User',
+      'title-settings': 'Settings',
     },
     'zh-CN': {
       'login': '登录',
@@ -51,9 +56,18 @@ const i18n = createI18n({
       'bio-empty': '该用户还没有简介',
 
       'please-login': '请先登录',
+
+      'title-default': 'Phira',
+      'title-charts': '谱面',
+      'title-users': '用户',
+      'title-settings': '设置',
     }
   },
   legacy: false,
+  missing(_locale, key) {
+    if (key.startsWith('title-')) return '';
+    return key;
+  }
 });
 changeLocale(locale);
 

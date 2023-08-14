@@ -1,4 +1,5 @@
 
+import { nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import HomeView from '../HomeView.vue'
@@ -39,17 +40,27 @@ const router = createRouter({
     { path: '/settings', redirect: () => '/settings/account' },
     { path: '/settings/:category', name: 'settings', component: SettingsView },
 
-    { path: '/dmca', name: 'DMCA', component: DMCA },
-    { path: '/privacy-policy', name: 'privacy policy', component: PrivacyPolicy },
-    { path: '/terms-of-use', name: 'terms of use', component: TermsOfUse },
+    { path: '/dmca', name: 'dmca', component: DMCA },
+    { path: '/privacy-policy', name: 'privacy-policy', component: PrivacyPolicy },
+    { path: '/terms-of-use', name: 'terms-of-use', component: TermsOfUse },
   ],
-  scrollBehavior (_to, from, savedPosition) {
+  scrollBehavior(_to, from, savedPosition) {
     return new Promise((resolve) => {
       onLoaded.value = () => {
         resolve(savedPosition? savedPosition: { top: 0 });
       };
     })
-  },
+  }
+});
+
+import { i18n } from '../main'
+import { setTitle } from '../common'
+
+router.afterEach((to) => {
+  nextTick(() => {
+    const title = i18n.global.t('title-' + (to.name as (string | undefined | null) || 'default'));
+    setTitle(title);
+  });
 });
 
 export default router

@@ -18,6 +18,10 @@ export const LANGUAGES = {
   'en-US': 'English',
 };
 
+export function setTitle(title: string) {
+  document.title = title.length? title + ' - Phira': 'Phira';
+}
+
 export function changeLocale(locale: string) {
   if (locale.startsWith('en')) locale = 'en';
   if (!SUPPORTED_LOCALES.includes(locale)) locale = 'en';

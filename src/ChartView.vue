@@ -51,7 +51,7 @@ const { t } = useI18n();
 
 import moment from 'moment'
 
-import { useFetchApi, fileToURL, toast, toastError, getCookie } from './common'
+import { useFetchApi, fileToURL, toast, toastError, getCookie, setTitle } from './common'
 import { Permission, Roles, type Chart, type User } from './model'
 
 import LeaderboardView from './components/LeaderboardView.vue'
@@ -69,6 +69,8 @@ const router = useRouter();
 
 const id = parseInt(String(route.params.id));
 const chart = reactive(await fetchApi(`/chart/${id}`) as Chart);
+
+setTitle(chart.name);
 
 const me = ref<User>();
 

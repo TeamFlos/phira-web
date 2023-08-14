@@ -30,7 +30,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n();
 
-import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, getCookie } from './common'
+import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, getCookie, setTitle } from './common'
 import { Permission, Roles, type User } from './model'
 
 import LoadOr from './components/LoadOr.vue'
@@ -44,6 +44,8 @@ const fetchApi = useFetchApi();
 
 const id = parseInt(String(route.params.id));
 const user = reactive(await fetchApi(`/user/${id}`) as User);
+
+setTitle(user.name);
 
 const confirmDeleteDialog = ref<HTMLDialogElement>();
 
