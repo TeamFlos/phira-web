@@ -21,7 +21,7 @@ export const LANGUAGES = {
 export function changeLocale(locale: string) {
   if (locale.startsWith('en')) locale = 'en';
   if (!SUPPORTED_LOCALES.includes(locale)) locale = 'en';
-  i18n.global.locale.value = locale === 'zh-TW'? 'zh-CN': locale;
+  i18n.global.locale.value = (locale === 'zh-TW'? 'zh-CN': locale) as (typeof i18n.global.locale.value);
   localStorage.setItem('locale', locale);
   let momentLocale = {
     'zh-CN': 'zh-cn',
