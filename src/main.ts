@@ -42,6 +42,10 @@ const i18n = createI18n({
       'title-charts': 'Charts',
       'title-users': 'User',
       'title-settings': 'Settings',
+
+      'title-dmca': 'DMCA',
+      'title-terms-of-use': 'Terms of Use',
+      'title-privacy-policy': 'Privacy Policy',
     },
     'zh-CN': {
       'login': '登录',
@@ -61,6 +65,10 @@ const i18n = createI18n({
       'title-charts': '谱面',
       'title-users': '用户',
       'title-settings': '设置',
+
+      'title-dmca': 'DMCA',
+      'title-terms-of-use': '使用条款',
+      'title-privacy-policy': '隐私政策',
     }
   },
   legacy: false,
