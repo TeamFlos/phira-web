@@ -15,9 +15,9 @@ zh-CN:
 import { ref, computed, watch, onMounted } from 'vue'
 
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n();
+useI18n();
 
-import { useFetchApi, fileToURL, pageCount, userNameClass, LANGUAGES } from '../common'
+import { useFetchApi, pageCount, userNameClass, LANGUAGES } from '../common'
 import type { Page, User } from '../model'
 
 const PAGE_NUM = 20;
@@ -83,20 +83,29 @@ onMounted(() => {
           <tr v-for="user in users" :key="user.id" class="hover text-lg">
             <th class="text-center">{{ user.id }}</th>
             <td>
-              <router-link :to="`/user/${user.id}`" class="flex flex-row items-center gap-2 group">
+              <router-link
+                :to="`/user/${user.id}`"
+                class="flex flex-row items-center gap-2 group"
+              >
                 <div class="avatar">
                   <div class="w-12 rounded-xl">
                     <UserAvatar :url="user.avatar" />
                   </div>
                 </div>
                 <div class="ml-2 flex flex-col">
-                  <span :class="[userNameClass(user.badges)]" class="group-hover:link font-black text-xl">{{ user.name }}</span>
-                  <span v-if="user.bio" class="text-xs truncate">{{ user.bio }}</span>
+                  <span
+                    :class="[userNameClass(user.badges)]"
+                    class="group-hover:link font-black text-xl"
+                    >{{ user.name }}</span
+                  >
+                  <span v-if="user.bio" class="text-xs truncate">{{
+                    user.bio
+                  }}</span>
                 </div>
               </router-link>
             </td>
             <td>{{ moment(user.last_login).fromNow() }}</td>
-            <td>{{ LANGUAGES[user.language] }}</td>
+            <td>{{ LANGUAGES[user.language as (keyof typeof LANGUAGES)] }}</td>
           </tr>
         </tbody>
       </table>
@@ -104,6 +113,10 @@ onMounted(() => {
         <LoadView />
       </div>
     </div>
-    <PageIndicator :total="pageCount(totalCount, PAGE_NUM)" ref="pagination" :init="props.initPage ?? 1" />
+    <PageIndicator
+      :total="pageCount(totalCount, PAGE_NUM)"
+      ref="pagination"
+      :init="props.initPage ?? 1"
+    />
   </div>
 </template>

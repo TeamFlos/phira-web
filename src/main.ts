@@ -13,7 +13,7 @@ export const SUPPORTED_LOCALES = ['en', 'zh-CN', 'zh-TW'];
 let locale = localStorage.getItem('locale');
 if (!locale) {
   locale = 'en';
-  for (let alt of navigator.languages) {
+  for (const alt of navigator.languages) {
     if (SUPPORTED_LOCALES.includes(alt)) {
       locale = alt;
       break;

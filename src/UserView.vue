@@ -30,7 +30,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n();
 
-import { useFetchApi, fileToURL, userNameClass, detailedTime, LANGUAGES, toast, toastError, getCookie } from './common'
+import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, getCookie } from './common'
 import { Permission, Roles, type User } from './model'
 
 import LoadOr from './components/LoadOr.vue'

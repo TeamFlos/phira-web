@@ -27,7 +27,7 @@ zh-CN:
 
 <script setup lang="ts">
 
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useI18n } from 'vue-i18n'
@@ -60,8 +60,6 @@ const fetchApi = useFetchApi();
 
 const accessToken = ref<string>();
 const user = ref<User>();
-
-import moment from 'moment'
 
 const drawerOpened = ref(false);
 

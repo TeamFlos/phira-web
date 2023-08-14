@@ -30,9 +30,9 @@ zh-CN:
 import { ref, computed, watch, onMounted } from 'vue'
 
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n();
+useI18n();
 
-import { useFetchApi, fileToURL, pageCount, userNameClass } from '../common'
+import { useFetchApi, pageCount, userNameClass } from '../common'
 import type { Page, PlayRecord } from '../model'
 
 const PAGE_NUM = 20;

@@ -3,9 +3,9 @@
 import { ref } from 'vue'
 
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n();
+useI18n();
 
-import { useFetchApi, fileToURL, userNameClass } from '../common'
+import { useFetchApi, userNameClass } from '../common'
 import type { User } from '../model'
 
 import UserAvatar from './UserAvatar.vue'

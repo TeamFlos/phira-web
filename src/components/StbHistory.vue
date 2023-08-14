@@ -28,7 +28,7 @@ zh-CN:
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n();
 
-import { useFetchApi, fileToURL, detailedTime } from '../common'
+import { useFetchApi, detailedTime } from '../common'
 import type { StbHistory, User } from '../model'
 
 import UserAvatar from './UserAvatar.vue'
