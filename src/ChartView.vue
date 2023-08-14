@@ -153,7 +153,7 @@ async function setRanked(ranked: boolean) {
               </div>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p v-t="'rating'"></p>
-                <RatingBar name="chart-rating" :init="(chart.rating ?? 0) * 10" ref="chartRating" />
+                <RatingBar name="chart-rating" :init="Math.round((chart.rating ?? 0) * 10)" ref="chartRating" />
                 <button v-if="rating" class="btn btn-primary mt-2" v-t="'submit'"></button>
               </div>
             </div>
