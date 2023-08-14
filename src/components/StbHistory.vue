@@ -8,6 +8,7 @@ en:
     approve: Stabilization approved
     deny: Stabilization denied
   comment: '{0} commented: {1}'
+  history-empty: 'No history'
 
 zh-CN:
   stb-request: '{0} 提交了上架申请'
@@ -18,6 +19,7 @@ zh-CN:
     approve: 谱面上架申请通过
     deny: 谱面上架申请被拒
   comment: '{0} 评论：{1}'
+  history-empty: 暂无评议记录
 
 </i18n>
 
@@ -68,7 +70,7 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
       </li>
     </ol>
     <div v-if="!history.length" class="text-center italic py-8">
-      暂无评议记录
+      {{ t('history-empty') }}
     </div>
   </div>
 </template>

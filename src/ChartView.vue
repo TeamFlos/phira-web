@@ -18,7 +18,6 @@ en:
   div-updated: Division updated
 
   rating: Rating
-  submit-rating: Submit
 
 zh-CN:
   composer: 曲师
@@ -39,7 +38,6 @@ zh-CN:
   div-updated: 分区已更新
 
   rating: 评分
-  submit-rating: 提交评分
 
 </i18n>
 
@@ -156,7 +154,7 @@ async function setRanked(ranked: boolean) {
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p v-t="'rating'"></p>
                 <RatingBar name="chart-rating" :init="(chart.rating ?? 0) * 10" ref="chartRating" />
-                <button v-if="rating" class="btn btn-primary mt-2" v-t="'submit-rating'"></button>
+                <button v-if="rating" class="btn btn-primary mt-2" v-t="'submit'"></button>
               </div>
             </div>
             <div class="grow -mt-8 lg:w-3/4">
