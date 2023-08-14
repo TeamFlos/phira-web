@@ -7,7 +7,7 @@ import App from './App.vue'
 import router from './router'
 
 const i18n = createI18n({
-  locale: 'zh-CN',
+  locale: 'en',
   fallbackLocale: 'en',
   messages: {
     'en': {
@@ -17,8 +17,11 @@ const i18n = createI18n({
       'warning': 'Warning',
       'cancel': 'Cancel',
       'confirm': 'Confirm',
+      'save': 'Save',
 
       'bio-empty': 'This user does not have bio',
+
+      'please-login': 'Please login',
     },
     'zh-CN': {
       'login': '登录',
@@ -27,8 +30,11 @@ const i18n = createI18n({
       'warning': '警告',
       'cancel': '取消',
       'confirm': '确定',
+      'save': '保存',
 
       'bio-empty': '该用户还没有简介',
+
+      'please-login': '请先登录',
     }
   },
   legacy: false,

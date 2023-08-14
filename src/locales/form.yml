@@ -11,6 +11,10 @@ en:
   username:
     label: Username
     hint: Username
+  bio:
+    label: Bio
+    hint: Tell people about your self…
+
   invalid-email: Invalid email
   password-short: Password is too short
   password-inconsistent: Inconsistent passwords
@@ -29,6 +33,10 @@ zh-CN:
   username:
     label: 用户名
     hint: 名字
+  bio:
+    label: 简介
+    hint: 向别人介绍一下自己…
+
   invalid-email: 邮箱不合法
   password-short: 密码过短
   password-inconsistent: 两次输入的密码不一致

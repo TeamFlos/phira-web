@@ -1,3 +1,17 @@
+<i18n lang="yml" src="@/locales/form.yml"></i18n>
+<i18n>
+en:
+  edit-password: Edit password
+  password-updated: Password updated
+  old-password: Original password
+
+zh-CN:
+  edit-password: 更改密码
+  password-updated: 更改密码成功
+  old-password: 原密码
+
+</i18n>
+
 <script setup lang="ts">
 
 import { ref } from 'vue'
@@ -37,7 +51,7 @@ async function changePassword() {
     password_old.value = undefined;
     password.value = undefined;
     password2.value = undefined;
-    toast('更改密码成功');
+    toast(t('password-updated'));
   } catch (e) {
     toastError(e);
   } finally {
@@ -49,19 +63,19 @@ async function changePassword() {
 
 <template>
   <div class="flex flex-col gap-2">
-    <h1 class="card-title">更改密码</h1>
+    <h1 class="card-title" v-t="'edit-password'"></h1>
     <div class="form-control grow">
-      <input type="password" placeholder="原密码" class="input input-bordered" v-model="password_old"/>
+      <input type="password" :placeholder="t('old-password')" class="input input-bordered" v-model="password_old"/>
     </div>
     <div class="form-control grow">
-      <input type="password" placeholder="密码" class="input input-bordered" v-model="password"/>
+      <input type="password" :placeholder="t('password.label')" class="input input-bordered" v-model="password"/>
     </div>
     <div class="form-control grow">
-      <input type="password" placeholder="重复密码" class="input input-bordered" v-model="password2"/>
+      <input type="password" :placeholder="t('password-confirm.label')" class="input input-bordered" v-model="password2"/>
     </div>
     <div class="flex flex-row-reverse">
       <button class="btn btn-primary" @click="changePassword">
-        <LoadOr :loading="changingPassword">确认更改</LoadOr>
+        <LoadOr :loading="changingPassword">{{ t('save') }}</LoadOr>
       </button>
     </div>
   </div>

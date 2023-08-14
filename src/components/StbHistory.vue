@@ -43,7 +43,7 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
 <template>
   <div class="px-4">
     <ol v-if="history.length" class="relative border-l border-gray-200 dark:border-gray-700 p-2">
-      <li v-for="item in history" v-bind:key="item.id" class="mb-10 ml-4">
+      <li v-for="item in history" :key="item.id" class="mb-10 ml-4">
         <router-link v-if="item.approve === null || item.reviewer !== null" class="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 bg-base-100 ring-8 ring-base-100" :to="`/user/${item.reviewer ?? uploader.id}`">
           <UserAvatar class="rounded-full shadow-lg" :url="item.reviewerAvatar ?? uploader.avatar"/>
         </router-link>

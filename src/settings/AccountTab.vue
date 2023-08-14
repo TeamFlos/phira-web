@@ -1,8 +1,29 @@
+<i18n lang="yml" src="@/locales/form.yml"></i18n>
+<i18n>
+en:
+  language: Language
+
+  update-avatar: Update avatar
+  avatar-updated: Avatar updated
+  profile-updated: Profile updated
+
+zh-CN:
+  language: 语言
+
+  update-avatar: 更新头像
+  avatar-updated: 头像已更新
+  profile-updated: 资料已更新
+
+</i18n>
+
 <script setup lang="ts">
 
 import { ref } from 'vue'
 
-import { useFetchApi, toast, toastError, uploadFile, fileToURL } from '../common'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n();
+
+import { useFetchApi, toast, toastError, uploadFile, fileToURL, LANGUAGES } from '../common'
 import type { User } from '../model'
 
 import LoadOr from '../components/LoadOr.vue'
@@ -42,7 +63,7 @@ async function updateAvatar() {
       method: 'PATCH',
       json: { avatar: id },
     });
-    toast('头像已更新');
+    toast(t('avatar-updated'));
     avatarFile.value = undefined;
   } catch (e) {
     toastError(e);
@@ -63,7 +84,7 @@ async function saveProfile() {
         bio: bio.value.length? bio.value: null,
       }
     });
-    toast('资料已更新');
+    toast(t('profile-updated'));
   } catch (e) {
     toastError(e);
   } finally {
@@ -83,38 +104,36 @@ async function saveProfile() {
         </label>
       </div>
       <button class="btn btn-secondary m-3" :class="{ hidden: !avatarFile }" @click="updateAvatar" ref="updateAvatarButton">
-        <LoadOr :loading="updatingAvatar">更新头像</LoadOr>
+        <LoadOr :loading="updatingAvatar">{{ t('update-avatar') }}</LoadOr>
       </button>
     </div>
     <div class="flex flex-col gap-2 grow">
       <div class="form-control grow">
         <div class="label">
-          <span class="label-text text-inherit">用户名</span>
+          <span class="label-text text-inherit" v-t="'username.label'"></span>
         </div>
-        <input type="text" placeholder="名字" class="input input-bordered" v-model="username"/>
+        <input type="text" :placeholder="t('username.hint')" class="input input-bordered" v-model="username"/>
       </div>
       <div class="flex flex-col form-control grow">
         <div class="label">
           <span class="label-text text-inherit">
-            语言
+            {{ t('language') }}
             <i class="fa-solid fa-globe"></i>
           </span>
         </div>
         <select class="select select-bordered w-full" v-model="language">
-          <option value="en-US">English</option>
-          <option value="zh-CN">简体中文</option>
-          <option value="zh-TW">繁體中文</option>
+          <option v-for="(label, key) in LANGUAGES" :key="key" :value="key">{{ label }}</option>
         </select>
       </div>
       <div class="form-control grow">
         <div class="label">
-          <span class="label-text text-inherit">简介</span>
+          <span class="label-text text-inherit" v-t="'bio.label'"></span>
         </div>
-        <textarea placeholder="个人简介" class="textarea textarea-bordered" v-model="bio"></textarea>
+        <textarea :placeholder="t('bio.hint')" class="textarea textarea-bordered" v-model="bio"></textarea>
       </div>
       <div class="flex justify-end">
         <button class="btn btn-primary mt-2" @click="saveProfile">
-          <LoadOr :loading="savingProfile">保存</LoadOr>
+          <LoadOr :loading="savingProfile">{{ t('save') }}</LoadOr>
         </button>
       </div>
     </div>
