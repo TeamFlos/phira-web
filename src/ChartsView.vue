@@ -15,8 +15,6 @@ en:
     name: Name asc.
     name-rev: Name desc.
 
-  search: Search
-
   filter-opts: Filter options
   filters:
     uploaded-by-me: Uploaded by me
@@ -232,7 +230,6 @@ await fetchCharts();
 
 onMounted(() => {
   watch(parameters, (params) => {
-
     fetchCharts(); // do not wait
     router.push({ query: params });
   });

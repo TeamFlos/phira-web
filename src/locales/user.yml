@@ -1,0 +1,9 @@
+en:
+  last-login: Last login
+  registered-at: Registered at
+  language: Language
+
+zh-CN:
+  last-login: 上次登录于
+  registered-at: 注册于
+  language: 语言

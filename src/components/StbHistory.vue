@@ -59,7 +59,7 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
           <p v-else v-t="'stb-result.deny'"></p>
         </div>
         <div v-else-if="item.comment || item.comment === ''" class="mb-4">
-          <i18n-t tag="span" keypath="comment" class="text-gray-400 italic">
+          <i18n-t tag="span" keypath="comment" class="italic">
             <router-link :to="`/user/${item.reviewer}`" class="link link-hover">{{ item.reviewerName }}</router-link>
             <span class="not-italic">{{ item.comment }}</span>
           </i18n-t>

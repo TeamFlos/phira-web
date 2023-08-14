@@ -1,11 +1,8 @@
+<i18n lang="yml" src="@/locales/user.yml"></i18n>
 <i18n>
 en:
   play-count: Play Count
   avg-accuracy: Avg. Accuracy
-
-  last-login: Last login
-  registered-at: Registered at
-  language: Language
 
   ban-user: Ban User
   ban-confirm: 'Are you sure to ban this user?'
@@ -16,10 +13,6 @@ en:
 zh-CN:
   play-count: 总游玩次数
   avg-accuracy: 平均准确率
-
-  last-login: 上次登录于
-  registered-at: 注册于
-  language: 语言
 
   ban-user: 封禁用户
   ban-confirm: 你确定要封禁该用户吗？
@@ -154,4 +147,3 @@ function tryCloseBan() {
     </div>
   </dialog>
 </template>
-s

@@ -9,6 +9,7 @@ import RegisterView from '../RegisterView.vue'
 import ChartsView from '../ChartsView.vue'
 import ChartView from '../ChartView.vue'
 
+import UsersView from '../UsersView.vue'
 import UserView from '../UserView.vue'
 
 import SettingsView from '../SettingsView.vue'
@@ -32,6 +33,7 @@ const router = createRouter({
     { path: '/chart', name: 'charts', component: ChartsView },
     { path: '/chart/:id(\\d+)', name: 'chart', component: ChartView },
 
+    { path: '/user', name: 'users', component: UsersView },
     { path: '/user/:id(\\d+)', name: 'user', component: UserView },
 
     { path: '/settings', redirect: () => '/settings/account' },

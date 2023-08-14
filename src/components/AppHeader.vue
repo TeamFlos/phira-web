@@ -105,7 +105,7 @@ function doLogout() {
               <i class="fa-solid fa-star"></i>
               {{ t('event') }}
             </router-link>
-            <router-link to="/" class="btn btn-ghost normal-case text-lg">
+            <router-link to="/user" class="btn btn-ghost normal-case text-lg" :class="{ 'btn-active': route.path.startsWith('/user') }">
               <i class="fa-solid fa-user"></i>
               {{ t('user') }}
             </router-link>
@@ -147,7 +147,7 @@ function doLogout() {
           <i class="fa-solid fa-star w-8"></i>
           {{ t('event') }}
         </router-link>
-        <router-link to="/" class="btn btn-ghost normal-case text-lg justify-start" @click="drawerOpened = false">
+        <router-link to="/user" class="btn btn-ghost normal-case text-lg justify-start" :class="{ 'btn-active': route.path.startsWith('/user') }" @click="drawerOpened = false">
           <i class="fa-solid fa-user w-8"></i>
           {{ t('user') }}
         </router-link>
