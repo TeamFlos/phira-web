@@ -33,6 +33,7 @@ const i18n = createI18n({
       'confirm': 'Confirm',
       'save': 'Save',
       'search': 'Search',
+      'submit': 'Submit',
 
       'bio-empty': 'This user does not have bio',
 
@@ -56,6 +57,7 @@ const i18n = createI18n({
       'confirm': '确定',
       'save': '保存',
       'search': '搜索',
+      'submit': '提交',
 
       'bio-empty': '该用户还没有简介',
 

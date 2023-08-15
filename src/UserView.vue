@@ -62,6 +62,7 @@ const stats = await fetchApi(`/user/${id}/stats`) as {
 
 let banning = ref(false);
 async function ban() {
+  if (banning.value) return;
   banning.value = true;
   try {
     await fetchApi(`/user/${id}/ban`, { method: 'POST' });

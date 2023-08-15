@@ -164,6 +164,7 @@ export type Chart = {
 
   tags: string[],
   rating?: number,
+  ratingCount: number,
 
   created: string,
   updated: string,

@@ -17,7 +17,11 @@ en:
   set-special: Set special
   div-updated: Division updated
 
-  rating: Rating
+  rating:
+    title: Rating
+    title-with-mine: Rating ({score})
+    detail: '{score} / 5.00, {count} votes'
+    done: Rated
 
 zh-CN:
   composer: 曲师
@@ -37,7 +41,11 @@ zh-CN:
   set-special: 设置为特殊
   div-updated: 分区已更新
 
-  rating: 评分
+  rating:
+    title: 评分
+    title-with-mine: 评分（{score}）
+    detail: '{score} / 5.00，{count} 人投票'
+    done: 投票成功
 
 </i18n>
 
@@ -99,17 +107,39 @@ function switchTab(s: string) {
   router.replace({ path: route.path, hash: '#' + s });
 }
 
+const myRating = ref<number>();
+fetchApi(`/chart/${id}/rate`, {}, (r) => myRating.value = (r as { score: number }).score);
+
 const settingRanked = ref(false);
 async function setRanked(ranked: boolean) {
+  if (settingRanked.value) return;
   settingRanked.value = true;
   try {
-    await fetchApi(`/chart/${id}/set-ranked`, { method: 'POST', json: { 'ranked': ranked } });
+    await fetchApi(`/chart/${id}/set-ranked`, { method: 'POST', json: { ranked } });
     toast(t('div-updated'));
     chart.ranked = ranked;
   } catch (e) {
     toastError(e);
   } finally {
     settingRanked.value = false;
+  }
+}
+
+const submittingRating = ref(false);
+async function submitRating() {
+  if (submittingRating.value) return;
+  submittingRating.value = true;
+  try {
+    await fetchApi(`/chart/${id}/rate`, {
+      method: 'POST',
+      json: { score: rating.value! }
+    });
+    myRating.value = rating.value!;
+    toast(t('rating.done'));
+  } catch (e) {
+    toastError(e);
+  } finally {
+    submittingRating.value = false;
   }
 }
 
@@ -154,9 +184,13 @@ async function setRanked(ranked: boolean) {
                 </button>
               </div>
               <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
-                <p v-t="'rating'"></p>
+                <p v-if="!myRating" class="text-center">{{ t('rating.title') }}</p>
+                <p v-else class="text-center">{{ t('rating.title-with-mine', { score: (myRating / 2).toFixed(1) }) }}</p>
+                <p class="text-center text-sm">{{ t('rating.detail', { score: ((chart.rating? chart.rating: 0.) * 5).toFixed(2), count: chart.ratingCount }) }}</p>
                 <RatingBar name="chart-rating" :init="Math.round((chart.rating ?? 0) * 10)" ref="chartRating" />
-                <button v-if="rating" class="btn btn-primary mt-2" v-t="'submit'"></button>
+                <button v-if="rating" class="btn btn-primary mt-2" @click="submitRating">
+                  <LoadOr :loading='submittingRating'>{{ t('submit') }}</LoadOr>
+                </button>
               </div>
             </div>
             <div class="grow -mt-8 lg:w-3/4">
