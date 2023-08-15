@@ -141,7 +141,7 @@ async function setRanked(ranked: boolean) {
                   <PropItem :title="t('created-at')" :value="moment(chart.created).fromNow()" />
                 </div>
                 <div class="divider"></div>
-                <p v-if="chart.description.length" class="w-full">{{ chart.description }}</p>
+                <p v-if="chart.description.length" class="w-full break-words">{{ chart.description }}</p>
                 <p v-else class="w-full italic" v-t="'description-empty'"></p>
               </UserCard>
               <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_RANKED) && chart.stable"
