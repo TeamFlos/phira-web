@@ -18,6 +18,10 @@ export const LANGUAGES = {
   'en-US': 'English',
 };
 
+export function loggedIn() {
+  return !!getCookie('access_token');
+}
+
 export function setTitle(title: string) {
   document.title = title.length? title + ' - Phira': 'Phira';
 }
@@ -55,7 +59,8 @@ export function pageCount(count: number, pageNum: number) {
 }
 
 export function toastError(error: any) {
-  toast((error instanceof Error)? error.message: String(error), 'error');
+  let msg = (error instanceof Error)? error.message: String(error);
+  if (msg.length) toast(msg, 'error');
 }
 
 export function fileToURL(file: string) {
@@ -162,6 +167,7 @@ export function useFetchApi(): FetchApi {
           logout();
           router.push('/login');
           toast(i18n.global.t('please-login'), 'error');
+          throw new Error();
         } else if (!onError || onError(json, resp)) {
           if (!onSuccess) throw new Error(json.error);
           toast(json.error, 'error');

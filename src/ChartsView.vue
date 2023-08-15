@@ -71,7 +71,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n();
 
-import { useFetchApi, fileToURL, pageCount, isString, getCookie } from './common'
+import { useFetchApi, fileToURL, pageCount, isString, loggedIn } from './common'
 
 import { Permission, Roles } from './model'
 import type { Chart, Page, User } from './model'
@@ -89,8 +89,7 @@ const router = useRouter();
 const fetchApi = useFetchApi();
 
 let user: User | null = null;
-
-if (getCookie('access_token')) {
+if (loggedIn()) {
   user = await fetchApi('/me') as User;
 }
 

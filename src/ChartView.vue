@@ -59,7 +59,7 @@ const { t } = useI18n();
 
 import moment from 'moment'
 
-import { useFetchApi, fileToURL, toast, toastError, getCookie, setTitle } from './common'
+import { useFetchApi, fileToURL, toast, toastError, loggedIn, setTitle } from './common'
 import { Permission, Roles, type Chart, type User } from './model'
 
 import LeaderboardView from './components/LeaderboardView.vue'
@@ -81,8 +81,7 @@ const chart = reactive(await fetchApi(`/chart/${id}`) as Chart);
 setTitle(chart.name);
 
 const me = ref<User>();
-
-if (getCookie('access_token')) {
+if (loggedIn()) {
   fetchApi('/me', {}, (user) => me.value = user as User);
 }
 
@@ -108,7 +107,9 @@ function switchTab(s: string) {
 }
 
 const myRating = ref<number>();
-fetchApi(`/chart/${id}/rate`, {}, (r) => myRating.value = (r as { score: number }).score);
+if (loggedIn()) {
+  fetchApi(`/chart/${id}/rate`, {}, (r) => myRating.value = (r as { score: number }).score);
+}
 
 const settingRanked = ref(false);
 async function setRanked(ranked: boolean) {

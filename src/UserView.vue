@@ -30,7 +30,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n();
 
-import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, getCookie, setTitle } from './common'
+import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle } from './common'
 import { Permission, Roles, type User } from './model'
 
 import LoadOr from './components/LoadOr.vue'
@@ -51,7 +51,7 @@ const confirmDeleteDialog = ref<HTMLDialogElement>();
 
 const me = ref<User>();
 
-if (getCookie('access_token')) {
+if (loggedIn()) {
   fetchApi('/me', {}, (user) => me.value = user as User);
 }
 
