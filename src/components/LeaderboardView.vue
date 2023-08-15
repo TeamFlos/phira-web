@@ -10,6 +10,7 @@ en:
   bad: Bad
   miss: Miss
   time: Time
+  no-std: NaN
 
 zh-CN:
   rank: 排名
@@ -22,6 +23,7 @@ zh-CN:
   bad: Bad
   miss: Miss
   time: 时间
+  no-std: 无数据
 
 </i18n>
 
@@ -126,7 +128,8 @@ onMounted(() => {
               </router-link>
             </td>
             <td class="font-black font-mono text-2xl">{{ record.score }}</td>
-            <td class="font-black font-mono text-2xl">{{ Math.floor(record.std_score) }}</td>
+            <td v-if="record.std_score" class="font-black font-mono text-2xl">{{ Math.floor(record.std_score) }}</td>
+            <td v-else class="text-xl" v-t="'no-std'"></td>
             <td>{{ (record.accuracy * 100).toFixed(2) + '%' }}</td>
             <td>{{ record.perfect }}</td>
             <td>{{ record.good }}</td>
