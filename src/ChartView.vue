@@ -1,7 +1,7 @@
 <i18n>
 en:
   composer: Composer
-  illustartor: Illustrator
+  illustrator: Illustrator
   charter: Charter
   difficulty: Difficulty
 
@@ -21,7 +21,7 @@ en:
 
 zh-CN:
   composer: 曲师
-  illustartor: 画师
+  illustrator: 画师
   charter: 谱师
   difficulty: 难度
 
