@@ -99,8 +99,8 @@ const initAvatar = user.avatar? fileToURL(user.avatar): defaultAvatar;
 </script>
 
 <template>
-  <div class="flex flex-row">
-    <div class="flex flex-col w-36 avatar avatar-lg m-8">
+  <div class="flex flex-col lg:flex-row items-center lg:items-start">
+    <div class="flex flex-col w-36 avatar avatar-lg mb-4 lg:m-8">
       <div class="rounded-full">
         <label>
           <input type="file" class="hidden" accept="image/png, image/jpeg, image/webp" @change="onChangeAvatar" />
@@ -111,7 +111,7 @@ const initAvatar = user.avatar? fileToURL(user.avatar): defaultAvatar;
         <LoadOr :loading="updatingAvatar">{{ t('update-avatar') }}</LoadOr>
       </button>
     </div>
-    <div class="flex flex-col gap-2 grow">
+    <div class="flex flex-col gap-2 grow w-full lg:w-auto">
       <div class="form-control grow">
         <div class="label">
           <span class="label-text text-inherit" v-t="'username.label'"></span>
