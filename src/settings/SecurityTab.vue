@@ -13,15 +13,14 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
+import { ref } from "vue";
 
-import { ref } from 'vue'
-
-import { useI18n } from 'vue-i18n'
+import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError, validatePassword } from '../common'
+import { useFetchApi, toast, toastError, validatePassword } from "../common";
 
-import LoadOr from '../components/LoadOr.vue'
+import LoadOr from "../components/LoadOr.vue";
 
 const fetchApi = useFetchApi();
 
@@ -35,23 +34,22 @@ async function changePassword() {
   if (changingPassword.value) return;
   changingPassword.value = true;
   try {
-    let
-      pwd_old = password_old.value!,
+    let pwd_old = password_old.value!,
       pwd = password.value!,
       pwd2 = password2.value!;
     validatePassword(t, pwd_old);
     validatePassword(t, pwd, pwd2);
-    await fetchApi('/edit/password', {
-      method: 'POST',
+    await fetchApi("/edit/password", {
+      method: "POST",
       json: {
         old: pwd_old,
         new: pwd,
-      }
+      },
     });
     password_old.value = undefined;
     password.value = undefined;
     password2.value = undefined;
-    toast(t('password-updated'));
+    toast(t("password-updated"));
   } catch (e) {
     toastError(e);
   } finally {
@@ -59,26 +57,40 @@ async function changePassword() {
   }
 }
 
-import tabLoading from '../SettingsView.vue'
+import tabLoading from "../SettingsView.vue";
 tabLoading.value = false;
-
 </script>
 
 <template>
   <div class="flex flex-col gap-2">
     <h1 class="card-title" v-t="'edit-password'"></h1>
     <div class="form-control grow">
-      <input type="password" :placeholder="t('old-password')" class="input input-bordered" v-model="password_old"/>
+      <input
+        type="password"
+        :placeholder="t('old-password')"
+        class="input input-bordered"
+        v-model="password_old"
+      />
     </div>
     <div class="form-control grow">
-      <input type="password" :placeholder="t('password.label')" class="input input-bordered" v-model="password"/>
+      <input
+        type="password"
+        :placeholder="t('password.label')"
+        class="input input-bordered"
+        v-model="password"
+      />
     </div>
     <div class="form-control grow">
-      <input type="password" :placeholder="t('password-confirm.label')" class="input input-bordered" v-model="password2"/>
+      <input
+        type="password"
+        :placeholder="t('password-confirm.label')"
+        class="input input-bordered"
+        v-model="password2"
+      />
     </div>
     <div class="flex flex-row-reverse">
       <button class="btn btn-primary" @click="changePassword">
-        <LoadOr :loading="changingPassword">{{ t('save') }}</LoadOr>
+        <LoadOr :loading="changingPassword">{{ t("save") }}</LoadOr>
       </button>
     </div>
   </div>

@@ -17,20 +17,27 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
+import { ref } from "vue";
 
-import { ref } from 'vue'
-
-import { useI18n } from 'vue-i18n'
+import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError, uploadFile, fileToURL, LANGUAGES, changeLocale } from '../common'
-import type { User } from '../model'
+import {
+  useFetchApi,
+  toast,
+  toastError,
+  uploadFile,
+  fileToURL,
+  LANGUAGES,
+  changeLocale,
+} from "../common";
+import type { User } from "../model";
 
-import LoadOr from '../components/LoadOr.vue'
+import LoadOr from "../components/LoadOr.vue";
 
 const fetchApi = useFetchApi();
 
-const user: User = await fetchApi('/me') as User;
+const user: User = (await fetchApi("/me")) as User;
 
 const avatarImage = ref<HTMLImageElement>();
 const updateAvatarButton = ref<HTMLElement>();
@@ -40,14 +47,14 @@ const updatingAvatar = ref(false);
 
 const username = ref(user.name);
 const language = ref(user.language);
-const bio = ref(user.bio ?? '');
+const bio = ref(user.bio ?? "");
 
 const savingProfile = ref(false);
 
 function onChangeAvatar(event: Event) {
-  updateAvatarButton.value!.classList.remove('hidden');
+  updateAvatarButton.value!.classList.remove("hidden");
   let reader = new FileReader();
-  reader.onload = function() {
+  reader.onload = function () {
     avatarImage.value!.src = reader.result as string;
   };
   avatarFile.value = (event.target as HTMLInputElement).files![0];
@@ -59,11 +66,11 @@ async function updateAvatar() {
   updatingAvatar.value = true;
   try {
     let id = await uploadFile(fetchApi, avatarFile.value!);
-    await fetchApi('/me', {
-      method: 'PATCH',
+    await fetchApi("/me", {
+      method: "PATCH",
       json: { avatar: id },
     });
-    toast(t('avatar-updated'));
+    toast(t("avatar-updated"));
     avatarFile.value = undefined;
   } catch (e) {
     toastError(e);
@@ -76,16 +83,16 @@ async function saveProfile() {
   if (savingProfile.value) return;
   savingProfile.value = true;
   try {
-    await fetchApi('/me', {
-      method: 'PATCH',
+    await fetchApi("/me", {
+      method: "PATCH",
       json: {
         name: username.value,
         language: language.value,
-        bio: bio.value.length? bio.value: null,
-      }
+        bio: bio.value.length ? bio.value : null,
+      },
     });
     changeLocale(language.value);
-    toast(t('profile-updated'));
+    toast(t("profile-updated"));
   } catch (e) {
     toastError(e);
   } finally {
@@ -93,9 +100,8 @@ async function saveProfile() {
   }
 }
 
-import defaultAvatar from '@/assets/user.png'
-const initAvatar = user.avatar? fileToURL(user.avatar): defaultAvatar;
-
+import defaultAvatar from "@/assets/user.png";
+const initAvatar = user.avatar ? fileToURL(user.avatar) : defaultAvatar;
 </script>
 
 <template>
@@ -103,12 +109,22 @@ const initAvatar = user.avatar? fileToURL(user.avatar): defaultAvatar;
     <div class="flex flex-col w-36 avatar avatar-lg mb-4 lg:m-8">
       <div class="rounded-full">
         <label>
-          <input type="file" class="hidden" accept="image/png, image/jpeg, image/webp" @change="onChangeAvatar" />
+          <input
+            type="file"
+            class="hidden"
+            accept="image/png, image/jpeg, image/webp"
+            @change="onChangeAvatar"
+          />
           <img :src="initAvatar" class="cursor-pointer" ref="avatarImage" />
         </label>
       </div>
-      <button class="btn btn-secondary m-3" :class="{ hidden: !avatarFile }" @click="updateAvatar" ref="updateAvatarButton">
-        <LoadOr :loading="updatingAvatar">{{ t('update-avatar') }}</LoadOr>
+      <button
+        class="btn btn-secondary m-3"
+        :class="{ hidden: !avatarFile }"
+        @click="updateAvatar"
+        ref="updateAvatarButton"
+      >
+        <LoadOr :loading="updatingAvatar">{{ t("update-avatar") }}</LoadOr>
       </button>
     </div>
     <div class="flex flex-col gap-2 grow w-full lg:w-auto">
@@ -116,28 +132,39 @@ const initAvatar = user.avatar? fileToURL(user.avatar): defaultAvatar;
         <div class="label">
           <span class="label-text text-inherit" v-t="'username.label'"></span>
         </div>
-        <input type="text" :placeholder="t('username.hint')" class="input input-bordered" v-model="username"/>
+        <input
+          type="text"
+          :placeholder="t('username.hint')"
+          class="input input-bordered"
+          v-model="username"
+        />
       </div>
       <div class="flex flex-col form-control grow">
         <div class="label">
           <span class="label-text text-inherit">
-            {{ t('language') }}
+            {{ t("language") }}
             <i class="fa-solid fa-globe"></i>
           </span>
         </div>
         <select class="select select-bordered w-full" v-model="language">
-          <option v-for="(label, key) in LANGUAGES" :key="key" :value="key">{{ label }}</option>
+          <option v-for="(label, key) in LANGUAGES" :key="key" :value="key">
+            {{ label }}
+          </option>
         </select>
       </div>
       <div class="form-control grow">
         <div class="label">
           <span class="label-text text-inherit" v-t="'bio.label'"></span>
         </div>
-        <textarea :placeholder="t('bio.hint')" class="textarea textarea-bordered" v-model="bio"></textarea>
+        <textarea
+          :placeholder="t('bio.hint')"
+          class="textarea textarea-bordered"
+          v-model="bio"
+        ></textarea>
       </div>
       <div class="flex justify-end">
         <button class="btn btn-primary mt-2" @click="saveProfile">
-          <LoadOr :loading="savingProfile">{{ t('save') }}</LoadOr>
+          <LoadOr :loading="savingProfile">{{ t("save") }}</LoadOr>
         </button>
       </div>
     </div>

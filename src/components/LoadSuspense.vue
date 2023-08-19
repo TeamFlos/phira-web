@@ -1,7 +1,5 @@
 <script setup lang="ts">
-
-import LoadView from './LoadView.vue'
-
+import LoadView from "./LoadView.vue";
 </script>
 
 <template>

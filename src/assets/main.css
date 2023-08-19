@@ -1,22 +1,22 @@
-
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Tektur:wght@600&family=Ubuntu:wght@400;700&display=swap');
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Tektur:wght@600&family=Ubuntu:wght@400;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @font-face {
-    font-family: 'Halva';
-    font-style: normal;
-    font-weight: 400;
-    src: url('https://fonts.cdnfonts.com/s/47814/Halva-qZY3r.woff') format('woff');
+  font-family: "Halva";
+  font-style: normal;
+  font-weight: 400;
+  src: url("https://fonts.cdnfonts.com/s/47814/Halva-qZY3r.woff") format("woff");
 }
 @font-face {
-    font-family: 'Halva Medium';
-    font-style: normal;
-    font-weight: 400;
-    src: url('https://fonts.cdnfonts.com/s/47814/HalvamediumRegular-ALmwM.woff') format('woff');
+  font-family: "Halva Medium";
+  font-style: normal;
+  font-weight: 400;
+  src: url("https://fonts.cdnfonts.com/s/47814/HalvamediumRegular-ALmwM.woff")
+    format("woff");
 }
 
 @layer base {
@@ -27,12 +27,12 @@
 }
 
 @keyframes toast-out {
-  0%{
+  0% {
     transform: scale(1);
     opacity: 1;
   }
 
-  100%{
+  100% {
     transform: scale(0.9);
     opacity: 0;
   }
@@ -48,7 +48,8 @@
   animation: button-pop var(--animation-btn, 0.25s) ease-out;
 }
 
-.interactive-card:active:hover, .chart-card:active:focus {
+.interactive-card:active:hover,
+.chart-card:active:focus {
   animation: button-press 0.25s ease-out;
   transform: scale(0.97);
 }

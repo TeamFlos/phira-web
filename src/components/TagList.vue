@@ -12,32 +12,31 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
+import { ref, reactive } from "vue";
 
-import { ref, reactive } from 'vue'
-
-import { useI18n } from 'vue-i18n'
+import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
-import { toast } from '../common'
+import { toast } from "../common";
 
 const props = defineProps<{ init?: string[] }>();
 
-const tags = reactive<string[]>(props.init? [...props.init]: []);
+const tags = reactive<string[]>(props.init ? [...props.init] : []);
 
-const newTag = ref('');
+const newTag = ref("");
 
 function addTag() {
   let tag = newTag.value;
   if (!tag.length) {
-    toast(t('tag-empty'), 'error');
+    toast(t("tag-empty"), "error");
     return;
   }
   tag = tag.trim();
   if (tags.includes(tag)) {
-    toast(t('tag-exists'), 'error');
+    toast(t("tag-exists"), "error");
     return;
   }
-  newTag.value = '';
+  newTag.value = "";
   tags.push(tag);
 }
 
@@ -49,15 +48,29 @@ function removeTag(tag: string) {
 }
 
 defineExpose({ tags });
-
 </script>
 
 <template>
   <div class="flex flex-wrap flex-row gap-2">
-    <div v-for="tag in tags" :key="tag" class="badge badge-neutral text-sm h-[2rem] cursor-pointer" @click="removeTag(tag)">{{ tag }}</div>
+    <div
+      v-for="tag in tags"
+      :key="tag"
+      class="badge badge-neutral text-sm h-[2rem] cursor-pointer"
+      @click="removeTag(tag)"
+    >
+      {{ tag }}
+    </div>
     <div class="join w-32">
-      <input class="input input-bordered join-item rounded-l-full w-full text-sm h-[2rem]" :placeholder="t('add')" v-model="newTag" @keyup.enter="addTag" />
-      <button class="btn btn-primary join-item rounded-r-full h-[2rem] min-h-0 p-2" @click="addTag">
+      <input
+        class="input input-bordered join-item rounded-l-full w-full text-sm h-[2rem]"
+        :placeholder="t('add')"
+        v-model="newTag"
+        @keyup.enter="addTag"
+      />
+      <button
+        class="btn btn-primary join-item rounded-r-full h-[2rem] min-h-0 p-2"
+        @click="addTag"
+      >
         <i class="fa-solid fa-add"></i>
       </button>
     </div>

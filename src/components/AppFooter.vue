@@ -20,20 +20,41 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-
-import { useI18n } from 'vue-i18n'
+import { useI18n } from "vue-i18n";
 useI18n();
-
 </script>
 
 <template>
-  <footer class="footer footer-center p-10 bg-base text-base-content rounded gap-3">
+  <footer
+    class="footer footer-center p-10 bg-base text-base-content rounded gap-3"
+  >
     <div class="grid grid-flow-col gap-4">
-      <router-link to="/dmca" class="link link-hover" v-t="'dmca'"></router-link>
-      <router-link to="/terms-of-use" class="link link-hover" v-t="'terms-of-use'"></router-link>
-      <router-link to="/privacy-policy" class="link link-hover" v-t="'privacy-policy'"></router-link>
-      <a href="https://status.phira.cn/" target="_blank" class="link link-hover" v-t="'server-status'"></a>
-      <a href="mailto:contact@phira.cn" class="link link-hover" v-t="'contact-us'"></a>
+      <router-link
+        to="/dmca"
+        class="link link-hover"
+        v-t="'dmca'"
+      ></router-link>
+      <router-link
+        to="/terms-of-use"
+        class="link link-hover"
+        v-t="'terms-of-use'"
+      ></router-link>
+      <router-link
+        to="/privacy-policy"
+        class="link link-hover"
+        v-t="'privacy-policy'"
+      ></router-link>
+      <a
+        href="https://status.phira.cn/"
+        target="_blank"
+        class="link link-hover"
+        v-t="'server-status'"
+      ></a>
+      <a
+        href="mailto:contact@phira.cn"
+        class="link link-hover"
+        v-t="'contact-us'"
+      ></a>
     </div>
     <div>
       <div class="grid grid-flow-col gap-4">

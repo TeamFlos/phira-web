@@ -1,9 +1,7 @@
 <script setup lang="ts">
-
-withDefaults(defineProps<{ title: string, value: string, multi?: boolean }>(), {
-  multi: false
+withDefaults(defineProps<{ title: string; value: string; multi?: boolean }>(), {
+  multi: false,
 });
-
 </script>
 
 <template>

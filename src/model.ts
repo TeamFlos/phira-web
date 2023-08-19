@@ -1,7 +1,6 @@
-
 export enum Permission {
   NONE = 0x00000000,
-  ALL = 0xFFFFFFFF,
+  ALL = 0xffffffff,
   UPLOAD_CHART = 0x00000001,
   SEE_UNREVIEWED = 0x00000002,
   DELETE_UNSTABLE = 0x00000004,
@@ -65,13 +64,11 @@ export enum Role {
   ADMIN = 0x0001,
   REVIEWER = 0x0002,
   SUPERVISOR = 0x0004,
-  HEAD_SUPERVISOR = 0x0008
+  HEAD_SUPERVISOR = 0x0008,
 }
 
 export class Roles {
-
   private roles: number;
-
 
   constructor(roles: number) {
     this.roles = roles;
@@ -122,102 +119,101 @@ export class Roles {
   }
 }
 
-
 export type Page<T> = {
-  count: number,
-  results: T[],
+  count: number;
+  results: T[];
 };
 
 export type User = {
-  id: number,
-  avatar: string,
-  name: string,
-  email: string,
-  language: string,
-  bio: string | null,
-  badges: string[],
-  roles: number,
-  banned: boolean,
+  id: number;
+  avatar: string;
+  name: string;
+  email: string;
+  language: string;
+  bio: string | null;
+  badges: string[];
+  roles: number;
+  banned: boolean;
 
-  joined: string,
-  last_login: string,
+  joined: string;
+  last_login: string;
 };
 
 export type Chart = {
-  id: number,
-  name: string,
-  composer: string,
-  illustrator: string,
-  charter: string,
-  description: string,
-  level: string,
-  difficulty: number,
-  ranked: boolean,
-  stable: boolean,
-  stableRequest: boolean,
+  id: number;
+  name: string;
+  composer: string;
+  illustrator: string;
+  charter: string;
+  description: string;
+  level: string;
+  difficulty: number;
+  ranked: boolean;
+  stable: boolean;
+  stableRequest: boolean;
 
-  illustration: string,
-  preview: string,
-  file: string,
+  illustration: string;
+  preview: string;
+  file: string;
 
-  uploader: number,
+  uploader: number;
 
-  tags: string[],
-  rating?: number,
-  ratingCount: number,
+  tags: string[];
+  rating?: number;
+  ratingCount: number;
 
-  created: string,
-  updated: string,
-  chartUpdated: string,
+  created: string;
+  updated: string;
+  chartUpdated: string;
 };
 
 export type PlayRecord = {
-  id: number,
-  player: number,
-  chart: number,
-  score: number,
-  accuracy: number,
-  perfect: number,
-  good: number,
-  bad: number,
-  miss: number,
-  speed: number,
-  max_combo: number,
-  mods: number,
-  full_combo: boolean,
-  std: number,
-  std_score: number,
+  id: number;
+  player: number;
+  chart: number;
+  score: number;
+  accuracy: number;
+  perfect: number;
+  good: number;
+  bad: number;
+  miss: number;
+  speed: number;
+  max_combo: number;
+  mods: number;
+  full_combo: boolean;
+  std: number;
+  std_score: number;
 
-  best: boolean,
-  best_std: boolean,
-  time: string,
+  best: boolean;
+  best_std: boolean;
+  time: string;
 };
 
 export type StbHistory = {
-  id: number,
-  reviewer?: number,
-  reviewerName?: string,
-  reviewerAvatar?: string,
-  chart: number,
-  approve: boolean,
-  comment?: string,
-  time: string,
+  id: number;
+  reviewer?: number;
+  reviewerName?: string;
+  reviewerAvatar?: string;
+  chart: number;
+  approve: boolean;
+  comment?: string;
+  time: string;
 };
 
 export type SimpleUser = {
-  id: number,
-  name: string,
+  id: number;
+  name: string;
 };
 
 export type StbStatus = {
-  stable: boolean,
-  stableRequest: boolean,
-  approves: SimpleUser[],
-  denies: SimpleUser[],
-  history: StbHistory[],
+  stable: boolean;
+  stableRequest: boolean;
+  approves: SimpleUser[];
+  denies: SimpleUser[];
+  history: StbHistory[];
 };
 
 export type EmailSubs = {
-  review: boolean,
-  stb: boolean,
+  review: boolean;
+  stb: boolean;
 };
