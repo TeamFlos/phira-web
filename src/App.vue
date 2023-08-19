@@ -23,11 +23,12 @@ import AppFooter from './components/AppFooter.vue'
 import AppHeader from './components/AppHeader.vue'
 import LoadView from './components/LoadView.vue'
 import ToastsView from './components/ToastsView.vue'
+
 </script>
 
 <template>
   <AppHeader />
-  <div class="w-full mt-20 fullpage">
+  <div class="w-full mt-20">
     <router-view v-slot="{ Component }">
       <Suspense timeout="0">
         <template #default>
