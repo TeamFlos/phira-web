@@ -60,9 +60,13 @@ const fetchApi = useFetchApi();
 
 const accessToken = ref<string>();
 const user = ref<User>();
-
+const WorkInProgress = () => toast('Work in progress');
 const drawerOpened = ref(false);
-
+const Navs = ref([
+  { path: '/chart', icon: 'fa-book', text: 'chart' },
+  { path: '/', icon: 'fa-star', text: 'event', click: WorkInProgress },
+  { path: '/user', icon: 'fa-user', text: 'user' },
+]);
 addCookieListener(() => {
   accessToken.value = getCookie('access_token');
   user.value = undefined;
@@ -80,7 +84,6 @@ function doLogout() {
   logout();
   toast(t('logged-out'));
 }
-
 </script>
 
 <template>
@@ -95,17 +98,9 @@ function doLogout() {
           </label>
           <router-link to="/" class="btn btn-ghost normal-case text-2xl">Phira</router-link>
           <div class="ms-8 gap-2 hidden md:flex">
-            <router-link to="/chart" class="btn btn-ghost normal-case text-lg" :class="{ 'btn-active': route.path.startsWith('/chart') }">
-              <i class="fa-solid fa-book"></i>
-              {{ t('chart') }}
-            </router-link>
-            <router-link to="/" class="btn btn-ghost normal-case text-lg">
-              <i class="fa-solid fa-star"></i>
-              {{ t('event') }}
-            </router-link>
-            <router-link to="/user" class="btn btn-ghost normal-case text-lg" :class="{ 'btn-active': route.path.startsWith('/user') }">
-              <i class="fa-solid fa-user"></i>
-              {{ t('user') }}
+            <router-link v-for="nav in Navs" :to="nav.path" :key="nav.path" :value="nav.text" class="btn btn-ghost normal-case text-lg" :class="{ 'btn-active': route.path.startsWith(nav.path) }" @click="nav?.click">
+              <i :class="nav.icon" class="fa-solid"></i>
+              {{ t(nav.text) }}
             </router-link>
           </div>
         </div>
@@ -137,18 +132,10 @@ function doLogout() {
     <div class="drawer-side z-[31]">
       <label for="drawer" class="drawer-overlay"></label>
       <ul class="menu p-4 w-80 h-full bg-base-200 gap-2">
-        <router-link to="/chart" class="btn btn-ghost normal-case text-lg justify-start" :class="{ 'btn-active': route.path.startsWith('/chart') }" @click="drawerOpened = false">
-          <i class="fa-solid fa-book w-8"></i>
-          {{ t('chart') }}
-        </router-link>
-        <router-link to="/" class="btn btn-ghost normal-case text-lg justify-start" @click="drawerOpened = false">
-          <i class="fa-solid fa-star w-8"></i>
-          {{ t('event') }}
-        </router-link>
-        <router-link to="/user" class="btn btn-ghost normal-case text-lg justify-start" :class="{ 'btn-active': route.path.startsWith('/user') }" @click="drawerOpened = false">
-          <i class="fa-solid fa-user w-8"></i>
-          {{ t('user') }}
-        </router-link>
+        <router-link v-for="nav in Navs" :to="nav.path" :key="nav.path" :value="nav.text" class="btn btn-ghost normal-case text-lg" :class="{ 'btn-active': route.path.startsWith(nav.path) }" @click="nav?.click">
+              <i :class="nav.icon" class="fa-solid w-8"></i>
+              {{ t(nav.text) }}
+            </router-link>
       </ul>
     </div>
   </div>

@@ -59,7 +59,7 @@ export function pageCount(count: number, pageNum: number) {
 }
 
 export function toastError(error: any) {
-  let msg = (error instanceof Error)? error.message: String(error);
+  const msg = (error instanceof Error)? error.message: String(error);
   if (msg.length) toast(msg, 'error');
 }
 
