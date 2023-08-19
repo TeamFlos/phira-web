@@ -64,7 +64,7 @@ import { Permission, Roles, type Chart, type User } from './model'
 
 import LeaderboardView from './components/LeaderboardView.vue'
 import LoadOr from './components/LoadOr.vue'
-import LoadView from './components/LoadView.vue'
+import LoadSuspense from './components/LoadSuspense.vue'
 import PropItem from './components/PropItem.vue'
 import RatingBar from './components/RatingBar.vue'
 import StbStatus from './components/StbStatus.vue'
@@ -202,8 +202,13 @@ async function submitRating() {
                   @click="switchTab('stb')" v-t="'stb-history'"></a>
               </div>
               <div class="card bg-base-100 shadow-xl p-4 rounded-t-none">
-                <LeaderboardView v-if="contentTab === 'ldb'" :chart="chart.id" />
-                <Suspense v-if="contentTab === 'stb'" timeout="0">
+                <LoadSuspense v-if="contentTab === 'ldb'">
+                  <LeaderboardView :chart="chart.id" />
+                </LoadSuspense>
+                <LoadSuspense v-if="contentTab === 'stb'">
+                  <StbStatus :chart="chart.id" :uploader="chart.uploader" />
+                </LoadSuspense>
+                <!-- <Suspense v-if="contentTab === 'stb'" timeout="0">
                   <template #default>
                     <StbStatus :chart="chart.id" :uploader="chart.uploader" />
                   </template>
@@ -212,7 +217,7 @@ async function submitRating() {
                       <LoadView />
                     </div>
                   </template>
-                </Suspense>
+                </Suspense> -->
               </div>
             </div>
           </div>
