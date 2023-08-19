@@ -10,6 +10,13 @@ en:
   comment: '{0} commented: {1}'
   history-empty: 'No history'
 
+  steps:
+    reviewed: Reviewed
+    request: Submit request
+    done: Stabilized
+    approve: 'No approves | 1 approve: | {count} approves:'
+    deny: 'No denies: | 1 deny: | {count} denies:'
+
 zh-CN:
   stb-request: '{0} 提交了上架申请'
   stb-action:
@@ -21,6 +28,13 @@ zh-CN:
   comment: '{0} 评论：{1}'
   history-empty: 暂无评议记录
 
+  steps:
+    reviewed: 通过审核
+    request: 申请上架
+    done: 谱面上架
+    approve: '无人通过 | 1 人通过： | {count} 人通过：'
+    deny: '无人拒绝 | 1 人拒绝： | {count} 人拒绝：'
+
 </i18n>
 
 <script setup lang="ts">
@@ -29,7 +43,7 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n();
 
 import { useFetchApi, detailedTime } from '../common'
-import type { StbHistory, User } from '../model'
+import type { StbStatus, User } from '../model'
 
 import UserAvatar from './UserAvatar.vue'
 
@@ -37,15 +51,37 @@ const props = defineProps<{ chart: number, uploader: number }>();
 
 const fetchApi = useFetchApi();
 
-const history = await fetchApi(`/chart/${props.chart}/stabilize-history`) as StbHistory[];
+const status = await fetchApi(`/chart/${props.chart}/stabilize-status`) as StbStatus;
 const uploader = await fetchApi(`/user/${props.uploader}`) as User;
 
 </script>
 
 <template>
-  <div class="px-4">
-    <ol v-if="history.length" class="relative border-l border-gray-200 dark:border-gray-700 p-2">
-      <li v-for="item in history" :key="item.id" class="mb-10 ml-4">
+  <div class="px-4 flex flex-col">
+    <ul class="steps steps-vertical lg:steps-horizontal my-4">
+      <li class="step step-primary" v-t="'steps.reviewed'"></li>
+      <li class="step" :class="{ 'step-primary': status.stable || status.stableRequest }">
+        <div class="text-left lg:text-center">
+          <p>{{ t('steps.request') }}</p>
+          <template v-if="status.stableRequest">
+            <span>{{ t('steps.approve', status.approves.length) }}</span>
+            <template v-for="(user, index) in status.approves" :key="user.id">
+              <span v-if="index > 0">, </span>
+              <router-link :to="`/user/${user.id}`" class="link link-hover">{{ user.name }}</router-link>
+            </template>
+            <br>
+            <span>{{ t('steps.deny', status.denies.length) }}</span>
+            <template v-for="(user, index) in status.denies" :key="user.id">
+              <span v-if="index > 0">, </span>
+              <router-link :to="`/user/${user.id}`" class="link link-hover">{{ user.name }}</router-link>
+            </template>
+          </template>
+        </div>
+      </li>
+      <li class="step" :class="{ 'step-primary': status.stable }" v-t="'steps.done'"></li>
+    </ul>
+    <ol v-if="status.history.length" class="relative border-l border-gray-200 dark:border-gray-700 p-2">
+      <li v-for="item in status.history" :key="item.id" class="mb-10 ml-4">
         <router-link v-if="item.approve === null || item.reviewer !== null" class="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 bg-base-100 ring-8 ring-base-100" :to="`/user/${item.reviewer ?? uploader.id}`">
           <UserAvatar class="rounded-full shadow-lg" :url="item.reviewerAvatar ?? uploader.avatar"/>
         </router-link>
@@ -69,7 +105,7 @@ const uploader = await fetchApi(`/user/${props.uploader}`) as User;
         </i18n-t>
       </li>
     </ol>
-    <div v-if="!history.length" class="text-center italic py-8">
+    <div v-if="!status.history.length" class="text-center italic py-8">
       {{ t('history-empty') }}
     </div>
   </div>

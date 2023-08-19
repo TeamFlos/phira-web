@@ -204,6 +204,19 @@ export type StbHistory = {
   time: string,
 };
 
+export type SimpleUser = {
+  id: number,
+  name: string,
+};
+
+export type StbStatus = {
+  stable: boolean,
+  stableRequest: boolean,
+  approves: SimpleUser[],
+  denies: SimpleUser[],
+  history: StbHistory[],
+};
+
 export type EmailSubs = {
   review: boolean,
   stb: boolean,

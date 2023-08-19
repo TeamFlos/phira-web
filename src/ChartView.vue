@@ -67,7 +67,7 @@ import LoadOr from './components/LoadOr.vue'
 import LoadView from './components/LoadView.vue'
 import PropItem from './components/PropItem.vue'
 import RatingBar from './components/RatingBar.vue'
-import StbHistory from './components/StbHistory.vue'
+import StbStatus from './components/StbStatus.vue'
 import UserCard from './components/UserCard.vue'
 
 const fetchApi = useFetchApi();
@@ -205,7 +205,7 @@ async function submitRating() {
                 <LeaderboardView v-if="contentTab === 'ldb'" :chart="chart.id" />
                 <Suspense v-if="contentTab === 'stb'" timeout="0">
                   <template #default>
-                    <StbHistory :chart="chart.id" :uploader="chart.uploader" />
+                    <StbStatus :chart="chart.id" :uploader="chart.uploader" />
                   </template>
                   <template #fallback>
                     <div class="flex justify-center my-2">
