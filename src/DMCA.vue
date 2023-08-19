@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row justify-center w-full">
-    <article class="card bg-base-100 shadow-xl mx-8 prose max-w-none w-full lg:w-3/4 p-4">
+    <article class="card bg-base-100 shadow-xl mx-8 prose max-w-none w-full lg:w-3/4 p-4 overflow-x-auto">
       <h1>DMCA Policy</h1>
       <p>Phira is a community-driven rhythm game, devoid of commercial intent. We do not generate any profit either directly or indirectly. We operate solely on user donations. Although we demand users to obtain legal license of used assets before uploading levels, it may not be observed in some cases.</p>
       <p>We respect the intellectual property rights of others and expects our users to do the same. In accordance with the Digital Millennium Copyright Act of 1998, Phira will respond expeditiously to claims of copyright infringement committed using the Phira service and/or the Phira website (the “Site”) if such claims are reported to our Designated Copyright Agent identified in the sample notice below.</p>
@@ -29,6 +29,10 @@ China</pre>
 <style scoped>
 article * {
   @apply my-2;
+}
+
+article br {
+  @apply my-0;
 }
 
 article a {
