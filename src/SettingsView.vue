@@ -21,6 +21,7 @@ const { t } = useI18n();
 
 import AccountTab from './settings/AccountTab.vue'
 import SecurityTab from './settings/SecurityTab.vue'
+import EmailTab from './settings/EmailTab.vue'
 
 const route = useRoute();
 const category = computed(() => {
@@ -42,6 +43,7 @@ const category = computed(() => {
       <div class="flex flex-col grow card bg-base-100 min-h-12 p-8">
         <AccountTab v-if="category === 'account'" />
         <SecurityTab v-if="category === 'security'" />
+        <EmailTab v-if="category === 'email'" />
       </div>
     </div>
   </div>

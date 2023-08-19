@@ -203,3 +203,8 @@ export type StbHistory = {
   comment?: string,
   time: string,
 };
+
+export type EmailSubs = {
+  review: boolean,
+  stb: boolean,
+};
