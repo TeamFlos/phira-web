@@ -13,11 +13,13 @@ zh-CN:
 
 <script setup lang="ts">
 
-import { computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n();
+
+import LoadSuspense from './components/LoadSuspense.vue'
 
 import AccountTab from './settings/AccountTab.vue'
 import SecurityTab from './settings/SecurityTab.vue'
@@ -41,9 +43,15 @@ const category = computed(() => {
         </ul>
       </div>
       <div class="flex flex-col grow card bg-base-100 min-h-12 p-8">
-        <AccountTab v-if="category === 'account'" />
-        <SecurityTab v-if="category === 'security'" />
-        <EmailTab v-if="category === 'email'" />
+        <LoadSuspense v-if="category === 'account'">
+          <AccountTab />
+        </LoadSuspense>
+        <LoadSuspense v-if="category === 'security'">
+          <SecurityTab />
+        </LoadSuspense>
+        <LoadSuspense v-if="category === 'email'">
+          <EmailTab />
+        </LoadSuspense>
       </div>
     </div>
   </div>

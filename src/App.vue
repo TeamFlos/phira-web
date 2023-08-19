@@ -36,7 +36,7 @@ import ToastsView from './components/ToastsView.vue'
         </template>
         <template #fallback>
           <div class="flex justify-center">
-            <LoadView/>
+            <LoadView />
           </div>
         </template>
       </Suspense>
