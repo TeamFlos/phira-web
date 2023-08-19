@@ -3,13 +3,11 @@ en:
   description: Phigros Fanmade Community
   link:
     github: GitHub
-    afdian: Afdian
 
 zh-CN:
   description: Phigros 二创社区
   link:
     github: GitHub
-    afdian: 爱发电
 
 </i18n>
 
@@ -32,11 +30,6 @@ const { t } = useI18n();
             <button class="btn btn-neutral">
               <i class="fa-brands fa-github"></i>
               {{ t('link.github') }}
-            </button>
-          </a>
-          <a href="https://afdian.net/a/phira" target="_blank">
-            <button class="btn btn-primary bg-[#946ce6]">
-              {{ t('link.afdian') }}
             </button>
           </a>
         </div>
