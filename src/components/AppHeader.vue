@@ -103,7 +103,7 @@ function doLogout() {
           </label>
           <router-link to="/" class="btn btn-ghost normal-case text-2xl">Phira</router-link>
           <div class="ms-8 gap-2 hidden md:flex">
-            <router-link v-for="nav in NAVS" :to="nav.enabled? nav.path: route" :key="nav.text" :value="nav.text" class="btn btn-ghost normal-case text-lg" :class="{ 'btn-active': route.path.startsWith(nav.path) && nav.enabled }" @click="!nav.enabled && toast(t('wip'))">
+            <router-link v-for="nav in NAVS" :to="nav.enabled? nav.path: route" :key="nav.text" :value="nav.text" class="btn btn-ghost normal-case text-lg" :class="{ 'btn-active': route.path.startsWith(nav.path) && nav.enabled }" @click="!nav.enabled && toast(t('wip'), 'warning')">
               <i :class="nav.icon" class="fa-solid"></i>
               {{ t(nav.text) }}
             </router-link>
