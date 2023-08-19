@@ -59,6 +59,7 @@ type RecordEx = PlayRecord & {
 };
 
 const std = ref(false);
+watch(std, () => pagination.value!.current = 1);
 
 const totalCount = ref(0);
 const records = ref<RecordEx[]>();
