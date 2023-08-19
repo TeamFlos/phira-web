@@ -93,6 +93,9 @@ async function saveProfile() {
   }
 }
 
+import defaultAvatar from '@/assets/user.png'
+const initAvatar = user.avatar? fileToURL(user.avatar): defaultAvatar;
+
 </script>
 
 <template>
@@ -101,7 +104,7 @@ async function saveProfile() {
       <div class="rounded-full">
         <label>
           <input type="file" class="hidden" accept="image/png, image/jpeg, image/webp" @change="onChangeAvatar" />
-          <img :src="fileToURL(user.avatar)" class="cursor-pointer" ref="avatarImage" />
+          <img :src="initAvatar" class="cursor-pointer" ref="avatarImage" />
         </label>
       </div>
       <button class="btn btn-secondary m-3" :class="{ hidden: !avatarFile }" @click="updateAvatar" ref="updateAvatarButton">
