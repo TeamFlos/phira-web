@@ -243,6 +243,7 @@ function saveFilters() {
   onlyStableRequest.value = tempOnlyStableRequest.value;
   ratingLower.value = ratingLowerEl.value!.selected;
   ratingUpper.value = ratingUpperEl.value!.selected;
+  pagination.value!.current = 1;
 }
 
 </script>
