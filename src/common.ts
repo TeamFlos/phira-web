@@ -1,4 +1,5 @@
 import { useRouter } from 'vue-router';
+import type { Router } from 'vue-router'
 
 import { toast } from './components/ToastsView.vue';
 
@@ -146,6 +147,11 @@ interface RequestInitWithJson extends RequestInit {
   json?: object;
 }
 
+export function pleaseLogin(router: Router) {
+  router.push('/login');
+  toast(i18n.global.t('please-login'), 'error');
+}
+
 export function useFetchApi(): FetchApi {
   const router = useRouter();
   return async function (
@@ -178,8 +184,7 @@ export function useFetchApi(): FetchApi {
         if (resp.status == 401) {
           // unauthorized
           logout();
-          router.push('/login');
-          toast(i18n.global.t('please-login'), 'error');
+          pleaseLogin(router);
           throw new Error();
         } else if (!onError || onError(json, resp)) {
           if (!onSuccess) throw new Error(json.error);
