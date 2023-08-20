@@ -4,12 +4,14 @@ en:
   done: Following
   done-follow: Followed
   done-unfollow: Unfollowed
+  error-follow-self: You cannot follow yourself
 
 zh-CN:
   button: 关注
   done: 已关注
   done-follow: 已关注
   done-unfollow: 已取关
+  error-follow-self: 不能关注自己
 
 </i18n>
 
@@ -30,7 +32,9 @@ const following = ref(!!props.initFollowing);
 const fetchApi = useFetchApi();
 
 const doing = ref(false);
+const me: User = (await fetchApi('/me')) as User;
 async function switchFollow() {
+  if (props.id == me.id) return toast(t('error-follow-self'));
   if (doing.value) return;
   doing.value = true;
   try {

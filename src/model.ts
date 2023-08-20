@@ -208,3 +208,15 @@ export type EmailSubs = {
   review: boolean;
   stb: boolean;
 };
+
+export type EventList = {
+  count: number;
+  id: number;
+  sid: string;
+  creator: number;
+  name: string;
+  illustration: string;
+  timeStart: Date;
+  timeEnd: Date;
+  locked: boolean;
+}
