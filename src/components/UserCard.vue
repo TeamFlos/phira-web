@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref } from 'vue';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 useI18n();
 
-import { useFetchApi, userNameClass } from "../common";
-import type { User } from "../model";
+import { useFetchApi, userNameClass } from '../common';
+import type { User } from '../model';
 
-import UserAvatar from "./UserAvatar.vue";
+import UserAvatar from './UserAvatar.vue';
 
 const props = defineProps<{ id: number }>();
 

@@ -11,21 +11,21 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted } from 'vue';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 useI18n();
 
-import { useFetchApi, pageCount, userNameClass, LANGUAGES } from "../common";
-import type { Page, User } from "../model";
+import { useFetchApi, pageCount, userNameClass, LANGUAGES } from '../common';
+import type { Page, User } from '../model';
 
 const PAGE_NUM = 20;
 
-import LoadView from "./LoadView.vue";
-import PageIndicator from "./PageIndicator.vue";
-import UserAvatar from "./UserAvatar.vue";
+import LoadView from './LoadView.vue';
+import PageIndicator from './PageIndicator.vue';
+import UserAvatar from './UserAvatar.vue';
 
-import moment from "moment";
+import moment from 'moment';
 
 const props = defineProps<{ initPage?: number; params?: object }>();
 
@@ -52,7 +52,7 @@ async function fetchUsers() {
     ...parameters.value,
   };
   const resp = (await fetchApi(
-    "/user/?" + new URLSearchParams(params),
+    '/user/?' + new URLSearchParams(params),
   )) as Page<User>;
   totalCount.value = resp.count;
   users.value = resp.results;

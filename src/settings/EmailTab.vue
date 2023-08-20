@@ -18,19 +18,19 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive } from 'vue';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError } from "../common";
-import type { EmailSubs } from "../model";
+import { useFetchApi, toast, toastError } from '../common';
+import type { EmailSubs } from '../model';
 
-import LoadOr from "../components/LoadOr.vue";
+import LoadOr from '../components/LoadOr.vue';
 
 const fetchApi = useFetchApi();
 
-const subs = reactive((await fetchApi("/me/subs")) as EmailSubs);
+const subs = reactive((await fetchApi('/me/subs')) as EmailSubs);
 
 const savingSubs = ref(false);
 async function saveSubs() {
@@ -38,10 +38,10 @@ async function saveSubs() {
   savingSubs.value = true;
   try {
     await fetchApi(`/me/subs`, {
-      method: "PATCH",
+      method: 'PATCH',
       json: subs,
     });
-    toast(t("subs.done"));
+    toast(t('subs.done'));
   } catch (e) {
     toastError(e);
   } finally {
@@ -65,7 +65,7 @@ async function saveSubs() {
     </div>
     <div class="flex flex-row-reverse mt-4">
       <button class="btn btn-primary" @click="saveSubs">
-        <LoadOr :loading="savingSubs">{{ t("subs.save") }}</LoadOr>
+        <LoadOr :loading="savingSubs">{{ t('subs.save') }}</LoadOr>
       </button>
     </div>
   </div>

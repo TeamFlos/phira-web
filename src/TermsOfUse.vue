@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { i18n } from "./main";
+import { i18n } from './main';
 </script>
 
 <template>

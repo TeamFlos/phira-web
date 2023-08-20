@@ -1,11 +1,16 @@
 <script lang="ts" setup>
-import { fileToURL } from "../common";
+import { fileToURL } from '../common';
 
-import defaultAvatar from "@/assets/user.png";
+import { darkTheme } from './AppHeader.vue';
+
+import defaultAvatar from '@/assets/user.png';
 
 defineProps<{ url?: string }>();
 </script>
 
 <template>
-  <img :src="url ? fileToURL(url) : defaultAvatar" />
+  <img
+    :src="url ? fileToURL(url) : defaultAvatar"
+    :class="{ invert: !darkTheme }"
+  />
 </template>

@@ -13,14 +13,14 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref } from 'vue';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError, validatePassword } from "../common";
+import { useFetchApi, toast, toastError, validatePassword } from '../common';
 
-import LoadOr from "../components/LoadOr.vue";
+import LoadOr from '../components/LoadOr.vue';
 
 const fetchApi = useFetchApi();
 
@@ -39,8 +39,8 @@ async function changePassword() {
       pwd2 = password2.value!;
     validatePassword(t, pwd_old);
     validatePassword(t, pwd, pwd2);
-    await fetchApi("/edit/password", {
-      method: "POST",
+    await fetchApi('/edit/password', {
+      method: 'POST',
       json: {
         old: pwd_old,
         new: pwd,
@@ -49,7 +49,7 @@ async function changePassword() {
     password_old.value = undefined;
     password.value = undefined;
     password2.value = undefined;
-    toast(t("password-updated"));
+    toast(t('password-updated'));
   } catch (e) {
     toastError(e);
   } finally {
@@ -57,7 +57,7 @@ async function changePassword() {
   }
 }
 
-import tabLoading from "../SettingsView.vue";
+import tabLoading from '../SettingsView.vue';
 tabLoading.value = false;
 </script>
 
@@ -90,7 +90,7 @@ tabLoading.value = false;
     </div>
     <div class="flex flex-row-reverse">
       <button class="btn btn-primary" @click="changePassword">
-        <LoadOr :loading="changingPassword">{{ t("save") }}</LoadOr>
+        <LoadOr :loading="changingPassword">{{ t('save') }}</LoadOr>
       </button>
     </div>
   </div>

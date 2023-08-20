@@ -23,10 +23,10 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
-import { useRoute } from "vue-router";
+import { ref, reactive } from 'vue';
+import { useRoute } from 'vue-router';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import {
@@ -38,13 +38,13 @@ import {
   toastError,
   loggedIn,
   setTitle,
-} from "./common";
-import { Permission, Roles, type User } from "./model";
+} from './common';
+import { Permission, Roles, type User } from './model';
 
-import LoadOr from "./components/LoadOr.vue";
-import PropItem from "./components/PropItem.vue";
-import RecordList from "./components/RecordList.vue";
-import UserAvatar from "./components/UserAvatar.vue";
+import LoadOr from './components/LoadOr.vue';
+import PropItem from './components/PropItem.vue';
+import RecordList from './components/RecordList.vue';
+import UserAvatar from './components/UserAvatar.vue';
 
 const route = useRoute();
 
@@ -60,7 +60,7 @@ const confirmDeleteDialog = ref<HTMLDialogElement>();
 const me = ref<User>();
 
 if (loggedIn()) {
-  fetchApi("/me", {}, (user) => (me.value = user as User));
+  fetchApi('/me', {}, (user) => (me.value = user as User));
 }
 
 const stats = (await fetchApi(`/user/${id}/stats`)) as {
@@ -73,8 +73,8 @@ async function ban() {
   if (banning.value) return;
   banning.value = true;
   try {
-    await fetchApi(`/user/${id}/ban`, { method: "POST" });
-    toast(t("banned"));
+    await fetchApi(`/user/${id}/ban`, { method: 'POST' });
+    toast(t('banned'));
     user.banned = true;
     confirmDeleteDialog.value!.close();
   } catch (e) {
@@ -130,7 +130,7 @@ function tryCloseBan() {
               <div class="stat">
                 <div class="stat-title text-center" v-t="'avg-accuracy'"></div>
                 <div class="stat-value text-center">
-                  {{ (stats.avgAccuracy * 100).toFixed(2) + "%" }}
+                  {{ (stats.avgAccuracy * 100).toFixed(2) + '%' }}
                 </div>
               </div>
             </div>
@@ -207,7 +207,7 @@ function tryCloseBan() {
           v-t="'cancel'"
         ></button>
         <button class="btn btn-error" @click="ban">
-          <LoadOr :loading="banning">{{ t("confirm") }}</LoadOr>
+          <LoadOr :loading="banning">{{ t('confirm') }}</LoadOr>
         </button>
       </div>
     </div>

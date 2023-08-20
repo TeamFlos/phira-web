@@ -1,22 +1,22 @@
-@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Tektur:wght@600&family=Ubuntu:wght@400;700&display=swap");
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Tektur:wght@600&family=Ubuntu:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @font-face {
-  font-family: "Halva";
+  font-family: 'Halva';
   font-style: normal;
   font-weight: 400;
-  src: url("https://fonts.cdnfonts.com/s/47814/Halva-qZY3r.woff") format("woff");
+  src: url('https://fonts.cdnfonts.com/s/47814/Halva-qZY3r.woff') format('woff');
 }
 @font-face {
-  font-family: "Halva Medium";
+  font-family: 'Halva Medium';
   font-style: normal;
   font-weight: 400;
-  src: url("https://fonts.cdnfonts.com/s/47814/HalvamediumRegular-ALmwM.woff")
-    format("woff");
+  src: url('https://fonts.cdnfonts.com/s/47814/HalvamediumRegular-ALmwM.woff')
+    format('woff');
 }
 
 @layer base {

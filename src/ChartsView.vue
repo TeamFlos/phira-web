@@ -64,10 +64,10 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, watch, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import {
@@ -76,15 +76,15 @@ import {
   pageCount,
   isString,
   loggedIn,
-} from "./common";
+} from './common';
 
-import { Permission, Roles } from "./model";
-import type { Chart, Page, User } from "./model";
+import { Permission, Roles } from './model';
+import type { Chart, Page, User } from './model';
 
-import LoadView from "./components/LoadView.vue";
-import PageIndicator from "./components/PageIndicator.vue";
-import RatingBar from "./components/RatingBar.vue";
-import TagList from "./components/TagList.vue";
+import LoadView from './components/LoadView.vue';
+import PageIndicator from './components/PageIndicator.vue';
+import RatingBar from './components/RatingBar.vue';
+import TagList from './components/TagList.vue';
 
 const PAGE_NUM = 28;
 
@@ -95,7 +95,7 @@ const fetchApi = useFetchApi();
 
 let user: User | null = null;
 if (loggedIn()) {
-  user = (await fetchApi("/me")) as User;
+  user = (await fetchApi('/me')) as User;
 }
 
 const pagination = ref<typeof PageIndicator>();
@@ -104,10 +104,10 @@ const totalCount = ref(0);
 const charts = ref<Chart[]>();
 
 let initPage = 1;
-const searchValue = ref(""),
+const searchValue = ref(''),
   tempSearchValue = ref<string>();
-const division = ref("regular");
-const order = ref("-updated");
+const division = ref('regular');
+const order = ref('-updated');
 const wantedTagsEl = ref<typeof TagList>(),
   unwantedTagsEl = ref<typeof TagList>();
 const ratingLowerEl = ref<typeof RatingBar>(),
@@ -144,19 +144,19 @@ watch(
     }
     if (
       isString(q.division) &&
-      ["regular", "troll", "plain", "visual"].includes(q.division)
+      ['regular', 'troll', 'plain', 'visual'].includes(q.division)
     ) {
       division.value = q.division;
     }
     if (isString(q.tags)) {
-      let tags = q.tags.split(",");
+      let tags = q.tags.split(',');
       let wanted = [],
         unwanted = [];
       let ws = new Set(),
         uws = new Set();
       for (let tag of tags) {
         tag = tag.trim();
-        if (tag.startsWith("-")) {
+        if (tag.startsWith('-')) {
           tag = tag.substring(1).trim();
           if (tag.length && !uws.has(tag)) {
             unwanted.push(tag);
@@ -174,7 +174,7 @@ watch(
       fromMe.value = user !== null && q.uploader === String(user.id);
     }
     if (isString(q.rating)) {
-      let r = q.rating.split(",");
+      let r = q.rating.split(',');
       if (r.length === 2) {
         try {
           initRatingLower = Math.max(
@@ -190,11 +190,11 @@ watch(
         }
       }
     }
-    onlyUnreviewed.value = q.reviewed === "false";
-    onlyStableRequest.value = q.stableRequest === "true";
+    onlyUnreviewed.value = q.reviewed === 'false';
+    onlyStableRequest.value = q.stableRequest === 'true';
     if (onlyUnreviewed.value) onlyStableRequest.value = false;
     if (
-      ["updated", "-updated", "rating", "-rating", "name", "-name"].includes(
+      ['updated', '-updated', 'rating', '-rating', 'name', '-name'].includes(
         q.order as string,
       )
     ) {
@@ -217,14 +217,14 @@ const parameters = computed(() => {
     page: String(pagination.value?.current ?? initPage),
     order: order.value,
   };
-  if (division.value !== "regular") {
+  if (division.value !== 'regular') {
     res.division = division.value;
   }
   if (wantedTags.value.length || unwantedTags.value.length) {
-    let s = "";
-    for (let tag of wantedTags.value) s += tag + ",";
-    for (let tag of unwantedTags.value) s += "-" + tag + ",";
-    if (s.endsWith(",")) s = s.substring(0, s.length - 1);
+    let s = '';
+    for (let tag of wantedTags.value) s += tag + ',';
+    for (let tag of unwantedTags.value) s += '-' + tag + ',';
+    if (s.endsWith(',')) s = s.substring(0, s.length - 1);
     res.tags = s;
   }
   if (searchValue.value?.length) {
@@ -234,14 +234,14 @@ const parameters = computed(() => {
     res.uploader = String(user?.id);
   }
   if (onlyUnreviewed.value) {
-    res.reviewed = "false";
-    res.stableRequest = "false";
+    res.reviewed = 'false';
+    res.stableRequest = 'false';
   }
   if (onlyStableRequest.value) {
-    res.stableRequest = "true";
+    res.stableRequest = 'true';
   }
   if (ratingLower.value !== 3 || ratingUpper.value !== 10) {
-    res.rating = ratingLower.value / 10 + "," + ratingUpper.value / 10;
+    res.rating = ratingLower.value / 10 + ',' + ratingUpper.value / 10;
   }
   return res;
 });
@@ -253,7 +253,7 @@ async function fetchCharts() {
     ...parameters.value,
   };
   const resp = (await fetchApi(
-    "/chart?" + new URLSearchParams(params),
+    '/chart?' + new URLSearchParams(params),
   )) as Page<Chart>;
   totalCount.value = resp.count;
   charts.value = resp.results;
@@ -310,7 +310,7 @@ function saveFilters() {
         <div class="form-control">
           <label class="label">
             <span class="label-text">
-              {{ t("division.label") }}<i class="fa-solid fa-grip ml-2"></i>
+              {{ t('division.label') }}<i class="fa-solid fa-grip ml-2"></i>
             </span>
           </label>
           <select
@@ -327,7 +327,7 @@ function saveFilters() {
         <div class="form-control">
           <label class="label">
             <span class="label-text">
-              {{ t("order.label")
+              {{ t('order.label')
               }}<i class="fa-solid fa-arrow-up-wide-short ml-2"></i>
             </span>
           </label>

@@ -11,15 +11,15 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, validateEmail, validatePassword, toast } from "./common";
+import { useFetchApi, validateEmail, validatePassword, toast } from './common';
 
-import LoadOr from "./components/LoadOr.vue";
+import LoadOr from './components/LoadOr.vue';
 
 const router = useRouter();
 
@@ -36,7 +36,7 @@ const errorMessage = ref<string>();
 
 async function submit() {
   if (doingRegister.value) {
-    toast(t("registering"), "warning");
+    toast(t('registering'), 'warning');
     return;
   }
   errorMessage.value = undefined;
@@ -46,15 +46,15 @@ async function submit() {
     let pwd = password.value!,
       pwd2 = password2.value!;
     validatePassword(pwd, pwd2);
-    await fetchApi("/register", {
-      method: "POST",
+    await fetchApi('/register', {
+      method: 'POST',
       json: {
         email: email.value!,
         name: username.value!,
         password: pwd,
       },
     });
-    toast(t("registered"));
+    toast(t('registered'));
     router.back();
   } catch (e) {
     errorMessage.value = e instanceof Error ? e.message : String(e);
@@ -138,7 +138,7 @@ async function submit() {
             :class="{ disabled: doingRegister }"
             @click="submit"
           >
-            <LoadOr :loading="doingRegister">{{ t("register") }}</LoadOr>
+            <LoadOr :loading="doingRegister">{{ t('register') }}</LoadOr>
           </button>
         </div>
       </div>

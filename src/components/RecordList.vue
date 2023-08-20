@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from "vue";
+import { ref, reactive, watch } from 'vue';
 
-import { useFetchApi, fileToURL } from "../common";
-import type { Chart, PlayRecord } from "../model";
+import { useFetchApi, fileToURL } from '../common';
+import type { Chart, PlayRecord } from '../model';
 
-import LoadView from "./LoadView.vue";
+import LoadView from './LoadView.vue';
 
 const props = defineProps<{
   params?: Record<string, string>;
@@ -20,7 +20,7 @@ const records = ref<ReturnType<typeof reactive<PlayRecordEx>>[]>();
 async function fetchRecords() {
   records.value = undefined;
   let resp = (await fetchApi(
-    "/record?" + new URLSearchParams(props.params ?? {}),
+    '/record?' + new URLSearchParams(props.params ?? {}),
   )) as PlayRecordEx[];
   if (props.limit && resp.length > props.limit) {
     resp.splice(props.limit);
@@ -89,7 +89,7 @@ watch(() => props.params, fetchRecords);
             {{ record?.chartDetail?.name }}
           </p>
           <p class="font-mono font-black text-3xl">
-            {{ String(record.score).padStart(7, "0") }}
+            {{ String(record.score).padStart(7, '0') }}
           </p>
         </div>
       </div>

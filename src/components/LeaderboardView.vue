@@ -28,21 +28,21 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted } from 'vue';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, pageCount, userNameClass } from "../common";
-import type { Page, PlayRecord } from "../model";
+import { useFetchApi, pageCount, userNameClass } from '../common';
+import type { Page, PlayRecord } from '../model';
 
 const PAGE_NUM = 20;
 
-import LoadView from "./LoadView.vue";
-import PageIndicator from "./PageIndicator.vue";
-import UserAvatar from "./UserAvatar.vue";
+import LoadView from './LoadView.vue';
+import PageIndicator from './PageIndicator.vue';
+import UserAvatar from './UserAvatar.vue';
 
-import moment from "moment";
+import moment from 'moment';
 
 const props = defineProps<{ chart: number }>();
 
@@ -79,7 +79,7 @@ async function fetchRecords() {
     ...parameters.value,
   };
   const resp = (await fetchApi(
-    "/record/query/" + props.chart + "?" + new URLSearchParams(params),
+    '/record/query/' + props.chart + '?' + new URLSearchParams(params),
   )) as Page<RecordEx>;
   totalCount.value = resp.count;
   for (let i = 0; i < resp.results.length; ++i) {
@@ -103,7 +103,7 @@ onMounted(() => {
       <!-- <input type="checkbox" class="toggle" checked /> -->
       <!-- <span>无瑕度</span> -->
       <button class="btn btn-ghost" @click="std = !std">
-        <i class="fa-solid fa-repeat"></i>{{ std ? t("purity") : t("score") }}
+        <i class="fa-solid fa-repeat"></i>{{ std ? t('purity') : t('score') }}
       </button>
     </div>
     <div class="overflow-x-auto flex flex-col items-end gap-2 mt-2">
@@ -172,7 +172,7 @@ onMounted(() => {
               <td v-if="std" class="font-black font-mono text-2xl">
                 {{ record.score }}
               </td>
-              <td>{{ (record.accuracy * 100).toFixed(2) + "%" }}</td>
+              <td>{{ (record.accuracy * 100).toFixed(2) + '%' }}</td>
               <td>{{ record.perfect }}</td>
               <td>{{ record.good }}</td>
               <td>{{ record.bad }}</td>

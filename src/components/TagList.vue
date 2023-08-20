@@ -12,31 +12,31 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive } from 'vue';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { toast } from "../common";
+import { toast } from '../common';
 
 const props = defineProps<{ init?: string[] }>();
 
 const tags = reactive<string[]>(props.init ? [...props.init] : []);
 
-const newTag = ref("");
+const newTag = ref('');
 
 function addTag() {
   let tag = newTag.value;
   if (!tag.length) {
-    toast(t("tag-empty"), "error");
+    toast(t('tag-empty'), 'error');
     return;
   }
   tag = tag.trim();
   if (tags.includes(tag)) {
-    toast(t("tag-exists"), "error");
+    toast(t('tag-exists'), 'error');
     return;
   }
-  newTag.value = "";
+  newTag.value = '';
   tags.push(tag);
 }
 

@@ -50,13 +50,13 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, reactive } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, watch, onMounted, reactive } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import moment from "moment";
+import moment from 'moment';
 
 import {
   useFetchApi,
@@ -65,16 +65,16 @@ import {
   toastError,
   loggedIn,
   setTitle,
-} from "./common";
-import { Permission, Roles, type Chart, type User } from "./model";
+} from './common';
+import { Permission, Roles, type Chart, type User } from './model';
 
-import LeaderboardView from "./components/LeaderboardView.vue";
-import LoadOr from "./components/LoadOr.vue";
-import LoadSuspense from "./components/LoadSuspense.vue";
-import PropItem from "./components/PropItem.vue";
-import RatingBar from "./components/RatingBar.vue";
-import StbStatus from "./components/StbStatus.vue";
-import UserCard from "./components/UserCard.vue";
+import LeaderboardView from './components/LeaderboardView.vue';
+import LoadOr from './components/LoadOr.vue';
+import LoadSuspense from './components/LoadSuspense.vue';
+import PropItem from './components/PropItem.vue';
+import RatingBar from './components/RatingBar.vue';
+import StbStatus from './components/StbStatus.vue';
+import UserCard from './components/UserCard.vue';
 
 const fetchApi = useFetchApi();
 
@@ -88,7 +88,7 @@ setTitle(chart.name);
 
 const me = ref<User>();
 if (loggedIn()) {
-  fetchApi("/me", {}, (user) => (me.value = user as User));
+  fetchApi('/me', {}, (user) => (me.value = user as User));
 }
 
 const chartRating = ref<typeof RatingBar>();
@@ -101,18 +101,18 @@ onMounted(() => {
   );
 });
 
-const contentTab = ref("ldb");
+const contentTab = ref('ldb');
 watch(
   () => route.hash,
   (hash) => {
-    if (hash === "#ldb") contentTab.value = "ldb";
-    else if (hash === "#stb") contentTab.value = "stb";
+    if (hash === '#ldb') contentTab.value = 'ldb';
+    else if (hash === '#stb') contentTab.value = 'stb';
   },
   { immediate: true },
 );
 
 function switchTab(s: string) {
-  router.replace({ path: route.path, hash: "#" + s });
+  router.replace({ path: route.path, hash: '#' + s });
 }
 
 const myRating = ref<number>();
@@ -130,10 +130,10 @@ async function setRanked(ranked: boolean) {
   settingRanked.value = true;
   try {
     await fetchApi(`/chart/${id}/set-ranked`, {
-      method: "POST",
+      method: 'POST',
       json: { ranked },
     });
-    toast(t("div-updated"));
+    toast(t('div-updated'));
     chart.ranked = ranked;
   } catch (e) {
     toastError(e);
@@ -148,11 +148,11 @@ async function submitRating() {
   submittingRating.value = true;
   try {
     await fetchApi(`/chart/${id}/rate`, {
-      method: "POST",
+      method: 'POST',
       json: { score: rating.value! },
     });
     myRating.value = rating.value!;
-    toast(t("rating.done"));
+    toast(t('rating.done'));
   } catch (e) {
     toastError(e);
   } finally {
@@ -227,7 +227,7 @@ async function submitRating() {
                   @click="setRanked(false)"
                 >
                   <LoadOr :loading="settingRanked">{{
-                    t("set-special")
+                    t('set-special')
                   }}</LoadOr>
                 </button>
                 <button
@@ -236,7 +236,7 @@ async function submitRating() {
                   @click="setRanked(true)"
                 >
                   <LoadOr :loading="settingRanked">{{
-                    t("set-ranked")
+                    t('set-ranked')
                   }}</LoadOr>
                 </button>
               </div>
@@ -244,18 +244,18 @@ async function submitRating() {
                 class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12"
               >
                 <p v-if="!myRating" class="text-center">
-                  {{ t("rating.title") }}
+                  {{ t('rating.title') }}
                 </p>
                 <p v-else class="text-center">
                   {{
-                    t("rating.title-with-mine", {
+                    t('rating.title-with-mine', {
                       score: (myRating / 2).toFixed(1),
                     })
                   }}
                 </p>
                 <p class="text-center text-sm">
                   {{
-                    t("rating.detail", {
+                    t('rating.detail', {
                       score: ((chart.rating ? chart.rating : 0) * 5).toFixed(2),
                       count: chart.ratingCount,
                     })
@@ -271,7 +271,7 @@ async function submitRating() {
                   class="btn btn-primary mt-2"
                   @click="submitRating"
                 >
-                  <LoadOr :loading="submittingRating">{{ t("submit") }}</LoadOr>
+                  <LoadOr :loading="submittingRating">{{ t('submit') }}</LoadOr>
                 </button>
               </div>
             </div>

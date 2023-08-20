@@ -21,10 +21,10 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import {
@@ -34,10 +34,10 @@ import {
   validatePassword,
   toast,
   changeLocale,
-} from "./common";
-import type { User } from "./model";
+} from './common';
+import type { User } from './model';
 
-import LoadOr from "./components/LoadOr.vue";
+import LoadOr from './components/LoadOr.vue';
 
 const router = useRouter();
 
@@ -52,7 +52,7 @@ const errorMessage = ref<string>();
 
 async function submit() {
   if (doingLogin.value) {
-    toast(t("logging-in"), "warning");
+    toast(t('logging-in'), 'warning');
     return;
   }
   errorMessage.value = undefined;
@@ -61,21 +61,21 @@ async function submit() {
     validateEmail(t, email.value!);
     let pwd = password.value!;
     validatePassword(t, pwd);
-    let resp = (await fetchApi("/login", {
-      method: "POST",
+    let resp = (await fetchApi('/login', {
+      method: 'POST',
       json: {
         email: email.value!,
         password: pwd,
       },
     })) as { token: string; expireAt: string };
     setCookie(
-      "access_token",
+      'access_token',
       resp.token,
       new Date(Date.parse(resp.expireAt)).toUTCString(),
     );
-    toast(t("logged-in"));
+    toast(t('logged-in'));
     router.back();
-    fetchApi("/me", {}, (me) => {
+    fetchApi('/me', {}, (me) => {
       changeLocale((me as User).language);
     });
   } catch (e) {
@@ -141,11 +141,11 @@ async function submit() {
             :class="{ disabled: doingLogin }"
             @click="submit"
           >
-            <LoadOr :loading="doingLogin">{{ t("login") }}</LoadOr>
+            <LoadOr :loading="doingLogin">{{ t('login') }}</LoadOr>
           </button>
         </div>
         <div class="divider text-white">
-          {{ t("new-user.prompt") }}
+          {{ t('new-user.prompt') }}
           <router-link
             to="/register"
             class="link link-hover"

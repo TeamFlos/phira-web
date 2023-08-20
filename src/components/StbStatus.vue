@@ -38,13 +38,13 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, detailedTime } from "../common";
-import type { StbStatus, User } from "../model";
+import { useFetchApi, detailedTime } from '../common';
+import type { StbStatus, User } from '../model';
 
-import UserAvatar from "./UserAvatar.vue";
+import UserAvatar from './UserAvatar.vue';
 
 const props = defineProps<{ chart: number; uploader: number }>();
 
@@ -65,9 +65,9 @@ const uploader = (await fetchApi(`/user/${props.uploader}`)) as User;
         :class="{ 'step-primary': status.stable || status.stableRequest }"
       >
         <div class="text-left lg:text-center">
-          <p>{{ t("steps.request") }}</p>
+          <p>{{ t('steps.request') }}</p>
           <template v-if="status.stableRequest">
-            <span>{{ t("steps.approve", status.approves.length) }}</span>
+            <span>{{ t('steps.approve', status.approves.length) }}</span>
             <template v-for="(user, index) in status.approves" :key="user.id">
               <span v-if="index > 0">, </span>
               <router-link :to="`/user/${user.id}`" class="link link-hover">{{
@@ -75,7 +75,7 @@ const uploader = (await fetchApi(`/user/${props.uploader}`)) as User;
               }}</router-link>
             </template>
             <br />
-            <span>{{ t("steps.deny", status.denies.length) }}</span>
+            <span>{{ t('steps.deny', status.denies.length) }}</span>
             <template v-for="(user, index) in status.denies" :key="user.id">
               <span v-if="index > 0">, </span>
               <router-link :to="`/user/${user.id}`" class="link link-hover">{{
@@ -143,7 +143,7 @@ const uploader = (await fetchApi(`/user/${props.uploader}`)) as User;
       </li>
     </ol>
     <div v-if="!status.history.length" class="text-center italic py-8">
-      {{ t("history-empty") }}
+      {{ t('history-empty') }}
     </div>
   </div>
 </template>

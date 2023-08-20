@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, h } from "vue";
+import { ref, h } from 'vue';
 
 const props = defineProps<{ init?: number; total: number }>();
 
@@ -7,9 +7,9 @@ const current = ref(props.init ?? 1);
 
 function PageButton(props: { class?: string; page: number }) {
   return h(
-    "button",
+    'button',
     {
-      class: "join-item btn",
+      class: 'join-item btn',
       onClick() {
         current.value = props.page;
       },

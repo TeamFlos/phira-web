@@ -29,32 +29,38 @@ zh-CN:
 
 </i18n>
 
-<script setup lang="ts">
-import { ref, watch } from "vue";
-import { useRoute } from "vue-router";
+<script lang="ts">
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useI18n } from 'vue-i18n';
 
-import { toast } from "./ToastsView.vue";
-import { useFetchApi, getCookie, addCookieListener, logout } from "../common";
-import type { User } from "../model";
+import { toast } from './ToastsView.vue';
+import { useFetchApi, getCookie, addCookieListener, logout } from '../common';
+import type { User } from '../model';
 
-import LoadView from "./LoadView.vue";
-import UserAvatar from "./UserAvatar.vue";
+import LoadView from './LoadView.vue';
+import UserAvatar from './UserAvatar.vue';
 
-const darkTheme = ref(
+export const darkTheme = ref(
   (() => {
-    let theme = localStorage.getItem("data-theme");
-    return theme === "dark" ? true : theme !== "light";
+    let theme = localStorage.getItem('data-theme');
+    return theme === 'dark' ? true : theme !== 'light';
   })(),
 );
+
+export default {};
+</script>
+
+<script setup lang="ts">
+const { t } = useI18n();
+
 watch(
   darkTheme,
   (dark) => {
-    let theme = dark ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("data-theme", theme);
+    let theme = dark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('data-theme', theme);
   },
   { immediate: true },
 );
@@ -67,16 +73,16 @@ const accessToken = ref<string>();
 const user = ref<User>();
 const drawerOpened = ref(false);
 const NAVS = [
-  { path: "/chart", icon: "fa-book", text: "chart", enabled: true },
-  { path: "/", icon: "fa-star", text: "event", enabled: false },
-  { path: "/user", icon: "fa-user", text: "user", enabled: true },
+  { path: '/chart', icon: 'fa-book', text: 'chart', enabled: true },
+  { path: '/', icon: 'fa-star', text: 'event', enabled: false },
+  { path: '/user', icon: 'fa-user', text: 'user', enabled: true },
 ];
 
 addCookieListener(() => {
-  accessToken.value = getCookie("access_token");
+  accessToken.value = getCookie('access_token');
   user.value = undefined;
   if (accessToken.value) {
-    fetchApi("/me", {}, (me) => {
+    fetchApi('/me', {}, (me) => {
       user.value = me as User;
     });
   }
@@ -89,7 +95,7 @@ function blur() {
 function doLogout() {
   blur();
   logout();
-  toast(t("logged-out"));
+  toast(t('logged-out'));
 }
 </script>
 

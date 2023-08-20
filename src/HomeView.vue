@@ -12,7 +12,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 </script>
 
@@ -31,7 +31,7 @@ const { t } = useI18n();
           <a href="https://github.com/TeamFlos/phira" target="_blank">
             <button class="btn btn-neutral">
               <i class="fa-brands fa-github"></i>
-              {{ t("link.github") }}
+              {{ t('link.github') }}
             </button>
           </a>
         </div>

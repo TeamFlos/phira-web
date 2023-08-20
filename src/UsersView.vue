@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { isString } from "./common";
+import { isString } from './common';
 
-import UserList from "./components/UserList.vue";
+import UserList from './components/UserList.vue';
 
 const route = useRoute();
 const router = useRouter();
 
 const list = ref<typeof UserList>();
 
-const searchValue = ref(""),
+const searchValue = ref(''),
   tempSearchValue = ref<string>();
 
 let initPage = 1;
