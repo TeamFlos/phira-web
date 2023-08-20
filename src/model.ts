@@ -127,6 +127,8 @@ export type User = {
   last_login: string;
 };
 
+export type UserView = User & { following: boolean };
+
 export type Chart = {
   id: number;
   name: string;

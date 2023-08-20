@@ -5,17 +5,18 @@ import { useI18n } from 'vue-i18n';
 useI18n();
 
 import { useFetchApi, userNameClass } from '../common';
-import type { User } from '../model';
+import type { UserView } from '../model';
 
+import FollowButton from './FollowButton.vue';
 import UserAvatar from './UserAvatar.vue';
 
 const props = defineProps<{ id: number }>();
 
 const fetchApi = useFetchApi();
 
-const user = ref<User>();
+const user = ref<UserView>();
 fetchApi(`/user/${props.id}`, {}, (u) => {
-  user.value = u as User;
+  user.value = u as UserView;
 });
 </script>
 
@@ -37,6 +38,7 @@ fetchApi(`/user/${props.id}`, {}, (u) => {
       </router-link>
       <p v-if="user.bio" class="text-sm text-gray-500">{{ user.bio }}</p>
       <p v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></p>
+      <FollowButton class="mt-2" :id="id" :initFollowing="user.following" />
       <slot />
     </div>
   </div>

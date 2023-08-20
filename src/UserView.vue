@@ -20,13 +20,8 @@ en:
     title: Uploaded charts
     more: See More
 
-  follow:
-    button: Follow
-    done: Following
-    done-follow: Followed
-    done-unfollow: Unfollowed
-    num-follower: Follower
-    num-following: Following
+  num-follower: Follower
+  num-following: Following
 
 zh-CN:
   play-count: 总游玩次数
@@ -48,13 +43,8 @@ zh-CN:
     title: 上传的谱面
     more: 查看更多
 
-  follow:
-    button: 关注
-    done: 已关注
-    done-follow: 已关注
-    done-unfollow: 已取关
-    num-follower: 粉丝
-    num-following: 关注的人
+  num-follower: 粉丝
+  num-following: 关注的人
 
 </i18n>
 
@@ -66,9 +56,10 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle } from './common';
-import { Permission, Roles, type Chart, type User, type Page } from './model';
+import { Permission, Roles, type Chart, type User, type UserView, type Page } from './model';
 
-import ChartCard from './components/ChartCard.vue'
+import ChartCard from './components/ChartCard.vue';
+import FollowButton from './components/FollowButton.vue';
 import LoadOr from './components/LoadOr.vue';
 import LoadView from './components/LoadView.vue';
 import PropItem from './components/PropItem.vue';
@@ -80,7 +71,7 @@ const route = useRoute();
 const fetchApi = useFetchApi();
 
 const id = parseInt(String(route.params.id));
-const user = reactive((await fetchApi(`/user/${id}`)) as User & { following: boolean });
+const user = reactive((await fetchApi(`/user/${id}`)) as UserView);
 const charts = ref<Chart[]>();
 const chartHasMore = ref(false);
 
@@ -147,26 +138,6 @@ async function report() {
 function tryCloseReport() {
   if (!reporting.value) reportDialog.value!.close();
 }
-
-const following = ref(false);
-async function switchFollow() {
-  if (following.value) return;
-  following.value = true;
-  try {
-    await fetchApi(`/user/${id}/follow`, {
-      method: 'POST',
-      json: {
-        follow: !user.following,
-      },
-    });
-    toast(user.following ? t('follow.done-unfollow') : t('follow.done-follow'));
-    user.following = !user.following;
-  } catch (e) {
-    toastError(e);
-  } finally {
-    following.value = false;
-  }
-}
 </script>
 
 <template>
@@ -192,13 +163,13 @@ async function switchFollow() {
             </div>
             <div class="flex flex-row flex-wrap justify-center lg:-mt-4">
               <a class="stat w-fit group cursor-pointer" :href="`/user/?following=${id}`" target="_blank">
-                <div class="stat-title text-center group-hover:link" v-t="'follow.num-follower'"></div>
+                <div class="stat-title text-center group-hover:link" v-t="'num-follower'"></div>
                 <div class="stat-value text-center">
                   {{ user.follower_count }}
                 </div>
               </a>
               <a class="stat w-fit group cursor-pointer" :href="`/user/?followedBy=${id}`" target="_blank">
-                <div class="stat-title text-center group-hover:link" v-t="'follow.num-following'"></div>
+                <div class="stat-title text-center group-hover:link" v-t="'num-following'"></div>
                 <div class="stat-value text-center">
                   {{ user.following_count }}
                 </div>
@@ -220,15 +191,7 @@ async function switchFollow() {
       <div class="flex flex-col lg:flex-row mt-4 gap-4">
         <div class="lg:w-1/4 flex flex-col gap-3">
           <div class="gap-1 join join-vertical">
-            <button class="btn join-item" :class="{ 'btn-secondary': !user.following }" @click="switchFollow">
-              <LoadOr :loading="following">
-                <template v-if="!user.following">{{ t('follow.button') }}</template>
-                <template v-if="user.following">
-                  <i class="fa-solid fa-check"></i>
-                  {{ t('follow.done') }}
-                </template>
-              </LoadOr>
-            </button>
+            <FollowButton class="join-item" :id="id" :initFollowing="user.following" />
             <button
               class="btn btn-error join-item"
               v-t="'report.button'"
