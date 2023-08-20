@@ -19,7 +19,7 @@ const searchValue = ref(''),
 
 let initPage = 1;
 let following: number | null = null,
-  followedBy:number | null = null;
+  followedBy: number | null = null;
 
 watch(
   () => route.query,

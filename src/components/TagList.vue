@@ -13,13 +13,18 @@ zh-CN:
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toast } from '../common';
 
-const props = defineProps<{ init?: string[] }>();
+const props = withDefaults(defineProps<{ init?: string[]; canEdit?: boolean }>(), {
+  canEdit: true,
+});
+
+const router = useRouter();
 
 const tags = reactive<string[]>(props.init ? [...props.init] : []);
 
@@ -47,15 +52,24 @@ function removeTag(tag: string) {
   }
 }
 
+function search(tag) {
+  router.push({
+    path: '/chart',
+    query: {
+      tags: tag,
+    },
+  });
+}
+
 defineExpose({ tags });
 </script>
 
 <template>
   <div class="flex flex-wrap flex-row gap-2">
-    <div v-for="tag in tags" :key="tag" class="badge badge-neutral text-sm h-[2rem] cursor-pointer" @click="removeTag(tag)">
+    <div v-for="tag in tags" :key="tag" class="badge badge-neutral text-sm h-[2rem] cursor-pointer" @click="canEdit ? removeTag(tag) : search(tag)">
       {{ tag }}
     </div>
-    <div class="join w-32">
+    <div v-if="canEdit" class="join w-32">
       <input class="input input-bordered join-item rounded-l-full w-full text-sm h-[2rem]" :placeholder="t('add')" v-model="newTag" @keyup.enter="addTag" />
       <button class="btn btn-primary join-item rounded-r-full h-[2rem] min-h-0 p-2" @click="addTag">
         <i class="fa-solid fa-add"></i>

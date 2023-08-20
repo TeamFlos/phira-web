@@ -67,6 +67,7 @@ import LoadSuspense from './components/LoadSuspense.vue';
 import PropItem from './components/PropItem.vue';
 import RatingBar from './components/RatingBar.vue';
 import StbStatus from './components/StbStatus.vue';
+import TagList from './components/TagList.vue';
 import UserCard from './components/UserCard.vue';
 
 const fetchApi = useFetchApi();
@@ -76,6 +77,10 @@ const router = useRouter();
 
 const id = parseInt(String(route.params.id));
 const chart = reactive((await fetchApi(`/chart/${id}`)) as Chart);
+const tags = [];
+for (let tag of chart.tags) {
+  if (!['regular', 'troll', 'plain', 'visual'].includes(tag)) tags.push(tag);
+}
 
 setTitle(chart.name);
 
@@ -184,6 +189,10 @@ async function submitRating() {
                   {{ chart.description }}
                 </p>
                 <p v-else class="w-full italic" v-t="'description-empty'"></p>
+                <template v-if="tags.length">
+                  <div class="divider"></div>
+                  <TagList class="w-full" :canEdit="false" :init="tags" />
+                </template>
               </UserCard>
               <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_RANKED) && chart.stable" class="card shadow-xl">
                 <button v-if="chart.ranked" class="btn btn-neutral btn-active w-full" @click="setRanked(false)">
