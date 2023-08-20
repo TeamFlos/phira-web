@@ -114,6 +114,9 @@ import { i18n } from './main';
 
         <h2>GOVERNING LAW</h2>
         <p>These terms are governed by and construed in accordance with the laws of the People's Republic of China, and shall be interpreted accordingly.</p>
+
+        <h2>ATTRIBUTION</h2>
+        <p>Part of this text is based on "osu! Terms of Service" and "Cytoid Terms of Service", which is licensed under CC-BY-NC 4.0.</p>
       </template>
 
       <template v-if="i18n.global.locale.value === 'zh-CN'">
@@ -143,7 +146,7 @@ import { i18n } from './main';
 
         <h2>免责声明</h2>
         <p>
-          本文材料均以"现状"提供。Phira
+          本文材料均以“现状”提供。Phira
           不提供任何明示或暗示的保证，且在此声明并否认所有其他保证，包括但不限于对适销性、特定用途适用性或知识产权的非侵权性或其他权利的侵犯的暗示保证或条件。
         </p>
         <p>此外，Phira 不保证或作出任何关于材料使用的准确性、可能结果或可靠性的陈述，或与此类材料相关的其他陈述。</p>
@@ -196,6 +199,9 @@ import { i18n } from './main';
 
         <h2>适用法律</h2>
         <p>这些条款受中华人民共和国法律管辖并根据其进行解释。</p>
+
+        <h2>归属</h2>
+        <p>本文部分内容基于“osu! 服务条款”和“Terms of Service - Cytoid”，并已通过 CC-BY-NC 4.0 获得许可。</p>
       </template>
     </article>
   </div>

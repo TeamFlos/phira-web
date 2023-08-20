@@ -11,7 +11,7 @@ en:
 zh-CN:
   dmca: DMCA
   terms-of-use: 使用条款
-  privacy-policy: 隐私条款
+  privacy-policy: 隐私政策
   server-status: 服务器状态
   contact-us: 联系我们
 
