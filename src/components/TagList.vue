@@ -52,7 +52,7 @@ function removeTag(tag: string) {
   }
 }
 
-function search(tag) {
+function search(tag: string) {
   router.push({
     path: '/chart',
     query: {

@@ -89,7 +89,7 @@ const router = useRouter();
 
 const id = parseInt(String(route.params.id));
 const chart = reactive((await fetchApi(`/chart/${id}`)) as Chart);
-const tags = [];
+const tags: string[] = [];
 for (let tag of chart.tags) {
   if (!['regular', 'troll', 'plain', 'visual'].includes(tag)) tags.push(tag);
 }
