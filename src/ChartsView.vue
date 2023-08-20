@@ -75,6 +75,7 @@ import { useFetchApi, fileToURL, pageCount, isString, loggedIn } from './common'
 import { Permission, Roles } from './model';
 import type { Chart, Page, User } from './model';
 
+import ChartCard from './components/ChartCard.vue';
 import LoadView from './components/LoadView.vue';
 import PageIndicator from './components/PageIndicator.vue';
 import RatingBar from './components/RatingBar.vue';
@@ -332,24 +333,7 @@ function saveFilters() {
         </div>
       </div>
       <div v-if="charts" class="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-0 min-w-0">
-        <router-link
-          v-for="chart in charts"
-          :key="chart.id"
-          :to="`/chart/${chart.id}`"
-          class="group card relative image-full bg-base-100 shadow-xl aspect-[8/5] illustration chart-card min-h-0 min-w-0">
-          <figure>
-            <img class="w-full aspect-[8/5]" :src="fileToURL(chart.illustration) + '.thumbnail'" />
-          </figure>
-          <div class="absolute right-0 badge badge-primary z-[11] m-2 text-lg p-3">
-            {{ chart.level }}
-          </div>
-          <div class="card-body flex-col justify-end p-4 gap-0 min-h-0 min-w-0">
-            <p class="flex-none text-sm">{{ chart.composer }}</p>
-            <h2 class="card-title group-hover:link truncate">
-              {{ chart.name }}
-            </h2>
-          </div>
-        </router-link>
+        <ChartCard v-for="chart in charts" :key="chart.id" :chart="chart"></ChartCard>
       </div>
       <div v-else class="flex flex-col items-center w-full h-16 mb-8">
         <LoadView class="m-8 loading-lg" />

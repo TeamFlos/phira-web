@@ -16,6 +16,10 @@ en:
     confirm: 'Are you sure to ban this user?'
     done: Banned
 
+  upload:
+    title: Uploaded charts
+    more: See More
+
   follow:
     button: Follow
     done: Following
@@ -40,6 +44,10 @@ zh-CN:
     confirm: 你确定要封禁该用户吗？
     done: 已封禁
 
+  upload:
+    title: 上传的谱面
+    more: 查看更多
+
   follow:
     button: 关注
     done: 已关注
@@ -58,9 +66,11 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle } from './common';
-import { Permission, Roles, type User } from './model';
+import { Permission, Roles, type Chart, type User, type Page } from './model';
 
+import ChartCard from './components/ChartCard.vue'
 import LoadOr from './components/LoadOr.vue';
+import LoadView from './components/LoadView.vue';
 import PropItem from './components/PropItem.vue';
 import RecordList from './components/RecordList.vue';
 import UserAvatar from './components/UserAvatar.vue';
@@ -71,6 +81,13 @@ const fetchApi = useFetchApi();
 
 const id = parseInt(String(route.params.id));
 const user = reactive((await fetchApi(`/user/${id}`)) as User & { following: boolean });
+const charts = ref<Chart[]>();
+const chartHasMore = ref(false);
+
+fetchApi(`/chart/?uploader=${id}`, {}, (raw) => {
+  let resp = raw as Page<Chart>;
+  charts.value = resp.results;
+});
 
 setTitle(user.name);
 
@@ -172,7 +189,6 @@ async function switchFollow() {
               </p>
               <p v-if="user.bio" class="whitespace-nowrap">{{ user.bio }}</p>
               <p v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></p>
-              <p>我草</p>
             </div>
             <div class="flex flex-row flex-wrap justify-center lg:-mt-4">
               <a class="stat w-fit group cursor-pointer" :href="`/user/?following=${id}`" target="_blank">
@@ -235,9 +251,20 @@ async function switchFollow() {
             </div>
           </div>
         </div>
-        <div class="card bg-base-100 shadow-xl grow p-4">
-          <h2 class="text-2xl" v-t="'recent-records'"></h2>
-          <RecordList class="mt-2" :params="{ player: String(user.id) }" :limit="12" />
+        <div class="grow flex flex-col gap-3">
+          <div class="card bg-base-100 shadow-xl p-4">
+            <h2 class="text-2xl" v-t="'upload.title'"></h2>
+            <div v-if="!charts" class="w-full flex justify-center">
+              <LoadView />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-4">
+              <ChartCard v-for="chart in charts" :key="chart.id" :chart="chart" />
+            </div>
+          </div>
+          <div class="card bg-base-100 shadow-xl p-4">
+            <h2 class="text-2xl" v-t="'recent-records'"></h2>
+            <RecordList class="mt-2" :params="{ player: String(user.id) }" :limit="12" />
+          </div>
         </div>
       </div>
     </div>
