@@ -11,6 +11,6 @@ defineProps<{ url?: string }>();
 <template>
   <img
     :src="url ? fileToURL(url) : defaultAvatar"
-    :class="{ invert: !darkTheme }"
+    :class="{ invert: !url && !darkTheme }"
   />
 </template>
