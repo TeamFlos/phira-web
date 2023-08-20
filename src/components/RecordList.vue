@@ -38,7 +38,7 @@ async function fetchRecords() {
 
 await fetchRecords();
 
-watch(() => props.params, fetchRecords);
+watch(props.params, fetchRecords);
 </script>
 
 <template>

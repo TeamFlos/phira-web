@@ -10,6 +10,12 @@ en:
 
   recent-records: Recent Records
 
+  follow:
+    do: Follow
+    done: Following
+    done-follow: Followed
+    done-unfollow: Unfollowed
+
 zh-CN:
   play-count: 总游玩次数
   avg-accuracy: 平均准确率
@@ -19,6 +25,12 @@ zh-CN:
   banned: 已封禁
 
   recent-records: 最近游玩记录
+
+  follow:
+    do: 关注
+    done: 已关注
+    done-follow: 已关注
+    done-unfollow: 已取关
 
 </i18n>
 
@@ -51,7 +63,7 @@ const route = useRoute();
 const fetchApi = useFetchApi();
 
 const id = parseInt(String(route.params.id));
-const user = reactive((await fetchApi(`/user/${id}`)) as User);
+const user = reactive((await fetchApi(`/user/${id}`)) as User & { following: boolean });
 
 setTitle(user.name);
 
@@ -68,7 +80,7 @@ const stats = (await fetchApi(`/user/${id}/stats`)) as {
   avgAccuracy: number;
 };
 
-let banning = ref(false);
+const banning = ref(false);
 async function ban() {
   if (banning.value) return;
   banning.value = true;
@@ -86,6 +98,26 @@ async function ban() {
 
 function tryCloseBan() {
   if (!banning.value) confirmDeleteDialog.value!.close();
+}
+
+const following = ref(false);
+async function switchFollow() {
+  if (following.value) return;
+  following.value = true;
+  try {
+    await fetchApi(`/user/${id}/follow`, {
+      method: 'POST',
+      json: {
+        'follow': !user.following,
+      }
+    });
+    toast(user.following? t('follow.done-unfollow'): t('follow.done-follow'));
+    user.following = !user.following;
+  } catch (e) {
+    toastError(e);
+  } finally {
+    following.value = false;
+  }
 }
 </script>
 
@@ -109,12 +141,12 @@ function tryCloseBan() {
             <div
               class="flex flex-col items-center mt-3 lg:mt-0 lg:ml-4 lg:items-start grow"
             >
-              <p
-                class="font-black text-3xl"
-                :class="[userNameClass(user.badges)]"
-              >
-                {{ user.name }}
-              </p>
+                <p
+                  class="font-black text-3xl"
+                  :class="[userNameClass(user.badges)]"
+                >
+                  {{ user.name }}
+                </p>
               <p v-if="user.bio" class="whitespace-nowrap">{{ user.bio }}</p>
               <p
                 v-else
@@ -139,7 +171,18 @@ function tryCloseBan() {
       </div>
       <div class="flex flex-col lg:flex-row mt-4 gap-4">
         <div class="lg:w-1/4">
-          <div class="card bg-base-100 shadow-xl p-4">
+          <div class="card shadow-xl">
+            <button v-if="!user.following" class="btn btn-secondary" @click="switchFollow">
+              <LoadOr :loading="following">{{ t('follow.do') }}</LoadOr>
+            </button>
+            <button v-if="user.following" class="btn" @click="switchFollow">
+              <LoadOr :loading="following">
+              <i class="fa-solid fa-check"></i>
+              {{ t('follow.done') }}
+            </LoadOr>
+            </button>
+          </div>
+          <div class="card bg-base-100 shadow-xl p-4 mt-2">
             <div class="flex flex-col w-full gap-2">
               <PropItem
                 :title="t('last-login')"
