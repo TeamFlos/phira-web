@@ -203,7 +203,7 @@ async function switchFollow() {
       </div>
       <div class="flex flex-col lg:flex-row mt-4 gap-4">
         <div class="lg:w-1/4 flex flex-col gap-3">
-          <div class="card shadow-xl gap-1 join join-vertical">
+          <div class="gap-1 join join-vertical">
             <button class="btn join-item" :class="{ 'btn-secondary': !user.following }" @click="switchFollow">
               <LoadOr :loading="following">
                 <template v-if="!user.following">{{ t('follow.button') }}</template>

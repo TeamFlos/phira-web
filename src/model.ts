@@ -120,6 +120,9 @@ export type User = {
   roles: number;
   banned: boolean;
 
+  follower_count: number,
+  following_count: number,
+
   joined: string;
   last_login: string;
 };
