@@ -15,6 +15,8 @@ en:
     done: Following
     done-follow: Followed
     done-unfollow: Unfollowed
+    num-follower: Follower
+    num-following: Following
 
 zh-CN:
   play-count: 总游玩次数
@@ -31,6 +33,8 @@ zh-CN:
     done: 已关注
     done-follow: 已关注
     done-unfollow: 已取关
+    num-follower: 粉丝
+    num-following: 关注的人
 
 </i18n>
 
@@ -153,13 +157,22 @@ async function switchFollow() {
                 class="text-sm italic text-gray-500"
                 v-t="'bio-empty'"
               ></p>
+              <p>我草</p>
             </div>
-            <div class="flex flex-row lg:-mt-4">
-              <div class="stat">
+            <div class="flex flex-row flex-wrap justify-center lg:-mt-4">
+              <a class="stat w-fit group cursor-pointer" :href="`/user/?following=${id}`" target="_blank">
+                <div class="stat-title text-center group-hover:link" v-t="'follow.num-follower'"></div>
+                <div class="stat-value text-center">{{ user.follower_count }}</div>
+              </a>
+              <a class="stat w-fit group cursor-pointer" :href="`/user/?followedBy=${id}`" target="_blank">
+                <div class="stat-title text-center group-hover:link" v-t="'follow.num-following'"></div>
+                <div class="stat-value text-center">{{ user.following_count }}</div>
+              </a>
+              <div class="stat w-fit">
                 <div class="stat-title text-center" v-t="'play-count'"></div>
                 <div class="stat-value text-center">{{ stats.numRecords }}</div>
               </div>
-              <div class="stat">
+              <div class="stat w-fit">
                 <div class="stat-title text-center" v-t="'avg-accuracy'"></div>
                 <div class="stat-value text-center">
                   {{ (stats.avgAccuracy * 100).toFixed(2) + '%' }}
@@ -170,7 +183,7 @@ async function switchFollow() {
         </div>
       </div>
       <div class="flex flex-col lg:flex-row mt-4 gap-4">
-        <div class="lg:w-1/4">
+        <div class="lg:w-1/4 flex flex-col gap-3">
           <div class="card shadow-xl">
             <button v-if="!user.following" class="btn btn-secondary" @click="switchFollow">
               <LoadOr :loading="following">{{ t('follow.do') }}</LoadOr>
@@ -182,7 +195,7 @@ async function switchFollow() {
             </LoadOr>
             </button>
           </div>
-          <div class="card bg-base-100 shadow-xl p-4 mt-2">
+          <div class="card bg-base-100 shadow-xl p-4">
             <div class="flex flex-col w-full gap-2">
               <PropItem
                 :title="t('last-login')"
@@ -208,7 +221,7 @@ async function switchFollow() {
                 .permissions(me.banned)
                 .has(Permission.BAN_USER)
             "
-            class="card shadow-xl mt-2"
+            class="card shadow-xl"
           >
             <button
               v-if="!user.banned"

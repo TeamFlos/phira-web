@@ -18,6 +18,7 @@ const searchValue = ref(''),
   tempSearchValue = ref<string>();
 
 let initPage = 1;
+let following = null, followedBy = null;
 
 watch(
   () => route.query,
@@ -38,6 +39,20 @@ watch(
         initPage = page;
       }
     }
+    if (q.following) {
+      try {
+        following = parseInt(q.following as string);
+      } catch (e) {
+        // empty
+      }
+    }
+    if (q.followedBy) {
+      try {
+        followedBy = parseInt(q.followedBy as string);
+      } catch (e) {
+        // empty
+      }
+    }
   },
   { immediate: true },
 );
@@ -47,11 +62,13 @@ const subParameters = computed(() => {
   if (searchValue.value?.length) {
     res.search = searchValue.value;
   }
+  if (following) res.following = String(following);
+  if (followedBy) res.followedBy = String(followedBy);
   return res;
 });
 
 const parameters = computed(() => {
-  let res = {
+  let res: Record<string, string> = {
     page: String(list.value?.pagination.current ?? 1),
     ...subParameters.value,
   };
