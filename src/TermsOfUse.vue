@@ -12,11 +12,8 @@ import { i18n } from './main';
         </p>
         <p>
           By visiting and/or using the services offered by this site (<a class="link link-hover !not-italic" href="https://phira.moe">https://phira.moe</a>), the Phira game client
-          or any affiliated services (henceforth referenced as "<b>Phira</b>"), you are acknowledging your full compliance to the terms and conditions listed here.
-        </p>
-        <p>
-          As a condition of your use of this web site, you warrant that you will not use this web site, or any of the content obtained from this web site, for any purpose that is
-          unlawful or prohibited by these terms.
+          or any affiliated services (henceforth referenced as "<b>Phira</b>"), you are acknowledging your full compliance to the terms and conditions listed here, and that you
+          warrant that you will not use this web site, or any of the content obtained from this web site, for any purpose that is unlawful or prohibited by these terms.
         </p>
         <p>
           In addition to this policy, please also make sure to visit and understand our
@@ -45,35 +42,30 @@ import { i18n } from './main';
         <p>Phira reserves the right to modify or discontinue the service with or without notice to user.</p>
         <p>Phira shall not be liable to user or any third party should Phira exercise its right to modify or discontinue the service.</p>
 
-        <h2>DISCLAIMER OF WARRANTIESs</h2>
+        <h2>DISCLAIMER</h2>
         <p>
-          USER EXPRESSLY AGREES THAT USE OF THE SERVICE IS AT USER'S SOLE RISK.<br />
-          THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. YOU UNDERSTAND AND EXPRESSLY AGREE THAT USE OF Phira'S SERVICES ARE AT YOUR SOLE RISK, THAT ANY MATERIAL
-          AND/OR DATA DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF Phira'S SERVICES IS AT YOUR OWN DISCRETION AND RISK AND THAT YOU WILL BE SOLELY RESPONSIBLE FOR ANY DAMAGE
-          TO YOUR COMPUTER SYSTEM OR LOSS OF DATA THAT RESULTS FROM THE DOWNLOAD OF SUCH MATERIAL AND/OR DATA. EXCEPT AS EXPRESSLY SET FORTH ON OUR SITES, Phira DISCLAIMS ALL
-          WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT OR TITLE AND
-          IT MAKES NO WARRANTY OR REPRESENTATION REGARDING THE RESULTS THAT MAY BE OBTAINED FROM THE USE OF Phira'S SERVICES, REGARDING THE ACCURACY OR RELIABILITY OF ANY
-          INFORMATION OBTAINED THROUGH Phira'S SERVICES, REGARDING ANY GOODS OR SERVICES PURCHASED OR OBTAINED THROUGH Phira'S SERVICES, REGARDING ANY TRANSACTIONS ENTERED INTO
-          THROUGH Phira'S SERVICES OR THAT Phira'S SERVICES WILL MEET ANY USER'S REQUIREMENTS, BE UNINTERRUPTED, TIMELY, SECURE OR ERROR FREE.<br />
-          The links to third party sites on this web site are for your convenience only, and the inclusion of such links within this web site does not imply any endorsement,
-          guarantee, warranty or representation by Phira.<br />
-          Phira user agrees that Phira is hereby absolved from any and all liabilities, losses, costs and claims, including attorney's fees asserted against Phira, its agents,
-          officers, employees, or associates, that may arise or result from any service provided, performed, be agreed to be performed by Phira.<br />
-          Phira MAKES NO WARRANTY THAT THE SERVICE WILL MEET YOUR REQUIREMENTS, OR THAT THE SERVICE WILL BE UNINTERRUPTED, TIMELY, SECURE, OR ERROR FREE; NOR DOES Phira MAKE ANY
-          WARRANTY AS TO THE RESULTS THAT MAY BE OBTAINED FROM THE USE OF THE SERVICE OR AS TO THE ACCURACY OR RELIABILITY OF ANY INFORMATION OBTAINED THROUGH THE SERVICE OR THAT
-          DEFECTS IN THE SOFTWARE WILL BE CORRECTED.
+          The materials are provided on an 'as is' basis. Phira makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without
+          limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of
+          rights.
         </p>
+
+        <p>
+          Further, Phira does not warrant or make any representations concerning the accuracy, likely results, or reliability of the use of the materials or otherwise relating to
+          such materials.
+        </p>
+
+        <p>Finally, Phira is not obligated, expressed or implied, to provide any maintenance, technical or other support for its services.</p>
 
         <h2>INDEMNITY</h2>
         <p>
-          You agree to defend, indemnify and hold harmless Phira, its parent corporation, officers, directors, employees and agents, from and against any and all claims, damages,
-          obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney's fees) arising from: (i) your use of and access to the Phira
-          Website; (ii) your violation of any term of these Terms of Use; (iii) your violation of any third party right, including without limitation any copyright, property, or
-          privacy right; or (iv) any claim that one of your user submissions caused damage to a third party.<br />
-          This defence and indemnification obligation will survive these Terms of Use and your use of the Phira Website.
+          You agree to defend, indemnify and hold harmless Phira, its parent organization, officers, directors, employees and agents, from and against any and all claims, damages,
+          obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney's fees) arising from: (i) your use of and access to Phira; (ii) your
+          violation of any term of these Terms of Use; (iii) your violation of any third party right, including without limitation any copyright, property, or privacy right; or
+          (iv) any claim that one of your user submissions caused damage to a third party.<br />
+          This defence and indemnification obligation will survive these Terms of Use and your use of Phira.
         </p>
 
-        <h2>YOUR USE OF CONTENT ON THE SITE</h2>
+        <h2>YOUR USE OF PHIRA'S CONTENT</h2>
         <p>
           You understand that when using the Phira, you will be exposed to user submissions from a variety of sources, and that Phira is not responsible for the accuracy,
           usefulness, safety, or intellectual property rights of or relating to such user submissions.<br />
@@ -92,13 +84,13 @@ import { i18n } from './main';
           party proprietary rights, including privacy and publicity rights, unless you are the owner of such rights or have permission from their rightful owner to post the
           material and to grant Phira all of the licence rights granted herein.
         </p>
-        <p>
+        <b>
           Phira does not endorse any user submission or any opinion, recommendation, or advice expressed therein, and Phira expressly disclaims any and all liability in connection
           with user submissions.<br />
           Phira does not permit copyright infringing activities and infringement of intellectual property rights on its Website, and Phira will remove all content and user
           submissions if properly notified that such content or user submission infringes on another's intellectual property rights.<br />
           Phira reserves the right to remove content and user submission without prior notice.
-        </p>
+        </b>
 
         <h2>PRIVACY POLICIES</h2>
         <p>See <router-link to="/privacy-policy">Privacy Policy</router-link>.</p>
@@ -113,15 +105,98 @@ import { i18n } from './main';
 
         <h2>LINKS</h2>
         <p>
-          Phira may provide, or users may include in e-mail, links to other Web sites or resources.<br />
+          Phira may provide, or users may include in e-mail, links to other websites or resources.<br />
           User acknowledges and agrees that Phira is not responsible for the availability of such external sites or resources, and does not endorse and is not responsible or liable
           for any content, advertising, products, or other materials on or available from such sites or resources.<br />
           User agrees that Phira shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with use of
           or reliance on any such content, goods or services available on such external sites or resources.
         </p>
+
+        <h2>GOVERNING LAW</h2>
+        <p>These terms are governed by and construed in accordance with the laws of the People's Republic of China, and shall be interpreted accordingly.</p>
       </template>
 
-      <template v-if="i18n.global.locale.value === 'zh-CN'"> </template>
+      <template v-if="i18n.global.locale.value === 'zh-CN'">
+        <h1>使用条款</h1>
+        <p>为了使用 <b>TeamFlos</b> 提供的服务，您需要接受以下条款、条件和通知，且不对其进行任何修改。</p>
+        <p>
+          为了访问和/或使用此网站（<a class="link link-hover !not-italic" href="https://phira.moe">https://phira.moe</a>）、Phira
+          游戏客户端以及任何关联服务（以下统称“<b>Phira</b>”），您需要确认您完全遵守此处列出的条款和条件。您保证您不会将本网站或从本网站获取的任何内容用于任何违法或被条款禁止的目的。
+        </p>
+        <p>在该份条款之外，您还需要确保阅读并理解我们的 <router-link to="/privacy-policy">隐私政策</router-link>。</p>
+
+        <h2>服务描述</h2>
+        <p>Phira 向用户提供免费的在线游玩服务以及在线排名系统。Phira 同时提供了托管用户上传内容的方式，使得其他用户可以访问上传的内容。</p>
+        <p>
+          Phira 的管理团队并不对用户上传内容的准确性、时效性和质量作出任何保证。<br />
+          我们不对无论是否已上传的，令人反感的内容承担责任。<br />
+          我们不对用户是否拥有分发已上传内容的权利承担责任。
+        </p>
+
+        <h2>使用条款的修改</h2>
+        <p>Phira 可能多次修改使用条款。</p>
+        <p>若您未遵守修改后的条款，可能会终止您的 Phira 服务。您同意，继续使用该服务即表示您同意修改后的使用条款。</p>
+
+        <h2>服务的修改</h2>
+        <p>Phira 保留修改或终止服务而不向用户通知的权利。</p>
+        <p>Phira 在行使修改或终止服务权利时，不对任何用户或第三方承担责任。</p>
+
+        <h2>免责声明</h2>
+        <p>
+          本文材料均以"现状"提供。Phira
+          不提供任何明示或暗示的保证，且在此声明并否认所有其他保证，包括但不限于对适销性、特定用途适用性或知识产权的非侵权性或其他权利的侵犯的暗示保证或条件。
+        </p>
+        <p>此外，Phira 不保证或作出任何关于材料使用的准确性、可能结果或可靠性的陈述，或与此类材料相关的其他陈述。</p>
+        <p>最后，Phira 没有义务（明示或暗示）为其服务提供任何维护、技术支持或其他支持。</p>
+
+        <h2>赔偿责任</h2>
+        <p>
+          您同意保卫、赔偿并使 Phira、其母组织、高管、董事、员工和代理人免受任何索赔、损害、责任、损失、债务、负债、费用或债务以及开支（包括但不限于律师费）的影响，源于：(i)
+          您对Phira的使用和访问；(ii) 您违反这些使用条款的任何条件；(iii) 您侵犯任何第三方权利，包括但不限于任何版权、财产或隐私权；或 (iv)
+          任何声称您的用户上传内容对第三方造成了损害。<br />
+          这项保卫和赔偿责任将在这些使用条款和您使用 Phira 之后继续存在。
+        </p>
+
+        <h2>您对 Phira 内容的使用</h2>
+        <p>
+          您理解，在使用 Phira 的过程中，您将会接触来自各种来源的用户上传内容，且 Phira 对这些用户上传内容的准确性、实用性、安全性或知识产权不负责。
+          此外，你理解并承认，您可能会接触到不准确、冒犯、淫秽或令人反感的用户上传内容，并且您同意放弃并在此放弃您在此方面可能拥有的法律或公平权利或救济措施，同意在法律允许的最大范围内，就与您使用该网站相关的所有事项，对
+          Phira、其所有者/运营者、附属公司和/或许可方免责。
+        </p>
+
+        <h2>用户上传内容和内容删除</h2>
+        <p>
+          您对您自己的用户上传内容及其发布或发表的后果负完全责任。关于用户上传内容，您确认、声明和/或保证：您拥有或具备必要的许可、权利、同意和权限，以便使用并授权 Phira
+          使用一切专利、商标、商业秘密、版权或其他专有权利，以便按照网站和这些使用条款的规定的方式包含和使用所有用户提交内容。
+          关于用户提交内容，您同意不会提交受版权保护、受商业秘密保护或受第三方专有权利（包括隐私和公众形象权）约束的材料，除非您是这些权利的所有者，或者已获得其合法所有者的许可来发布此材料，并授权
+          Phira 拥有在此授予的所有许可权利。
+        </p>
+        <b>
+          Phira 不认可任何用户提交内容，也不认可其中表达的任何观点、建议或意见。Phira 明确否认与用户提交内容相关的任何和所有责任。 Phira
+          不允许在其网站上进行侵犯版权的活动和侵犯知识产权的行为，如果得到适当的通知表明此类内容或用户提交内容侵犯了他人的知识产权，Phira 将删除所有此类内容和用户提交内容。<br />
+          Phira 保留在没有事先通知的情况下删除内容和用户提交内容的权利。
+        </b>
+
+        <h2>隐私政策</h2>
+        <p>参见 <router-link to="/privacy-policy">隐私政策</router-link>。</p>
+
+        <h2>内容的专有权利</h2>
+        <p>
+          用户承认，Phira
+          所提供的内容，包括但不限于文本、软件、音乐、声音、照片、视频、图形、名称引用或其他通过服务向用户提供或用户访问的材料（“内容”），受版权、商标、服务标志、专利或其他专有权利和法律的保护；因此，用户只有在服务明确授权的情况下才能使用此内容。<br />
+          用户不得未经服务的明确授权，复制、复制、分发或从这些内容中创建衍生作品。
+        </p>
+
+        <h2>链接</h2>
+        <p>
+          Phira 可能提供其他网站或资源的链接。用户可能在电子邮件中包含这些链接。<br />
+          用户承认并同意，Phira 不对这些外部网站或资源的可用性负责，并且不认可并且不对这些网站或资源上或可用的任何内容、广告、产品或其他材料负责或承担任何责任。<br />
+          用户同意 Phira 不会直接或间接地对因使用或依赖这些外部网站或资源上的任何内容、商品或服务而引起或声称引起的任何损害或损失负责或承担任何责任。
+        </p>
+
+        <h2>适用法律</h2>
+        <p>这些条款受中华人民共和国法律管辖并根据其进行解释。</p>
+      </template>
     </article>
   </div>
 </template>
