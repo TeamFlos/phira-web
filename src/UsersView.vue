@@ -18,7 +18,8 @@ const searchValue = ref(''),
   tempSearchValue = ref<string>();
 
 let initPage = 1;
-let following = null, followedBy = null;
+let following = null,
+  followedBy = null;
 
 watch(
   () => route.query,

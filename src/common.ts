@@ -1,5 +1,5 @@
 import { useRouter } from 'vue-router';
-import type { Router } from 'vue-router'
+import type { Router } from 'vue-router';
 
 import { toast } from './components/ToastsView.vue';
 
