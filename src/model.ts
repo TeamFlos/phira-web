@@ -136,6 +136,7 @@ export type Chart = {
   description: string;
   level: string;
   difficulty: number;
+  reviewed: boolean;
   ranked: boolean;
   stable: boolean;
   stableRequest: boolean;

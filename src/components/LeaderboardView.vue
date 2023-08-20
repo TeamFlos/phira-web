@@ -96,9 +96,6 @@ onMounted(() => {
 <template>
   <div class="flex flex-col">
     <div class="flex flex-row justify-end gap-3">
-      <!-- <span>分数</span> -->
-      <!-- <input type="checkbox" class="toggle" checked /> -->
-      <!-- <span>无瑕度</span> -->
       <button class="btn btn-ghost" @click="std = !std"><i class="fa-solid fa-repeat"></i>{{ std ? t('purity') : t('score') }}</button>
     </div>
     <div class="overflow-x-auto flex flex-col items-end gap-2 mt-2">

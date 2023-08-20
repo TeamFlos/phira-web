@@ -17,6 +17,12 @@ en:
   set-special: Set special
   div-updated: Division updated
 
+  status:
+    title: Status
+    unreviewed: Unreviewed
+    reviewed: Reviewed
+    stable: Stable
+
   rating:
     title: Rating
     title-with-mine: Rating ({score})
@@ -40,6 +46,12 @@ zh-CN:
   set-ranked: 设置为常规
   set-special: 设置为特殊
   div-updated: 分区已更新
+
+  status:
+    title: 状态
+    unreviewed: 未审核
+    reviewed: 未上架
+    stable: 已上架
 
   rating:
     title: 评分
@@ -181,6 +193,7 @@ async function submitRating() {
                 </div>
                 <div class="divider"></div>
                 <div class="flex flex-col w-full gap-2">
+                  <PropItem :title="t('status.title')" :value="t(chart.reviewed ? (chart.stable ? 'status.stable' : 'status.reviewed') : 'status.unreviewed')" />
                   <PropItem :title="t('updated-at')" :value="moment(chart.updated).fromNow()" />
                   <PropItem :title="t('created-at')" :value="moment(chart.created).fromNow()" />
                 </div>
@@ -239,16 +252,6 @@ async function submitRating() {
                 <LoadSuspense v-if="contentTab === 'stb'">
                   <StbStatus :chart="chart.id" :uploader="chart.uploader" />
                 </LoadSuspense>
-                <!-- <Suspense v-if="contentTab === 'stb'" timeout="0">
-                  <template #default>
-                    <StbStatus :chart="chart.id" :uploader="chart.uploader" />
-                  </template>
-                  <template #fallback>
-                    <div class="flex justify-center my-2">
-                      <LoadView />
-                    </div>
-                  </template>
-                </Suspense> -->
               </div>
             </div>
           </div>
