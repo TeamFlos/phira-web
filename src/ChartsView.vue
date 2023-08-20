@@ -110,6 +110,7 @@ const ratingLowerEl = ref<typeof RatingBar>(),
 const fromMe = ref(false),
   onlyUnreviewed = ref(false),
   onlyStableRequest = ref(false);
+const uploader = ref<number>();
 
 let initWanted: string[] = [],
   initUnwanted: string[] = [];
@@ -163,6 +164,11 @@ watch(
     }
     if (isString(q.uploader)) {
       fromMe.value = user !== null && q.uploader === String(user.id);
+      try {
+        uploader.value = parseInt(q.uploader);
+      } catch (e) {
+        // empty
+      }
     }
     if (isString(q.rating)) {
       let r = q.rating.split(',');
@@ -210,6 +216,9 @@ const parameters = computed(() => {
   }
   if (searchValue.value?.length) {
     res.search = searchValue.value;
+  }
+  if (uploader.value) {
+    res.uploader = String(uploader.value);
   }
   if (fromMe.value && user) {
     res.uploader = String(user?.id);

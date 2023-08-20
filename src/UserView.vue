@@ -19,6 +19,7 @@ en:
   upload:
     title: Uploaded charts
     more: See More
+    no-charts: This user did not upload any charts.
 
   num-follower: Follower
   num-following: Following
@@ -42,6 +43,7 @@ zh-CN:
   upload:
     title: 上传的谱面
     more: 查看更多
+    no-charts: 该用户没有上传谱面
 
   num-follower: 粉丝
   num-following: 关注的人
@@ -75,9 +77,10 @@ const user = reactive((await fetchApi(`/user/${id}`)) as UserView);
 const charts = ref<Chart[]>();
 const chartHasMore = ref(false);
 
-fetchApi(`/chart/?uploader=${id}`, {}, (raw) => {
+fetchApi(`/chart/?uploader=${id}&pageNum=3`, {}, (raw) => {
   let resp = raw as Page<Chart>;
   charts.value = resp.results;
+  chartHasMore.value = resp.results.length < resp.count;
 });
 
 setTitle(user.name);
@@ -220,8 +223,14 @@ function tryCloseReport() {
             <div v-if="!charts" class="w-full flex justify-center">
               <LoadView />
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-4">
+            <div v-if="charts && charts.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-4">
               <ChartCard v-for="chart in charts" :key="chart.id" :chart="chart" />
+            </div>
+            <div v-if="chartHasMore" class="flex flex-row-reverse mt-4">
+              <router-link :to="`/chart/?uploader=${id}`" class="btn" v-t="'upload.more'"></router-link>
+            </div>
+            <div v-if="charts && !charts.length" class="text-center p-8">
+              <p class="italic w-full" v-t="'upload.no-charts'"></p>
             </div>
           </div>
           <div class="card bg-base-100 shadow-xl p-4">
