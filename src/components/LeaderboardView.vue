@@ -78,13 +78,10 @@ async function fetchRecords() {
     best: String(true),
     ...parameters.value,
   };
-  const resp = (await fetchApi(
-    '/record/query/' + props.chart + '?' + new URLSearchParams(params),
-  )) as Page<RecordEx>;
+  const resp = (await fetchApi('/record/query/' + props.chart + '?' + new URLSearchParams(params))) as Page<RecordEx>;
   totalCount.value = resp.count;
   for (let i = 0; i < resp.results.length; ++i) {
-    resp.results[i].rank =
-      ((pagination.value?.current ?? 1) - 1) * PAGE_NUM + i + 1;
+    resp.results[i].rank = ((pagination.value?.current ?? 1) - 1) * PAGE_NUM + i + 1;
   }
   records.value = resp.results;
 }
@@ -102,9 +99,7 @@ onMounted(() => {
       <!-- <span>分数</span> -->
       <!-- <input type="checkbox" class="toggle" checked /> -->
       <!-- <span>无瑕度</span> -->
-      <button class="btn btn-ghost" @click="std = !std">
-        <i class="fa-solid fa-repeat"></i>{{ std ? t('purity') : t('score') }}
-      </button>
+      <button class="btn btn-ghost" @click="std = !std"><i class="fa-solid fa-repeat"></i>{{ std ? t('purity') : t('score') }}</button>
     </div>
     <div class="overflow-x-auto flex flex-col items-end gap-2 mt-2">
       <div class="overflow-x-auto w-full">
@@ -125,41 +120,21 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="record in records"
-              :key="record.id"
-              class="hover text-lg"
-            >
+            <tr v-for="record in records" :key="record.id" class="hover text-lg">
               <th class="text-center">
-                <i
-                  v-if="record.rank === 1"
-                  class="fa-solid fa-trophy text-[#ffd700]"
-                ></i>
-                <i
-                  v-if="record.rank === 2"
-                  class="fa-solid fa-trophy text-[#c0c0c0]"
-                ></i>
-                <i
-                  v-if="record.rank === 3"
-                  class="fa-solid fa-trophy text-[#cd7f32]"
-                ></i>
+                <i v-if="record.rank === 1" class="fa-solid fa-trophy text-[#ffd700]"></i>
+                <i v-if="record.rank === 2" class="fa-solid fa-trophy text-[#c0c0c0]"></i>
+                <i v-if="record.rank === 3" class="fa-solid fa-trophy text-[#cd7f32]"></i>
                 {{ record.rank }}
               </th>
               <td>
-                <router-link
-                  :to="`/user/${record.player}`"
-                  class="flex flex-row items-center gap-2 group"
-                >
+                <router-link :to="`/user/${record.player}`" class="flex flex-row items-center gap-2 group">
                   <div class="avatar">
                     <div class="w-8 rounded-xl">
                       <UserAvatar :url="record.playerAvatar" />
                     </div>
                   </div>
-                  <span
-                    :class="[userNameClass(record.playerBadges)]"
-                    class="group-hover:link"
-                    >{{ record.playerName }}</span
-                  >
+                  <span :class="[userNameClass(record.playerBadges)]" class="group-hover:link">{{ record.playerName }}</span>
                 </router-link>
               </td>
               <td v-if="!std" class="font-black font-mono text-2xl">
@@ -187,10 +162,7 @@ onMounted(() => {
           <LoadView />
         </div>
       </div>
-      <PageIndicator
-        :total="pageCount(totalCount, PAGE_NUM)"
-        ref="pagination"
-      />
+      <PageIndicator :total="pageCount(totalCount, PAGE_NUM)" ref="pagination" />
     </div>
   </div>
 </template>

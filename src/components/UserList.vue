@@ -51,9 +51,7 @@ async function fetchUsers() {
     pageNum: String(PAGE_NUM),
     ...parameters.value,
   };
-  const resp = (await fetchApi(
-    '/user/?' + new URLSearchParams(params),
-  )) as Page<User>;
+  const resp = (await fetchApi('/user/?' + new URLSearchParams(params))) as Page<User>;
   totalCount.value = resp.count;
   users.value = resp.results;
 }
@@ -83,24 +81,15 @@ onMounted(() => {
           <tr v-for="user in users" :key="user.id" class="hover text-lg">
             <th class="text-center">{{ user.id }}</th>
             <td>
-              <router-link
-                :to="`/user/${user.id}`"
-                class="flex flex-row items-center gap-2 group"
-              >
+              <router-link :to="`/user/${user.id}`" class="flex flex-row items-center gap-2 group">
                 <div class="avatar">
                   <div class="w-12 rounded-xl">
                     <UserAvatar :url="user.avatar" />
                   </div>
                 </div>
                 <div class="ml-2 flex flex-col">
-                  <span
-                    :class="[userNameClass(user.badges)]"
-                    class="group-hover:link font-black text-xl"
-                    >{{ user.name }}</span
-                  >
-                  <span v-if="user.bio" class="text-xs truncate">{{
-                    user.bio
-                  }}</span>
+                  <span :class="[userNameClass(user.badges)]" class="group-hover:link font-black text-xl">{{ user.name }}</span>
+                  <span v-if="user.bio" class="text-xs truncate">{{ user.bio }}</span>
                 </div>
               </router-link>
             </td>
@@ -113,10 +102,6 @@ onMounted(() => {
         <LoadView />
       </div>
     </div>
-    <PageIndicator
-      :total="pageCount(totalCount, PAGE_NUM)"
-      ref="pagination"
-      :init="props.initPage ?? 1"
-    />
+    <PageIndicator :total="pageCount(totalCount, PAGE_NUM)" ref="pagination" :init="props.initPage ?? 1" />
   </div>
 </template>

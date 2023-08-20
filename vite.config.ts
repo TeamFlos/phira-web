@@ -15,10 +15,7 @@ export default defineConfig(({ mode }) => {
       vue(),
       VueI18nPlugin({
         defaultSFCLang: 'yml',
-        include: resolve(
-          dirname(fileURLToPath(import.meta.url)),
-          './src/locales/**',
-        ),
+        include: resolve(dirname(fileURLToPath(import.meta.url)), './src/locales/**'),
       }),
     ],
     resolve: {

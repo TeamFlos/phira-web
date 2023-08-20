@@ -57,16 +57,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import {
-  useFetchApi,
-  userNameClass,
-  detailedTime,
-  LANGUAGES,
-  toast,
-  toastError,
-  loggedIn,
-  setTitle,
-} from './common';
+import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle } from './common';
 import { Permission, Roles, type User } from './model';
 
 import LoadOr from './components/LoadOr.vue';
@@ -79,9 +70,7 @@ const route = useRoute();
 const fetchApi = useFetchApi();
 
 const id = parseInt(String(route.params.id));
-const user = reactive(
-  (await fetchApi(`/user/${id}`)) as User & { following: boolean },
-);
+const user = reactive((await fetchApi(`/user/${id}`)) as User & { following: boolean });
 
 setTitle(user.name);
 
@@ -168,10 +157,7 @@ async function switchFollow() {
     <div class="lg:w-3/4 mx-8">
       <div class="card card-compact bg-base-100 shadow-xl">
         <figure>
-          <img
-            src="./assets/banner.jpg"
-            class="object-cover max-h-[30vh] w-full"
-          />
+          <img src="./assets/banner.jpg" class="object-cover max-h-[30vh] w-full" />
         </figure>
         <div class="card-body">
           <div class="flex flex-col lg:flex-row items-center lg:items-start">
@@ -180,46 +166,23 @@ async function switchFollow() {
                 <UserAvatar :url="user.avatar" />
               </div>
             </div>
-            <div
-              class="flex flex-col items-center mt-3 lg:mt-0 lg:ml-4 lg:items-start grow"
-            >
-              <p
-                class="font-black text-3xl"
-                :class="[userNameClass(user.badges)]"
-              >
+            <div class="flex flex-col items-center mt-3 lg:mt-0 lg:ml-4 lg:items-start grow">
+              <p class="font-black text-3xl" :class="[userNameClass(user.badges)]">
                 {{ user.name }}
               </p>
               <p v-if="user.bio" class="whitespace-nowrap">{{ user.bio }}</p>
-              <p
-                v-else
-                class="text-sm italic text-gray-500"
-                v-t="'bio-empty'"
-              ></p>
+              <p v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></p>
               <p>我草</p>
             </div>
             <div class="flex flex-row flex-wrap justify-center lg:-mt-4">
-              <a
-                class="stat w-fit group cursor-pointer"
-                :href="`/user/?following=${id}`"
-                target="_blank"
-              >
-                <div
-                  class="stat-title text-center group-hover:link"
-                  v-t="'follow.num-follower'"
-                ></div>
+              <a class="stat w-fit group cursor-pointer" :href="`/user/?following=${id}`" target="_blank">
+                <div class="stat-title text-center group-hover:link" v-t="'follow.num-follower'"></div>
                 <div class="stat-value text-center">
                   {{ user.follower_count }}
                 </div>
               </a>
-              <a
-                class="stat w-fit group cursor-pointer"
-                :href="`/user/?followedBy=${id}`"
-                target="_blank"
-              >
-                <div
-                  class="stat-title text-center group-hover:link"
-                  v-t="'follow.num-following'"
-                ></div>
+              <a class="stat w-fit group cursor-pointer" :href="`/user/?followedBy=${id}`" target="_blank">
+                <div class="stat-title text-center group-hover:link" v-t="'follow.num-following'"></div>
                 <div class="stat-value text-center">
                   {{ user.following_count }}
                 </div>
@@ -241,15 +204,9 @@ async function switchFollow() {
       <div class="flex flex-col lg:flex-row mt-4 gap-4">
         <div class="lg:w-1/4 flex flex-col gap-3">
           <div class="card shadow-xl gap-1 join join-vertical">
-            <button
-              class="btn join-item"
-              :class="{ 'btn-secondary': !user.following }"
-              @click="switchFollow"
-            >
+            <button class="btn join-item" :class="{ 'btn-secondary': !user.following }" @click="switchFollow">
               <LoadOr :loading="following">
-                <template v-if="!user.following">{{
-                  t('follow.button')
-                }}</template>
+                <template v-if="!user.following">{{ t('follow.button') }}</template>
                 <template v-if="user.following">
                   <i class="fa-solid fa-check"></i>
                   {{ t('follow.done') }}
@@ -264,77 +221,33 @@ async function switchFollow() {
                   reportReason = '';
                   reportDialog!.showModal();
                 }
-              "
-            ></button>
+              "></button>
           </div>
           <div class="card bg-base-100 shadow-xl p-4">
             <div class="flex flex-col w-full gap-2">
-              <PropItem
-                :title="t('last-login')"
-                :value="detailedTime(user.last_login)"
-                multi
-              />
-              <PropItem
-                :title="t('registered-at')"
-                :value="detailedTime(user.joined)"
-                multi
-              />
-              <PropItem
-                :title="t('language')"
-                :value="LANGUAGES[user.language as keyof typeof LANGUAGES]"
-                multi
-              />
+              <PropItem :title="t('last-login')" :value="detailedTime(user.last_login)" multi />
+              <PropItem :title="t('registered-at')" :value="detailedTime(user.joined)" multi />
+              <PropItem :title="t('language')" :value="LANGUAGES[user.language as keyof typeof LANGUAGES]" multi />
             </div>
           </div>
-          <div
-            class="card shadow-xl mt-2"
-            v-if="
-              me &&
-              Roles.from(me.roles)
-                .permissions(me.banned)
-                .has(Permission.BAN_USER)
-            "
-          >
-            <button
-              v-if="!user.banned"
-              class="btn btn-error join-item"
-              @click="confirmBanDialog!.showModal()"
-              v-t="'ban.button'"
-            ></button>
-            <button
-              v-else
-              class="btn btn-disabled w-full"
-              v-t="'ban.button'"
-            ></button>
+          <div class="card shadow-xl mt-2" v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)">
+            <button v-if="!user.banned" class="btn btn-error join-item" @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></button>
+            <button v-else class="btn btn-disabled w-full" v-t="'ban.button'"></button>
           </div>
         </div>
         <div class="card bg-base-100 shadow-xl grow p-4">
           <h2 class="text-2xl" v-t="'recent-records'"></h2>
-          <RecordList
-            class="mt-2"
-            :params="{ player: String(user.id) }"
-            :limit="12"
-          />
+          <RecordList class="mt-2" :params="{ player: String(user.id) }" :limit="12" />
         </div>
       </div>
     </div>
   </div>
-  <dialog
-    class="modal modal-bottom sm:modal-middle"
-    ref="confirmBanDialog"
-    id="ban"
-    @close.prevent="tryCloseBan"
-  >
+  <dialog class="modal modal-bottom sm:modal-middle" ref="confirmBanDialog" id="ban" @close.prevent="tryCloseBan">
     <div class="modal-box">
       <h3 class="font-bold text-lg" v-t="'warning'"></h3>
       <p class="py-4" v-t="'ban.confirm'"></p>
       <div class="modal-action">
-        <button
-          class="btn btn-neutral"
-          :disabled="banning"
-          @click="tryCloseBan"
-          v-t="'cancel'"
-        ></button>
+        <button class="btn btn-neutral" :disabled="banning" @click="tryCloseBan" v-t="'cancel'"></button>
         <button class="btn btn-error" @click="ban">
           <LoadOr :loading="banning">{{ t('confirm') }}</LoadOr>
         </button>
@@ -344,26 +257,12 @@ async function switchFollow() {
       <button class="cursor-default" @click="tryCloseBan"></button>
     </div>
   </dialog>
-  <dialog
-    class="modal modal-bottom sm:modal-middle"
-    id="report"
-    ref="reportDialog"
-    @close.prevent="tryCloseReport"
-  >
+  <dialog class="modal modal-bottom sm:modal-middle" id="report" ref="reportDialog" @close.prevent="tryCloseReport">
     <div class="modal-box">
       <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
-      <textarea
-        class="textarea textarea-bordered h-32 w-full mt-4"
-        :placeholder="t('report.hint')"
-        v-model="reportReason"
-      ></textarea>
+      <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
       <div class="modal-action">
-        <button
-          class="btn btn-neutral"
-          :disabled="reporting"
-          @click="tryCloseReport"
-          v-t="'cancel'"
-        ></button>
+        <button class="btn btn-neutral" :disabled="reporting" @click="tryCloseReport" v-t="'cancel'"></button>
         <button class="btn btn-error" @click="report">
           <LoadOr :loading="reporting">{{ t('confirm') }}</LoadOr>
         </button>

@@ -27,14 +27,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import {
-  useFetchApi,
-  setCookie,
-  validateEmail,
-  validatePassword,
-  toast,
-  changeLocale,
-} from './common';
+import { useFetchApi, setCookie, validateEmail, validatePassword, toast, changeLocale } from './common';
 import type { User } from './model';
 
 import LoadOr from './components/LoadOr.vue';
@@ -68,11 +61,7 @@ async function submit() {
         password: pwd,
       },
     })) as { token: string; expireAt: string };
-    setCookie(
-      'access_token',
-      resp.token,
-      new Date(Date.parse(resp.expireAt)).toUTCString(),
-    );
+    setCookie('access_token', resp.token, new Date(Date.parse(resp.expireAt)).toUTCString());
     toast(t('logged-in'));
     router.back();
     fetchApi('/me', {}, (me) => {
@@ -88,46 +77,22 @@ async function submit() {
 
 <template>
   <div class="flex justify-center items-center p-8">
-    <div
-      class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-gradient-to-r from-sky-400 to-blue-500 mt-16"
-    >
+    <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-gradient-to-r from-sky-400 to-blue-500 mt-16">
       <div class="card-body">
         <h2 class="card-title text-white" v-t="'login'"></h2>
         <div class="form-control">
           <div class="label">
-            <span
-              class="label-text text-inherit text-white"
-              v-t="'email.label'"
-            ></span>
+            <span class="label-text text-inherit text-white" v-t="'email.label'"></span>
           </div>
-          <input
-            type="email"
-            :placeholder="t('email.hint')"
-            class="input input-bordered"
-            v-model="email"
-          />
+          <input type="email" :placeholder="t('email.hint')" class="input input-bordered" v-model="email" />
         </div>
         <div class="form-control">
           <div class="label">
-            <span
-              class="label-text text-inherit text-white"
-              v-t="'password.label'"
-            ></span>
+            <span class="label-text text-inherit text-white" v-t="'password.label'"></span>
           </div>
-          <input
-            type="password"
-            :placeholder="t('password.hint')"
-            class="input input-bordered"
-            v-model="password"
-          />
+          <input type="password" :placeholder="t('password.hint')" class="input input-bordered" v-model="password" />
           <label class="label">
-            <a
-              href="https://api.phira.cn/reset-password"
-              target="_blank"
-              class="label-text-alt link link-hover"
-              style="color: white !important"
-              v-t="'forget-password'"
-            ></a>
+            <a href="https://api.phira.cn/reset-password" target="_blank" class="label-text-alt link link-hover" style="color: white !important" v-t="'forget-password'"></a>
           </label>
         </div>
         <div class="form-control">
@@ -136,21 +101,13 @@ async function submit() {
           </div>
         </div>
         <div class="form-control mt-6">
-          <button
-            class="btn glass text-white"
-            :class="{ disabled: doingLogin }"
-            @click="submit"
-          >
+          <button class="btn glass text-white" :class="{ disabled: doingLogin }" @click="submit">
             <LoadOr :loading="doingLogin">{{ t('login') }}</LoadOr>
           </button>
         </div>
         <div class="divider text-white">
           {{ t('new-user.prompt') }}
-          <router-link
-            to="/register"
-            class="link link-hover"
-            v-t="'new-user.action'"
-          ></router-link>
+          <router-link to="/register" class="link link-hover" v-t="'new-user.action'"></router-link>
         </div>
       </div>
     </div>

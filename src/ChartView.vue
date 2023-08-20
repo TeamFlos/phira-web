@@ -58,14 +58,7 @@ const { t } = useI18n();
 
 import moment from 'moment';
 
-import {
-  useFetchApi,
-  fileToURL,
-  toast,
-  toastError,
-  loggedIn,
-  setTitle,
-} from './common';
+import { useFetchApi, fileToURL, toast, toastError, loggedIn, setTitle } from './common';
 import { Permission, Roles, type Chart, type User } from './model';
 
 import LeaderboardView from './components/LeaderboardView.vue';
@@ -117,11 +110,7 @@ function switchTab(s: string) {
 
 const myRating = ref<number>();
 if (loggedIn()) {
-  fetchApi(
-    `/chart/${id}/rate`,
-    {},
-    (r) => (myRating.value = (r as { score: number }).score),
-  );
+  fetchApi(`/chart/${id}/rate`, {}, (r) => (myRating.value = (r as { score: number }).score));
 }
 
 const settingRanked = ref(false);
@@ -168,11 +157,8 @@ async function submitRating() {
         'background-image': 'url(' + fileToURL(chart.illustration) + ')',
       }"
       class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-overlay bg-[#bbbbbb] dark:bg-[#000000bb]"
-      style="transition: background-color 0.5s"
-    ></div>
-    <div
-      class="w-full h-48 -mt-48 bg-gradient-to-b from-transparent to-base-200"
-    ></div>
+      style="transition: background-color 0.5s"></div>
+    <div class="w-full h-48 -mt-48 bg-gradient-to-b from-transparent to-base-200"></div>
     <div class="flex flex-col items-center -mt-[35vh] mb-24">
       <div class="px-8 w-full lg:px-0 lg:w-3/4 gap-8">
         <div class="flex flex-col">
@@ -184,26 +170,14 @@ async function submitRating() {
                 <div class="divider"></div>
                 <div class="flex flex-col w-full gap-2">
                   <PropItem :title="t('composer')" :value="chart.composer" />
-                  <PropItem
-                    :title="t('illustrator')"
-                    :value="chart.illustrator"
-                  />
+                  <PropItem :title="t('illustrator')" :value="chart.illustrator" />
                   <PropItem :title="t('charter')" :value="chart.charter" />
-                  <PropItem
-                    :title="t('difficulty')"
-                    :value="`${chart.level} (${chart.difficulty.toFixed(1)})`"
-                  />
+                  <PropItem :title="t('difficulty')" :value="`${chart.level} (${chart.difficulty.toFixed(1)})`" />
                 </div>
                 <div class="divider"></div>
                 <div class="flex flex-col w-full gap-2">
-                  <PropItem
-                    :title="t('updated-at')"
-                    :value="moment(chart.updated).fromNow()"
-                  />
-                  <PropItem
-                    :title="t('created-at')"
-                    :value="moment(chart.created).fromNow()"
-                  />
+                  <PropItem :title="t('updated-at')" :value="moment(chart.updated).fromNow()" />
+                  <PropItem :title="t('created-at')" :value="moment(chart.created).fromNow()" />
                 </div>
                 <div class="divider"></div>
                 <p v-if="chart.description.length" class="w-full break-words">
@@ -211,38 +185,15 @@ async function submitRating() {
                 </p>
                 <p v-else class="w-full italic" v-t="'description-empty'"></p>
               </UserCard>
-              <div
-                v-if="
-                  me &&
-                  Roles.from(me.roles)
-                    .permissions(me.banned)
-                    .has(Permission.SET_RANKED) &&
-                  chart.stable
-                "
-                class="card shadow-xl"
-              >
-                <button
-                  v-if="chart.ranked"
-                  class="btn btn-neutral btn-active w-full"
-                  @click="setRanked(false)"
-                >
-                  <LoadOr :loading="settingRanked">{{
-                    t('set-special')
-                  }}</LoadOr>
+              <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_RANKED) && chart.stable" class="card shadow-xl">
+                <button v-if="chart.ranked" class="btn btn-neutral btn-active w-full" @click="setRanked(false)">
+                  <LoadOr :loading="settingRanked">{{ t('set-special') }}</LoadOr>
                 </button>
-                <button
-                  v-else
-                  class="btn btn-accent w-full"
-                  @click="setRanked(true)"
-                >
-                  <LoadOr :loading="settingRanked">{{
-                    t('set-ranked')
-                  }}</LoadOr>
+                <button v-else class="btn btn-accent w-full" @click="setRanked(true)">
+                  <LoadOr :loading="settingRanked">{{ t('set-ranked') }}</LoadOr>
                 </button>
               </div>
-              <div
-                class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12"
-              >
+              <div class="card bg-base-100 shadow-xl flex flex-col items-center p-4 gap-2 mb-12">
                 <p v-if="!myRating" class="text-center">
                   {{ t('rating.title') }}
                 </p>
@@ -261,34 +212,16 @@ async function submitRating() {
                     })
                   }}
                 </p>
-                <RatingBar
-                  name="chart-rating"
-                  :init="Math.round((chart.rating ?? 0) * 10)"
-                  ref="chartRating"
-                />
-                <button
-                  v-if="rating"
-                  class="btn btn-primary mt-2"
-                  @click="submitRating"
-                >
+                <RatingBar name="chart-rating" :init="Math.round((chart.rating ?? 0) * 10)" ref="chartRating" />
+                <button v-if="rating" class="btn btn-primary mt-2" @click="submitRating">
                   <LoadOr :loading="submittingRating">{{ t('submit') }}</LoadOr>
                 </button>
               </div>
             </div>
             <div class="grow -mt-8 lg:w-3/4">
               <div class="tabs">
-                <a
-                  class="tab tab-lifted text-base-content"
-                  :class="{ 'tab-active': contentTab === 'ldb' }"
-                  @click="switchTab('ldb')"
-                  v-t="'leaderboard'"
-                ></a>
-                <a
-                  class="tab tab-lifted text-base-content"
-                  :class="{ 'tab-active': contentTab === 'stb' }"
-                  @click="switchTab('stb')"
-                  v-t="'stb-history'"
-                ></a>
+                <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': contentTab === 'ldb' }" @click="switchTab('ldb')" v-t="'leaderboard'"></a>
+                <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': contentTab === 'stb' }" @click="switchTab('stb')" v-t="'stb-history'"></a>
               </div>
               <div class="card bg-base-100 shadow-xl p-4 rounded-t-none">
                 <LoadSuspense v-if="contentTab === 'ldb'">

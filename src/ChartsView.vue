@@ -70,13 +70,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import {
-  useFetchApi,
-  fileToURL,
-  pageCount,
-  isString,
-  loggedIn,
-} from './common';
+import { useFetchApi, fileToURL, pageCount, isString, loggedIn } from './common';
 
 import { Permission, Roles } from './model';
 import type { Chart, Page, User } from './model';
@@ -127,8 +121,7 @@ watch(
   () => route.query,
   () => {
     let q = route.query;
-    if (isString(q.search))
-      tempSearchValue.value = searchValue.value = q.search;
+    if (isString(q.search)) tempSearchValue.value = searchValue.value = q.search;
     if (q.page) {
       let page = 1;
       try {
@@ -142,10 +135,7 @@ watch(
         initPage = page;
       }
     }
-    if (
-      isString(q.division) &&
-      ['regular', 'troll', 'plain', 'visual'].includes(q.division)
-    ) {
+    if (isString(q.division) && ['regular', 'troll', 'plain', 'visual'].includes(q.division)) {
       division.value = q.division;
     }
     if (isString(q.tags)) {
@@ -177,14 +167,8 @@ watch(
       let r = q.rating.split(',');
       if (r.length === 2) {
         try {
-          initRatingLower = Math.max(
-            0,
-            Math.min(10, Math.round(parseFloat(r[0]) * 10)),
-          );
-          initRatingUpper = Math.max(
-            0,
-            Math.min(10, Math.round(parseFloat(r[1]) * 10)),
-          );
+          initRatingLower = Math.max(0, Math.min(10, Math.round(parseFloat(r[0]) * 10)));
+          initRatingUpper = Math.max(0, Math.min(10, Math.round(parseFloat(r[1]) * 10)));
         } catch (e) {
           // empty
         }
@@ -193,11 +177,7 @@ watch(
     onlyUnreviewed.value = q.reviewed === 'false';
     onlyStableRequest.value = q.stableRequest === 'true';
     if (onlyUnreviewed.value) onlyStableRequest.value = false;
-    if (
-      ['updated', '-updated', 'rating', '-rating', 'name', '-name'].includes(
-        q.order as string,
-      )
-    ) {
+    if (['updated', '-updated', 'rating', '-rating', 'name', '-name'].includes(q.order as string)) {
       order.value = q.order as string;
     }
   },
@@ -252,9 +232,7 @@ async function fetchCharts() {
     pageNum: String(PAGE_NUM),
     ...parameters.value,
   };
-  const resp = (await fetchApi(
-    '/chart?' + new URLSearchParams(params),
-  )) as Page<Chart>;
+  const resp = (await fetchApi('/chart?' + new URLSearchParams(params))) as Page<Chart>;
   totalCount.value = resp.count;
   charts.value = resp.results;
 }
@@ -309,15 +287,9 @@ function saveFilters() {
       <div class="flex flex-row items-end flex-wrap gap-4">
         <div class="form-control">
           <label class="label">
-            <span class="label-text">
-              {{ t('division.label') }}<i class="fa-solid fa-grip ml-2"></i>
-            </span>
+            <span class="label-text"> {{ t('division.label') }}<i class="fa-solid fa-grip ml-2"></i> </span>
           </label>
-          <select
-            class="select select-bordered"
-            v-model="division"
-            @change="pagination!.current = 1"
-          >
+          <select class="select select-bordered" v-model="division" @change="pagination!.current = 1">
             <option value="regular" v-t="'division.regular'"></option>
             <option value="troll" v-t="'division.troll'"></option>
             <option value="plain" v-t="'division.plain'"></option>
@@ -326,10 +298,7 @@ function saveFilters() {
         </div>
         <div class="form-control">
           <label class="label">
-            <span class="label-text">
-              {{ t('order.label')
-              }}<i class="fa-solid fa-arrow-up-wide-short ml-2"></i>
-            </span>
+            <span class="label-text"> {{ t('order.label') }}<i class="fa-solid fa-arrow-up-wide-short ml-2"></i> </span>
           </label>
           <select class="select select-bordered" v-model="order">
             <option value="-updated" v-t="'order.time'"></option>
@@ -340,10 +309,7 @@ function saveFilters() {
             <option value="-name" v-t="'order.name-rev'"></option>
           </select>
         </div>
-        <button
-          class="btn bg-base-100 btn-outline"
-          @click="filterDialog!.showModal()"
-        >
+        <button class="btn bg-base-100 btn-outline" @click="filterDialog!.showModal()">
           <i class="fa-solid fa-filter"></i>
         </button>
         <div class="ml-auto join w-full lg:w-auto">
@@ -354,38 +320,27 @@ function saveFilters() {
             @keyup.enter="
               pagination!.current = 1;
               searchValue = tempSearchValue!;
-            "
-          />
+            " />
           <button
             class="btn btn-secondary join-item rounded-r-full"
             @click="
               pagination!.current = 1;
               searchValue = tempSearchValue!;
-            "
-          >
+            ">
             <i class="fa-solid fa-search"></i>
           </button>
         </div>
       </div>
-      <div
-        v-if="charts"
-        class="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-0 min-w-0"
-      >
+      <div v-if="charts" class="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-0 min-w-0">
         <router-link
           v-for="chart in charts"
           :key="chart.id"
           :to="`/chart/${chart.id}`"
-          class="group card relative image-full bg-base-100 shadow-xl aspect-[8/5] illustration chart-card min-h-0 min-w-0"
-        >
+          class="group card relative image-full bg-base-100 shadow-xl aspect-[8/5] illustration chart-card min-h-0 min-w-0">
           <figure>
-            <img
-              class="w-full aspect-[8/5]"
-              :src="fileToURL(chart.illustration) + '.thumbnail'"
-            />
+            <img class="w-full aspect-[8/5]" :src="fileToURL(chart.illustration) + '.thumbnail'" />
           </figure>
-          <div
-            class="absolute right-0 badge badge-primary z-[11] m-2 text-lg p-3"
-          >
+          <div class="absolute right-0 badge badge-primary z-[11] m-2 text-lg p-3">
             {{ chart.level }}
           </div>
           <div class="card-body flex-col justify-end p-4 gap-0 min-h-0 min-w-0">
@@ -400,12 +355,7 @@ function saveFilters() {
         <LoadView class="m-8 loading-lg" />
       </div>
     </div>
-    <PageIndicator
-      :init="initPage"
-      :total="pageCount(totalCount, PAGE_NUM)"
-      class="mt-8 mb-16"
-      ref="pagination"
-    />
+    <PageIndicator :init="initPage" :total="pageCount(totalCount, PAGE_NUM)" class="mt-8 mb-16" ref="pagination" />
   </div>
   <dialog class="modal" ref="filterDialog">
     <div class="modal-box">
@@ -417,36 +367,26 @@ function saveFilters() {
             class="btn btn-neutral btn-outline flex-1"
             :class="{ 'btn-active': tempFromMe }"
             @click="tempFromMe = !tempFromMe"
-            v-t="'filters.uploaded-by-me'"
-          ></button>
+            v-t="'filters.uploaded-by-me'"></button>
           <button
-            v-if="
-              user &&
-              Roles.from(user.roles)
-                .permissions(user.banned)
-                .has(Permission.SEE_UNREVIEWED)
-            "
+            v-if="user && Roles.from(user.roles).permissions(user.banned).has(Permission.SEE_UNREVIEWED)"
             class="btn btn-neutral btn-outline flex-1"
             :class="{ 'btn-active': tempOnlyUnreviewed }"
             @click="
               () => {
-                if ((tempOnlyUnreviewed = !tempOnlyUnreviewed))
-                  tempOnlyStableRequest = false;
+                if ((tempOnlyUnreviewed = !tempOnlyUnreviewed)) tempOnlyStableRequest = false;
               }
             "
-            v-t="'filters.unreviewed-only'"
-          ></button>
+            v-t="'filters.unreviewed-only'"></button>
           <button
             class="btn btn-neutral btn-outline flex-1"
             :class="{ 'btn-active': tempOnlyStableRequest }"
             @click="
               () => {
-                if ((tempOnlyStableRequest = !tempOnlyStableRequest))
-                  tempOnlyUnreviewed = false;
+                if ((tempOnlyStableRequest = !tempOnlyStableRequest)) tempOnlyUnreviewed = false;
               }
             "
-            v-t="'filters.stb-req-only'"
-          ></button>
+            v-t="'filters.stb-req-only'"></button>
         </div>
         <div class="divider my-0"></div>
         <div>
@@ -460,28 +400,14 @@ function saveFilters() {
         <div class="divider my-0"></div>
         <div class="flex flex-col">
           <p v-t="'rating.lower'"></p>
-          <RatingBar
-            name="rating-lower"
-            :init="initRatingLower"
-            ref="ratingLowerEl"
-            canBeZero
-          />
+          <RatingBar name="rating-lower" :init="initRatingLower" ref="ratingLowerEl" canBeZero />
         </div>
         <div class="flex flex-col mt-2">
           <p v-t="'rating.upper'"></p>
-          <RatingBar
-            name="rating-upper"
-            :init="initRatingUpper"
-            ref="ratingUpperEl"
-            canBeZero
-          />
+          <RatingBar name="rating-upper" :init="initRatingUpper" ref="ratingUpperEl" canBeZero />
         </div>
         <div class="flex flew-row justify-end">
-          <button
-            class="btn btn-primary"
-            @click="saveFilters"
-            v-t="'confirm'"
-          ></button>
+          <button class="btn btn-primary" @click="saveFilters" v-t="'confirm'"></button>
         </div>
       </div>
     </div>

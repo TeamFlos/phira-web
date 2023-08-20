@@ -9,8 +9,5 @@ defineProps<{ url?: string }>();
 </script>
 
 <template>
-  <img
-    :src="url ? fileToURL(url) : defaultAvatar"
-    :class="{ invert: !url && !darkTheme }"
-  />
+  <img :src="url ? fileToURL(url) : defaultAvatar" :class="{ invert: !url && !darkTheme }" />
 </template>

@@ -15,8 +15,7 @@
   font-family: 'Halva Medium';
   font-style: normal;
   font-weight: 400;
-  src: url('https://fonts.cdnfonts.com/s/47814/HalvamediumRegular-ALmwM.woff')
-    format('woff');
+  src: url('https://fonts.cdnfonts.com/s/47814/HalvamediumRegular-ALmwM.woff') format('woff');
 }
 
 @layer base {

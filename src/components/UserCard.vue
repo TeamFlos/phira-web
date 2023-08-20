@@ -25,19 +25,13 @@ fetchApi(`/user/${props.id}`, {}, (u) => {
       <div class="w-2/3 loading loading-spinner"></div>
     </div>
     <div v-else class="flex flex-col w-full items-center">
-      <router-link
-        :to="`/user/${user.id}`"
-        class="group flex flex-col items-center"
-      >
+      <router-link :to="`/user/${user.id}`" class="group flex flex-col items-center">
         <div class="avatar">
           <div class="w-24 mask mask-squircle">
             <UserAvatar :url="user.avatar" />
           </div>
         </div>
-        <p
-          class="font-black text-xl group-hover:link mt-2"
-          :class="[userNameClass(user.badges)]"
-        >
+        <p class="font-black text-xl group-hover:link mt-2" :class="[userNameClass(user.badges)]">
           {{ user.name }}
         </p>
       </router-link>

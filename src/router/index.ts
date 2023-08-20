@@ -61,9 +61,7 @@ import { setTitle } from '../common';
 
 router.afterEach((to) => {
   nextTick(() => {
-    const title = i18n.global.t(
-      'title-' + ((to.name as string | undefined | null) || 'default'),
-    );
+    const title = i18n.global.t('title-' + ((to.name as string | undefined | null) || 'default'));
     setTitle(title);
   });
 });

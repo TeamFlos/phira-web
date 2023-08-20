@@ -45,12 +45,7 @@ const containerThis = container;
 
 <template>
   <div class="toast toast-top toast-end z-[33]" ref="containerThis">
-    <div
-      v-for="toast in toasts"
-      :key="toast.id"
-      class="alert"
-      :class="KIND_CLASS_NAME[toast.kind]"
-    >
+    <div v-for="toast in toasts" :key="toast.id" class="alert" :class="KIND_CLASS_NAME[toast.kind]">
       <span>{{ toast.message }}</span>
     </div>
   </div>

@@ -22,8 +22,7 @@ const { t } = useI18n();
       <img class="shadow-2xl rounded-lg lg:me-14" src="./assets/icon.png" />
       <div class="flex-col text-center">
         <h1
-          class="font-title font-black text-left text-8xl tracking-widest bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 bg-clip-text [-webkit-text-fill-color:transparent]"
-        >
+          class="font-title font-black text-left text-8xl tracking-widest bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 bg-clip-text [-webkit-text-fill-color:transparent]">
           Phira
         </h1>
         <p class="text-xl" v-t="'description'"></p>

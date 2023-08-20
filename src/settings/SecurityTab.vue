@@ -65,28 +65,13 @@ tabLoading.value = false;
   <div class="flex flex-col gap-2">
     <h1 class="card-title" v-t="'edit-password'"></h1>
     <div class="form-control grow">
-      <input
-        type="password"
-        :placeholder="t('old-password')"
-        class="input input-bordered"
-        v-model="password_old"
-      />
+      <input type="password" :placeholder="t('old-password')" class="input input-bordered" v-model="password_old" />
     </div>
     <div class="form-control grow">
-      <input
-        type="password"
-        :placeholder="t('password.label')"
-        class="input input-bordered"
-        v-model="password"
-      />
+      <input type="password" :placeholder="t('password.label')" class="input input-bordered" v-model="password" />
     </div>
     <div class="form-control grow">
-      <input
-        type="password"
-        :placeholder="t('password-confirm.label')"
-        class="input input-bordered"
-        v-model="password2"
-      />
+      <input type="password" :placeholder="t('password-confirm.label')" class="input input-bordered" v-model="password2" />
     </div>
     <div class="flex flex-row-reverse">
       <button class="btn btn-primary" @click="changePassword">

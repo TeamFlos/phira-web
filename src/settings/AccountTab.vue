@@ -22,15 +22,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import {
-  useFetchApi,
-  toast,
-  toastError,
-  uploadFile,
-  fileToURL,
-  LANGUAGES,
-  changeLocale,
-} from '../common';
+import { useFetchApi, toast, toastError, uploadFile, fileToURL, LANGUAGES, changeLocale } from '../common';
 import type { User } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
@@ -109,21 +101,11 @@ const initAvatar = user.avatar ? fileToURL(user.avatar) : defaultAvatar;
     <div class="flex flex-col w-36 avatar avatar-lg mb-4 lg:m-8">
       <div class="rounded-full">
         <label>
-          <input
-            type="file"
-            class="hidden"
-            accept="image/png, image/jpeg, image/webp"
-            @change="onChangeAvatar"
-          />
+          <input type="file" class="hidden" accept="image/png, image/jpeg, image/webp" @change="onChangeAvatar" />
           <img :src="initAvatar" class="cursor-pointer" ref="avatarImage" />
         </label>
       </div>
-      <button
-        class="btn btn-secondary m-3"
-        :class="{ hidden: !avatarFile }"
-        @click="updateAvatar"
-        ref="updateAvatarButton"
-      >
+      <button class="btn btn-secondary m-3" :class="{ hidden: !avatarFile }" @click="updateAvatar" ref="updateAvatarButton">
         <LoadOr :loading="updatingAvatar">{{ t('update-avatar') }}</LoadOr>
       </button>
     </div>
@@ -132,12 +114,7 @@ const initAvatar = user.avatar ? fileToURL(user.avatar) : defaultAvatar;
         <div class="label">
           <span class="label-text text-inherit" v-t="'username.label'"></span>
         </div>
-        <input
-          type="text"
-          :placeholder="t('username.hint')"
-          class="input input-bordered"
-          v-model="username"
-        />
+        <input type="text" :placeholder="t('username.hint')" class="input input-bordered" v-model="username" />
       </div>
       <div class="flex flex-col form-control grow">
         <div class="label">
@@ -156,11 +133,7 @@ const initAvatar = user.avatar ? fileToURL(user.avatar) : defaultAvatar;
         <div class="label">
           <span class="label-text text-inherit" v-t="'bio.label'"></span>
         </div>
-        <textarea
-          :placeholder="t('bio.hint')"
-          class="textarea textarea-bordered"
-          v-model="bio"
-        ></textarea>
+        <textarea :placeholder="t('bio.hint')" class="textarea textarea-bordered" v-model="bio"></textarea>
       </div>
       <div class="flex justify-end">
         <button class="btn btn-primary mt-2" @click="saveProfile">

@@ -92,28 +92,13 @@ export class Roles {
       return perms;
     }
     if (this.has(Role.REVIEWER)) {
-      perms.grant(
-        Permission.SEE_UNREVIEWED,
-        Permission.DELETE_STABLE,
-        Permission.REVIEW,
-        Permission.EDIT_TAGS,
-        Permission.BAN_USER,
-      );
+      perms.grant(Permission.SEE_UNREVIEWED, Permission.DELETE_STABLE, Permission.REVIEW, Permission.EDIT_TAGS, Permission.BAN_USER);
     }
     if (this.has(Role.SUPERVISOR)) {
-      perms.grant(
-        Permission.SEE_UNREVIEWED,
-        Permission.SEE_STABLE_REQ,
-        Permission.STABILIZE_CHART,
-        Permission.EDIT_TAGS,
-      );
+      perms.grant(Permission.SEE_UNREVIEWED, Permission.SEE_STABLE_REQ, Permission.STABILIZE_CHART, Permission.EDIT_TAGS);
     }
     if (this.has(Role.HEAD_SUPERVISOR)) {
-      perms.grant(
-        Permission.STABILIZE_JUDGE,
-        Permission.DELETE_STABLE,
-        Permission.SET_RANKED,
-      );
+      perms.grant(Permission.STABILIZE_JUDGE, Permission.DELETE_STABLE, Permission.SET_RANKED);
     }
     return perms;
   }

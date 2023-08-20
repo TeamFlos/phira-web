@@ -25,8 +25,7 @@ watch(
   () => route.query,
   () => {
     let q = route.query;
-    if (isString(q.search))
-      tempSearchValue.value = searchValue.value = q.search;
+    if (isString(q.search)) tempSearchValue.value = searchValue.value = q.search;
     if (q.page) {
       let page = 1;
       try {
@@ -94,15 +93,13 @@ onMounted(() => {
           @keyup.enter="
             list!.pagination.current = 1;
             searchValue = tempSearchValue!;
-          "
-        />
+          " />
         <button
           class="btn btn-secondary join-item rounded-r-full"
           @click="
             list!.pagination.current = 1;
             searchValue = tempSearchValue!;
-          "
-        >
+          ">
           <i class="fa-solid fa-search"></i>
         </button>
       </div>

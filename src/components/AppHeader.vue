@@ -102,21 +102,14 @@ function doLogout() {
 <template>
   <header class="relative">
     <div class="drawer">
-      <input
-        id="drawer"
-        type="checkbox"
-        class="drawer-toggle"
-        v-model="drawerOpened"
-      />
+      <input id="drawer" type="checkbox" class="drawer-toggle" v-model="drawerOpened" />
       <div class="drawer-content flex flex-col">
         <div class="w-full navbar h-16 fixed top-0 backdrop-blur z-30">
           <div class="navbar-start">
             <label for="drawer" class="btn btn-square btn-ghost md:hidden">
               <i class="fa-solid fa-bars text-xl"></i>
             </label>
-            <router-link to="/" class="btn btn-ghost normal-case text-2xl"
-              >Phira</router-link
-            >
+            <router-link to="/" class="btn btn-ghost normal-case text-2xl">Phira</router-link>
             <div class="ms-8 gap-2 hidden md:flex">
               <router-link
                 v-for="nav in NAVS"
@@ -127,8 +120,7 @@ function doLogout() {
                 :class="{
                   'btn-active': route.path.startsWith(nav.path) && nav.enabled,
                 }"
-                @click="!nav.enabled && toast(t('wip'), 'warning')"
-              >
+                @click="!nav.enabled && toast(t('wip'), 'warning')">
                 <i :class="nav.icon" class="fa-solid"></i>
                 {{ t(nav.text) }}
               </router-link>
@@ -140,12 +132,7 @@ function doLogout() {
               <i class="fa-solid fa-moon swap-on fill-current"></i>
               <i class="fa-solid fa-sun swap-off fill-current"></i>
             </label>
-            <router-link
-              v-if="!accessToken"
-              to="/login"
-              class="btn"
-              v-t="'login'"
-            ></router-link>
+            <router-link v-if="!accessToken" to="/login" class="btn" v-t="'login'"></router-link>
             <template v-else>
               <LoadView v-if="!user" />
               <div v-else class="dropdown dropdown-end">
@@ -154,23 +141,12 @@ function doLogout() {
                     <UserAvatar :url="user.avatar" />
                   </div>
                 </label>
-                <ul
-                  tabindex="0"
-                  class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40"
-                >
+                <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40">
                   <li>
-                    <router-link
-                      :to="`/user/${user.id}`"
-                      @click="blur"
-                      v-t="'me.profile'"
-                    ></router-link>
+                    <router-link :to="`/user/${user.id}`" @click="blur" v-t="'me.profile'"></router-link>
                   </li>
                   <li>
-                    <router-link
-                      to="/settings"
-                      @click="blur"
-                      v-t="'me.settings'"
-                    ></router-link>
+                    <router-link to="/settings" @click="blur" v-t="'me.settings'"></router-link>
                   </li>
                   <li><a @click="doLogout" v-t="'me.logout'"></a></li>
                 </ul>
@@ -190,8 +166,7 @@ function doLogout() {
             class="btn btn-ghost normal-case text-lg justify-start"
             :class="{
               'btn-active': nav.enabled && route.path.startsWith(nav.path),
-            }"
-          >
+            }">
             <i :class="nav.icon" class="fa-solid w-8"></i>
             {{ t(nav.text) }}
           </router-link>

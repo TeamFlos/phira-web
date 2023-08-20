@@ -29,9 +29,7 @@ export function setTitle(title: string) {
 export function changeLocale(locale: string) {
   if (locale.startsWith('en')) locale = 'en';
   if (!SUPPORTED_LOCALES.includes(locale)) locale = 'en';
-  i18n.global.locale.value = (
-    locale === 'zh-TW' ? 'zh-CN' : locale
-  ) as typeof i18n.global.locale.value;
+  i18n.global.locale.value = (locale === 'zh-TW' ? 'zh-CN' : locale) as typeof i18n.global.locale.value;
   localStorage.setItem('locale', locale);
   const momentLocale =
     {
@@ -51,9 +49,7 @@ export function detailedTime(time: string): string {
   return m.fromNow() + ' (' + m.format('lll') + ')';
 }
 
-export function userNameClass(
-  badges: string[],
-): 'text-[#673ab7]' | 'text-[#ff7043]' | 'text-base-content' {
+export function userNameClass(badges: string[]): 'text-[#673ab7]' | 'text-[#ff7043]' | 'text-base-content' {
   if (badges.includes('admin')) return 'text-[#673ab7]';
   if (badges.includes('sponsor')) return 'text-[#ff7043]';
   return 'text-base-content';
@@ -69,10 +65,7 @@ export function toastError(error: any) {
 }
 
 export function fileToURL(file: string) {
-  return file.replace(
-    /https:\/\/api.phira.cn\/files\//g,
-    'https://files-cf.phira.cn/',
-  );
+  return file.replace(/https:\/\/api.phira.cn\/files\//g, 'https://files-cf.phira.cn/');
 }
 
 export type FetchApi = (
@@ -83,11 +76,7 @@ export type FetchApi = (
 ) => object | null;
 
 export function validateEmail(t: any, email: string) {
-  if (
-    !/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(
-      email,
-    )
-  ) {
+  if (!/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(email)) {
     throw new Error(t('invalid-email'));
   }
 }
@@ -101,10 +90,7 @@ export function validatePassword(t: any, password: string, repeat?: string) {
   }
 }
 
-export async function uploadFile(
-  fetchApi: FetchApi,
-  file: File,
-): Promise<string> {
+export async function uploadFile(fetchApi: FetchApi, file: File): Promise<string> {
   const resp = (await fetchApi('/upload/avatar', {
     method: 'POST',
     body: file,
