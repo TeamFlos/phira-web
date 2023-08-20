@@ -89,7 +89,7 @@ const router = useRouter();
 const fetchApi = useFetchApi();
 
 let user: User | null = null;
-loggedIn() ? fetchApi('/me',{}, (user) => (user = user as User)) : user = null;
+loggedIn() ? fetchApi('/me', {}, (user) => (user = user as User)) : (user = null);
 
 const pagination = ref<typeof PageIndicator>();
 

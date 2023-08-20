@@ -219,4 +219,4 @@ export type EventList = {
   timeStart: Date;
   timeEnd: Date;
   locked: boolean;
-}
+};

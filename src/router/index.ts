@@ -6,6 +6,8 @@ import HomeView from '../HomeView.vue';
 import LoginView from '../LoginView.vue';
 import RegisterView from '../RegisterView.vue';
 
+import EventsView from '../EventsView.vue';
+
 import ChartsView from '../ChartsView.vue';
 import ChartView from '../ChartView.vue';
 
@@ -32,6 +34,9 @@ const router = createRouter({
 
     { path: '/chart', name: 'charts', component: ChartsView },
     { path: '/chart/:id(\\d+)', name: 'chart', component: ChartView },
+
+    { path: '/event', name: 'events', component: EventsView },
+    // { path: '/event/:id(\\d+)', name: 'event', component: EventsView},
 
     { path: '/user', name: 'users', component: UsersView },
     { path: '/user/:id(\\d+)', name: 'user', component: UserView },

@@ -74,7 +74,7 @@ const user = ref<User>();
 const drawerOpened = ref(false);
 const NAVS = [
   { path: '/chart', icon: 'fa-book', text: 'chart', enabled: true },
-  { path: '/', icon: 'fa-star', text: 'event', enabled: false },
+  { path: '/event', icon: 'fa-star', text: 'event', enabled: true },
   { path: '/user', icon: 'fa-user', text: 'user', enabled: true },
 ];
 
