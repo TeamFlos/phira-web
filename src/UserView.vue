@@ -222,6 +222,10 @@ async function switchFollow() {
                   reportDialog!.showModal();
                 }
               "></button>
+            <template v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)">
+              <button v-if="!user.banned" class="btn btn-error join-item" @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></button>
+              <button v-else class="btn btn-disabled w-full" v-t="'ban.button'"></button>
+            </template>
           </div>
           <div class="card bg-base-100 shadow-xl p-4">
             <div class="flex flex-col w-full gap-2">
@@ -229,10 +233,6 @@ async function switchFollow() {
               <PropItem :title="t('registered-at')" :value="detailedTime(user.joined)" multi />
               <PropItem :title="t('language')" :value="LANGUAGES[user.language as keyof typeof LANGUAGES]" multi />
             </div>
-          </div>
-          <div class="card shadow-xl mt-2" v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)">
-            <button v-if="!user.banned" class="btn btn-error join-item" @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></button>
-            <button v-else class="btn btn-disabled w-full" v-t="'ban.button'"></button>
           </div>
         </div>
         <div class="card bg-base-100 shadow-xl grow p-4">
