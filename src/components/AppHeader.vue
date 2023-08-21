@@ -134,16 +134,16 @@ function doLogout() {
             </label>
             <router-link v-if="!accessToken" to="/login" class="btn" v-t="'login'"></router-link>
             <template v-else>
-              <LoadView v-if="!user" />
-              <div v-else class="dropdown dropdown-end">
+              <div class="dropdown dropdown-end">
                 <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-                  <div class="w-10 rounded-full">
+                  <LoadView v-if="!user" />
+                  <div v-else class="w-10 rounded-full">
                     <UserAvatar :url="user.avatar" />
                   </div>
                 </label>
                 <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40">
                   <li>
-                    <router-link :to="`/user/${user.id}`" @click="blur" v-t="'me.profile'"></router-link>
+                    <router-link v-if="user" :to="`/user/${user.id}`" @click="blur" v-t="'me.profile'"></router-link>
                   </li>
                   <li>
                     <router-link to="/settings" @click="blur" v-t="'me.settings'"></router-link>
