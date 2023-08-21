@@ -166,7 +166,8 @@ function doLogout() {
             class="btn btn-ghost normal-case text-lg justify-start"
             :class="{
               'btn-active': nav.enabled && route.path.startsWith(nav.path),
-            }">
+            }"
+            @click="drawerOpened = false">
             <i :class="nav.icon" class="fa-solid w-8"></i>
             {{ t(nav.text) }}
           </router-link>
