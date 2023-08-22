@@ -110,7 +110,8 @@ export function setCookie(key: string, value: string, expires: string) {
 }
 
 export function deleteCookie(key: string) {
-  setCookie(key, 'test', 'Thu, 01 Jan 1970 00:00:01 GMT');
+  document.cookie = `${key}=test; Max-Age=-99999999; SameSite=None; Secure`;
+  triggerCookie();
 }
 
 export function logout() {
