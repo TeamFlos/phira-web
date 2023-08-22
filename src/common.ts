@@ -1,7 +1,7 @@
 import { useRouter } from 'vue-router';
 import type { Router } from 'vue-router';
 
-import { toast } from './components/ToastsView.vue';
+import { toast as toastSonner } from 'vue-sonner';
 
 import { SUPPORTED_LOCALES, i18n } from './main';
 
@@ -9,8 +9,6 @@ import moment from 'moment';
 
 import 'moment/dist/locale/zh-cn';
 import 'moment/dist/locale/zh-hk';
-
-export { toast };
 
 export const LANGUAGES = {
   'zh-CN': '简体中文',
@@ -59,6 +57,19 @@ export function pageCount(count: number, pageNum: number) {
   return count ? Math.floor((count - 1) / pageNum) + 1 : 0;
 }
 
+const KIND_CLASS_NAME = {
+  info: 'alert-info',
+  error: 'alert-error',
+  warning: 'alert-warning',
+  success: 'alert-success',
+};
+
+export function toast(msg: string, kind?: 'error' | 'success') {
+  let func = kind === 'error' ? toastSonner.error : kind === 'success' ? toastSonner.success : toastSonner;
+  func(msg, {
+    duration: 2000,
+  });
+}
 export function toastError(error: any) {
   const msg = error instanceof Error ? error.message : String(error);
   if (msg.length) toast(msg, 'error');
