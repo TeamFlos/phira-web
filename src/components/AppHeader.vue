@@ -101,7 +101,7 @@ function doLogout() {
 </script>
 
 <template>
-  <Toaster position="top-center" :theme="darkTheme ? 'dark' : 'light'" />
+  <Toaster position="top-center" :theme="darkTheme ? 'dark' : 'light'" closeButton />
   <header class="relative">
     <div class="drawer">
       <input id="drawer" type="checkbox" class="drawer-toggle" v-model="drawerOpened" />
@@ -169,7 +169,12 @@ function doLogout() {
             :class="{
               'btn-active': nav.enabled && route.path.startsWith(nav.path),
             }"
-            @click="drawerOpened = false">
+            @click="
+              () => {
+                !nav.enabled && toast(t('wip'), 'error');
+                drawerOpened = false;
+              }
+            ">
             <i :class="nav.icon" class="fa-solid w-8"></i>
             {{ t(nav.text) }}
           </router-link>
