@@ -36,7 +36,6 @@ import LoadView from './components/LoadView.vue';
         </template>
       </Suspense>
     </router-view>
-    <ToastsView />
   </div>
   <AppFooter />
 </template>
