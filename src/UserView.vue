@@ -62,6 +62,8 @@ import { Permission, Roles, type Chart, type User, type UserView, type Page } fr
 
 import ChartCard from './components/ChartCard.vue';
 import FollowButton from './components/FollowButton.vue';
+import SetReviewerButton from './components/SetReviewerButton.vue';
+import SetSupervisorButton from './components/SetSupervisorButton.vue';
 import LoadOr from './components/LoadOr.vue';
 import LoadView from './components/LoadView.vue';
 import PropItem from './components/PropItem.vue';
@@ -209,6 +211,12 @@ function tryCloseReport() {
               <button v-else class="btn btn-disabled w-full" v-t="'ban.button'"></button>
             </template>
           </div>
+
+          <div v-if="me && (Roles.from(me.roles).permissions(me.banned).has(Permission.SET_REVIEWER) || Roles.from(me.roles).permissions(me.banned).has(Permission.SET_SUPERVISOR))" class="gap-1 join join-vertical">
+            <SetReviewerButton   v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_REVIEWER)"   class="join-item" :id="id" :initIsReviewer="Roles.from(user.roles).permissions(me.banned).has(Permission.REVIEW)" />
+            <SetSupervisorButton v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_SUPERVISOR)" class="join-item" :id="id" :initIsSupervisor="Roles.from(user.roles).permissions(me.banned).has(Permission.SET_RANKED)" />
+          </div>
+
           <div class="card bg-base-100 shadow-xl p-4">
             <div class="flex flex-col w-full gap-2">
               <PropItem :title="t('last-login')" :value="detailedTime(user.last_login)" multi />
