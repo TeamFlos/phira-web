@@ -35,9 +35,10 @@ import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 
-import { toast } from './ToastsView.vue';
-import { useFetchApi, getCookie, addCookieListener, logout } from '../common';
+import { useFetchApi, getCookie, addCookieListener, logout, toast } from '../common';
 import type { User } from '../model';
+
+import { Toaster } from 'vue-sonner';
 
 import LoadView from './LoadView.vue';
 import UserAvatar from './UserAvatar.vue';
@@ -100,6 +101,7 @@ function doLogout() {
 </script>
 
 <template>
+  <Toaster position="top-center" :theme="darkTheme ? 'dark' : 'light'" closeButton />
   <header class="relative">
     <div class="drawer">
       <input id="drawer" type="checkbox" class="drawer-toggle" v-model="drawerOpened" />
@@ -120,7 +122,7 @@ function doLogout() {
                 :class="{
                   'btn-active': route.path.startsWith(nav.path) && nav.enabled,
                 }"
-                @click="!nav.enabled && toast(t('wip'), 'warning')">
+                @click="!nav.enabled && toast(t('wip'), 'error')">
                 <i :class="nav.icon" class="fa-solid"></i>
                 {{ t(nav.text) }}
               </router-link>
@@ -167,7 +169,12 @@ function doLogout() {
             :class="{
               'btn-active': nav.enabled && route.path.startsWith(nav.path),
             }"
-            @click="drawerOpened = false">
+            @click="
+              () => {
+                !nav.enabled && toast(t('wip'), 'error');
+                drawerOpened = false;
+              }
+            ">
             <i :class="nav.icon" class="fa-solid w-8"></i>
             {{ t(nav.text) }}
           </router-link>

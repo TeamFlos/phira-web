@@ -19,7 +19,6 @@ export default {};
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
 import LoadView from './components/LoadView.vue';
-import ToastsView from './components/ToastsView.vue';
 </script>
 
 <template>
@@ -37,7 +36,6 @@ import ToastsView from './components/ToastsView.vue';
         </template>
       </Suspense>
     </router-view>
-    <ToastsView />
   </div>
   <AppFooter />
 </template>

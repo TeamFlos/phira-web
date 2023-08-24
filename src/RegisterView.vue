@@ -36,7 +36,7 @@ const errorMessage = ref<string>();
 
 async function submit() {
   if (doingRegister.value) {
-    toast(t('registering'), 'warning');
+    toast(t('registering'), 'error');
     return;
   }
   errorMessage.value = undefined;

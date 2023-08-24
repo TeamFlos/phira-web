@@ -13,6 +13,9 @@ export enum Permission {
   SEE_ALL_EVENTS = 0x00000200,
   BAN_USER = 0x00000400,
   SET_RANKED = 0x00000800,
+  SET_ROLES = 0x00001000,
+  SET_REVIEWER = 0x00002000,
+  SET_SUPERVISOR = 0x00004000,
 }
 
 class Permissions {
@@ -65,6 +68,7 @@ export enum Role {
   REVIEWER = 0x0002,
   SUPERVISOR = 0x0004,
   HEAD_SUPERVISOR = 0x0008,
+  HEAD_REVIEWER = 0x0010,
 }
 
 export class Roles {
@@ -92,13 +96,16 @@ export class Roles {
       return perms;
     }
     if (this.has(Role.REVIEWER)) {
-      perms.grant(Permission.SEE_UNREVIEWED, Permission.DELETE_STABLE, Permission.REVIEW, Permission.EDIT_TAGS, Permission.BAN_USER);
+      perms.grant(Permission.SEE_UNREVIEWED, Permission.DELETE_STABLE, Permission.REVIEW, Permission.EDIT_TAGS);
     }
     if (this.has(Role.SUPERVISOR)) {
       perms.grant(Permission.SEE_UNREVIEWED, Permission.SEE_STABLE_REQ, Permission.STABILIZE_CHART, Permission.EDIT_TAGS);
     }
     if (this.has(Role.HEAD_SUPERVISOR)) {
-      perms.grant(Permission.STABILIZE_JUDGE, Permission.DELETE_STABLE, Permission.SET_RANKED);
+      perms.grant(Permission.STABILIZE_JUDGE, Permission.DELETE_STABLE, Permission.SET_RANKED, Permission.SET_SUPERVISOR);
+    }
+    if (this.has(Role.HEAD_REVIEWER)) {
+      perms.grant(Permission.SET_REVIEWER, Permission.BAN_USER);
     }
     return perms;
   }

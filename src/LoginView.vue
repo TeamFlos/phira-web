@@ -45,7 +45,7 @@ const errorMessage = ref<string>();
 
 async function submit() {
   if (doingLogin.value) {
-    toast(t('logging-in'), 'warning');
+    toast(t('logging-in'), 'error');
     return;
   }
   errorMessage.value = undefined;

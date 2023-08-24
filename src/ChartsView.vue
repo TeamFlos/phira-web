@@ -103,8 +103,8 @@ const division = ref('regular');
 const order = ref('-updated');
 const wantedTagsEl = ref<typeof TagList>(),
   unwantedTagsEl = ref<typeof TagList>();
-const ratingLowerEl = ref<typeof RatingBar>(),
-  ratingUpperEl = ref<typeof RatingBar>();
+const tempRatingLower = ref(3),
+  tempRatingUpper = ref(10);
 const fromMe = ref(false),
   onlyUnreviewed = ref(false),
   onlyStableRequest = ref(false);
@@ -112,38 +112,49 @@ const uploader = ref<number>();
 
 let initWanted: string[] = [],
   initUnwanted: string[] = [];
-let initRatingLower = 3,
-  initRatingUpper = 10;
+const wantedTags = ref<string[]>(initWanted),
+  unwantedTags = ref<string[]>(initUnwanted);
 
 const filterDialog = ref<HTMLDialogElement>();
+let triggeredByRouteChange = false,
+  preventQueryUpdate = false;
 
 watch(
   () => route.query,
   () => {
+    if (preventQueryUpdate) {
+      preventQueryUpdate = false;
+      return;
+    }
+    triggeredByRouteChange = true;
     let q = route.query;
-    if (isString(q.search)) tempSearchValue.value = searchValue.value = q.search;
+    tempSearchValue.value = searchValue.value = isString(q.search) ? q.search : '';
+
+    let page = 1;
     if (q.page) {
-      let page = 1;
       try {
         page = parseInt(q.page as string);
       } catch (e) {
         // empty
       }
-      if (pagination.value) {
-        pagination.value.current = page;
-      } else {
-        initPage = page;
-      }
     }
+    if (pagination.value) {
+      pagination.value.current = page;
+    } else {
+      initPage = page;
+    }
+
+    division.value = 'regular';
     if (isString(q.division) && ['regular', 'troll', 'plain', 'visual'].includes(q.division)) {
       division.value = q.division;
     }
+
+    let wanted = [],
+      unwanted = [];
+    let ws = new Set(),
+      uws = new Set();
     if (isString(q.tags)) {
       let tags = q.tags.split(',');
-      let wanted = [],
-        unwanted = [];
-      let ws = new Set(),
-        uws = new Set();
       for (let tag of tags) {
         tag = tag.trim();
         if (tag.startsWith('-')) {
@@ -157,9 +168,23 @@ watch(
           ws.add(tag);
         }
       }
-      initWanted = wanted;
-      initUnwanted = unwanted;
     }
+
+    initWanted = wanted;
+    initUnwanted = unwanted;
+    wantedTags.value = wanted;
+    unwantedTags.value = unwanted;
+    if (wantedTagsEl.value) {
+      wantedTagsEl.value!.tags.length = 0;
+      wantedTagsEl.value!.tags.push(...wanted);
+    }
+    if (unwantedTagsEl.value) {
+      unwantedTagsEl.value!.tags.length = 0;
+      unwantedTagsEl.value!.tags.push(...unwanted);
+    }
+
+    fromMe.value = false;
+    uploader.value = undefined;
     if (isString(q.uploader)) {
       fromMe.value = user !== null && q.uploader === String(user.id);
       try {
@@ -168,20 +193,25 @@ watch(
         // empty
       }
     }
+    tempRatingLower.value = 3;
+    tempRatingUpper.value = 10;
     if (isString(q.rating)) {
       let r = q.rating.split(',');
       if (r.length === 2) {
         try {
-          initRatingLower = Math.max(0, Math.min(10, Math.round(parseFloat(r[0]) * 10)));
-          initRatingUpper = Math.max(0, Math.min(10, Math.round(parseFloat(r[1]) * 10)));
+          tempRatingLower.value = Math.max(0, Math.min(10, Math.round(parseFloat(r[0]) * 10)));
+          tempRatingUpper.value = Math.max(0, Math.min(10, Math.round(parseFloat(r[1]) * 10)));
         } catch (e) {
           // empty
         }
       }
     }
+
     onlyUnreviewed.value = q.reviewed === 'false';
     onlyStableRequest.value = q.stableRequest === 'true';
     if (onlyUnreviewed.value) onlyStableRequest.value = false;
+
+    order.value = '-updated';
     if (['updated', '-updated', 'rating', '-rating', 'name', '-name'].includes(q.order as string)) {
       order.value = q.order as string;
     }
@@ -189,13 +219,11 @@ watch(
   { immediate: true },
 );
 
-const wantedTags = ref<string[]>(initWanted),
-  unwantedTags = ref<string[]>(initUnwanted);
 const tempFromMe = ref(fromMe.value),
   tempOnlyUnreviewed = ref(onlyUnreviewed.value),
   tempOnlyStableRequest = ref(onlyStableRequest.value);
-const ratingLower = ref(initRatingLower),
-  ratingUpper = ref(initRatingUpper);
+const ratingLower = ref(tempRatingLower.value),
+  ratingUpper = ref(tempRatingUpper.value);
 
 const parameters = computed(() => {
   let res: Record<string, string> = {
@@ -248,9 +276,14 @@ async function fetchCharts() {
 await fetchCharts();
 
 onMounted(() => {
+  triggeredByRouteChange = false;
   watch(parameters, (params) => {
     fetchCharts(); // do not wait
-    router.push({ query: params });
+    if (triggeredByRouteChange) triggeredByRouteChange = false;
+    else {
+      preventQueryUpdate = true;
+      router.push({ query: params });
+    }
   });
 });
 
@@ -261,8 +294,8 @@ function saveFilters() {
   fromMe.value = tempFromMe.value;
   onlyUnreviewed.value = tempOnlyUnreviewed.value;
   onlyStableRequest.value = tempOnlyStableRequest.value;
-  ratingLower.value = ratingLowerEl.value!.selected;
-  ratingUpper.value = ratingUpperEl.value!.selected;
+  ratingLower.value = tempRatingLower.value;
+  ratingUpper.value = tempRatingUpper.value;
   pagination.value!.current = 1;
 }
 </script>
@@ -391,11 +424,11 @@ function saveFilters() {
         <div class="divider my-0"></div>
         <div class="flex flex-col">
           <p v-t="'rating.lower'"></p>
-          <RatingBar name="rating-lower" :init="initRatingLower" ref="ratingLowerEl" canBeZero />
+          <RatingBar name="rating-lower" v-model="tempRatingLower" canBeZero />
         </div>
         <div class="flex flex-col mt-2">
           <p v-t="'rating.upper'"></p>
-          <RatingBar name="rating-upper" :init="initRatingUpper" ref="ratingUpperEl" canBeZero />
+          <RatingBar name="rating-upper" v-model="tempRatingUpper" canBeZero />
         </div>
         <div class="flex flew-row justify-end">
           <button class="btn btn-primary" @click="saveFilters" v-t="'confirm'"></button>
