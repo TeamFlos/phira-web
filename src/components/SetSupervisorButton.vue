@@ -37,7 +37,7 @@ async function switchSetSupervisor() {
   if (doing.value) return;
   doing.value = true;
   try {
-    await fetchApi(`/user/${props.id}/update_roles`, {
+    await fetchApi(`/user/${props.id}/update-roles`, {
       method: 'POST',
       json: {
         add: !isSupervisor.value ? Permission.SET_RANKED : 0,
