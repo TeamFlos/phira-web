@@ -20,11 +20,10 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toast, toastError, useFetchApi } from '../common';
-import type { User } from '../model';
 
 import LoadOr from './LoadOr.vue';
 
-import { Permission } from '../model';
+import { Role } from '../model';
 
 
 const props = defineProps<{ id: number; initIsReviewer: boolean }>();
@@ -40,8 +39,8 @@ async function switchSetReviewer() {
     await fetchApi(`/user/${props.id}/update-roles`, {
       method: 'POST',
       json: {
-        add: !isReviewer.value ? Permission.REVIEW : 0,
-        remove: isReviewer.value ? Permission.REVIEW : 0,
+        add: !isReviewer.value ? Role.REVIEWER : 0,
+        remove: isReviewer.value ? Role.REVIEWER : 0,
       },
     });
     toast(isReviewer.value ? t('done-unset') : t('done-set'));

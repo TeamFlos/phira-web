@@ -197,24 +197,27 @@ function tryCloseReport() {
         <div class="lg:w-1/4 flex flex-col gap-3">
           <div class="gap-1 join join-vertical">
             <FollowButton class="join-item" :id="id" :initFollowing="user.following" />
-            <button
-              class="btn btn-error join-item"
-              v-t="'report.button'"
-              @click="
-                () => {
-                  reportReason = '';
-                  reportDialog!.showModal();
-                }
+            <button class="btn btn-error join-item" v-t="'report.button'" @click="() => {
+                reportReason = '';
+                reportDialog!.showModal();
+              }
               "></button>
             <template v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)">
-              <button v-if="!user.banned" class="btn btn-error join-item" @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></button>
+              <button v-if="!user.banned" class="btn btn-error join-item" @click="confirmBanDialog!.showModal()"
+                v-t="'ban.button'"></button>
               <button v-else class="btn btn-disabled w-full" v-t="'ban.button'"></button>
             </template>
           </div>
 
-          <div v-if="me && (Roles.from(me.roles).permissions(me.banned).has(Permission.SET_REVIEWER) || Roles.from(me.roles).permissions(me.banned).has(Permission.SET_SUPERVISOR))" class="gap-1 join join-vertical">
-            <SetReviewerButton   v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_REVIEWER)"   class="join-item" :id="id" :initIsReviewer="Roles.from(user.roles).permissions(me.banned).has(Permission.REVIEW)" />
-            <SetSupervisorButton v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_SUPERVISOR)" class="join-item" :id="id" :initIsSupervisor="Roles.from(user.roles).permissions(me.banned).has(Permission.SET_RANKED)" />
+          <div
+            v-if="me && (Roles.from(me.roles).permissions(me.banned).has(Permission.SET_REVIEWER) || Roles.from(me.roles).permissions(me.banned).has(Permission.SET_SUPERVISOR))"
+            class="gap-1 join join-vertical">
+            <SetReviewerButton v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_REVIEWER)"
+              class="join-item" :id="id"
+              :initIsReviewer="Roles.from(user.roles).permissions(me.banned).has(Permission.REVIEW)" />
+            <SetSupervisorButton v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_SUPERVISOR)"
+              class="join-item" :id="id"
+              :initIsSupervisor="Roles.from(user.roles).permissions(me.banned).has(Permission.SET_RANKED)" />
           </div>
 
           <div class="card bg-base-100 shadow-xl p-4">
@@ -267,7 +270,8 @@ function tryCloseReport() {
   <dialog class="modal modal-bottom sm:modal-middle" id="report" ref="reportDialog" @close.prevent="tryCloseReport">
     <div class="modal-box">
       <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
-      <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
+      <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')"
+        v-model="reportReason"></textarea>
       <div class="modal-action">
         <button class="btn btn-neutral" :disabled="reporting" @click="tryCloseReport" v-t="'cancel'"></button>
         <button class="btn btn-error" @click="report">
@@ -277,6 +281,5 @@ function tryCloseReport() {
     </div>
     <div class="modal-backdrop">
       <button class="cursor-default" @click="tryCloseReport"></button>
-    </div>
-  </dialog>
-</template>
+  </div>
+</dialog></template>
