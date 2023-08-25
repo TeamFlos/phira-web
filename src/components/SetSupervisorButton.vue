@@ -20,11 +20,10 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toast, toastError, useFetchApi } from '../common';
-import type { User } from '../model';
 
 import LoadOr from './LoadOr.vue';
 
-import { Permission } from '../model';
+import { Role } from '../model';
 
 
 const props = defineProps<{ id: number; initIsSupervisor: boolean }>();
@@ -40,8 +39,8 @@ async function switchSetSupervisor() {
     await fetchApi(`/user/${props.id}/update-roles`, {
       method: 'POST',
       json: {
-        add: !isSupervisor.value ? Permission.SET_RANKED : 0,
-        remove: isSupervisor.value ? Permission.SET_RANKED : 0,
+        add: !isSupervisor.value ? Role.SUPERVISOR : 0,
+        remove: isSupervisor.value ? Role.SUPERVISOR : 0,
       },
     });
     toast(isSupervisor.value ? t('done-unset') : t('done-set'));
