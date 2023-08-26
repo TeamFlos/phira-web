@@ -4,6 +4,7 @@ import type { Router } from 'vue-router';
 import { toast as toastSonner } from 'vue-sonner';
 
 import { SUPPORTED_LOCALES, i18n } from './main';
+import { Roles, type User } from './model';
 
 import moment from 'moment';
 
@@ -15,6 +16,10 @@ export const LANGUAGES = {
   'zh-TW': '繁體中文',
   'en-US': 'English',
 };
+
+export function userPermissions(user: User) {
+  return Roles.from(user.roles).permissions(user.banned);
+}
 
 export function loggedIn() {
   return !!getCookie('access_token');

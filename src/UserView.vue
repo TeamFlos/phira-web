@@ -57,15 +57,14 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle } from './common';
-import { Permission, Roles, type Chart, type User, type UserView, type Page } from './model';
+import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle, userPermissions } from './common';
+import { Permission, Roles, type Chart, type User, type UserView, type Page, Role } from './model';
 
 import ChartCard from './components/ChartCard.vue';
 import FollowButton from './components/FollowButton.vue';
-import SetReviewerButton from './components/SetReviewerButton.vue';
-import SetSupervisorButton from './components/SetSupervisorButton.vue';
 import LoadOr from './components/LoadOr.vue';
 import LoadView from './components/LoadView.vue';
+import ModifyRoleButton from './components/ModifyRoleButton.vue';
 import PropItem from './components/PropItem.vue';
 import RecordList from './components/RecordList.vue';
 import UserAvatar from './components/UserAvatar.vue';
@@ -160,13 +159,40 @@ function tryCloseReport() {
               </div>
             </div>
             <div class="flex flex-col items-center mt-3 lg:mt-0 lg:ml-4 lg:items-start grow">
-              <p class="font-black text-3xl" :class="[userNameClass(user.badges)]">
-                {{ user.name }}
-              </p>
-              <p v-if="user.bio" class="whitespace-nowrap">{{ user.bio }}</p>
-              <p v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></p>
+              <div class="flex flex-col lg:flex-row items-center lg:items-end gap-2">
+                <span class="font-black text-3xl max-w-sm truncate" :class="[userNameClass(user.badges)]">
+                  {{ user.name }}
+                </span>
+                <div class="flex flex-row join min-w-[12rem] lg:min-w-0 gap-[0.15rem]">
+                  <FollowButton class="join-item grow btn-md lg:btn-sm" :id="id" :initFollowing="user.following" />
+                  <div class="dropdown">
+                    <label tabindex="0" class="btn btn-secondary btn-md lg:btn-sm rounded-s-none">
+                      <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </label>
+                    <ul tabindex="0" class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-52">
+                      <li>
+                        <a
+                          @click="
+                            () => {
+                              reportReason = '';
+                              reportDialog!.showModal();
+                            }
+                          "
+                          v-t="'report.button'"></a>
+                      </li>
+                      <template v-if="me && userPermissions(me).has(Permission.BAN_USER)">
+                        <li v-if="!user.banned"><a @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></a></li>
+                        <li v-else class="disabled"><a v-t="'ban.done'"></a></li>
+                      </template>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-2 lg:mt-0">
+                <span v-if="user.bio" class="whitespace-nowrap max-w-xs truncate">{{ user.bio }}</span> <span v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></span>
+              </div>
             </div>
-            <div class="flex flex-row flex-wrap justify-center lg:-mt-4">
+            <div class="flex flex-row justify-center flex-wrap lg:flex-nowrap overflow-x-hidden lg:-mt-4 lg:ml-4">
               <a class="stat w-fit group cursor-pointer" :href="`/user/?following=${id}`" target="_blank">
                 <div class="stat-title text-center group-hover:link" v-t="'num-follower'"></div>
                 <div class="stat-value text-center">
@@ -196,28 +222,14 @@ function tryCloseReport() {
       <div class="flex flex-col lg:flex-row mt-4 gap-4">
         <div class="lg:w-1/4 flex flex-col gap-3">
           <div class="gap-1 join join-vertical">
-            <FollowButton class="join-item" :id="id" :initFollowing="user.following" />
-            <button class="btn btn-error join-item" v-t="'report.button'" @click="() => {
-                reportReason = '';
-                reportDialog!.showModal();
-              }
-              "></button>
-            <template v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.BAN_USER)">
-              <button v-if="!user.banned" class="btn btn-error join-item" @click="confirmBanDialog!.showModal()"
-                v-t="'ban.button'"></button>
-              <button v-else class="btn btn-disabled w-full" v-t="'ban.button'"></button>
-            </template>
-          </div>
-
-          <div
-            v-if="me && (Roles.from(me.roles).permissions(me.banned).has(Permission.SET_REVIEWER) || Roles.from(me.roles).permissions(me.banned).has(Permission.SET_SUPERVISOR))"
-            class="gap-1 join join-vertical">
-            <SetReviewerButton v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_REVIEWER)"
-              class="join-item" :id="id"
-              :initIsReviewer="Roles.from(user.roles).permissions(me.banned).has(Permission.REVIEW)" />
-            <SetSupervisorButton v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_SUPERVISOR)"
-              class="join-item" :id="id"
-              :initIsSupervisor="Roles.from(user.roles).permissions(me.banned).has(Permission.SET_RANKED)" />
+            <ModifyRoleButton :id="id" role="reviewer" :permission="Permission.SET_REVIEWER" :initHasRole="Roles.from(user.roles).has(Role.REVIEWER)" :me="me" class="join-item" />
+            <ModifyRoleButton
+              :id="id"
+              role="supervisor"
+              :permission="Permission.SET_SUPERVISOR"
+              :initHasRole="Roles.from(user.roles).has(Role.SUPERVISOR)"
+              :me="me"
+              class="join-item" />
           </div>
 
           <div class="card bg-base-100 shadow-xl p-4">
@@ -270,8 +282,7 @@ function tryCloseReport() {
   <dialog class="modal modal-bottom sm:modal-middle" id="report" ref="reportDialog" @close.prevent="tryCloseReport">
     <div class="modal-box">
       <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
-      <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')"
-        v-model="reportReason"></textarea>
+      <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
       <div class="modal-action">
         <button class="btn btn-neutral" :disabled="reporting" @click="tryCloseReport" v-t="'cancel'"></button>
         <button class="btn btn-error" @click="report">
@@ -281,5 +292,6 @@ function tryCloseReport() {
     </div>
     <div class="modal-backdrop">
       <button class="cursor-default" @click="tryCloseReport"></button>
-  </div>
-</dialog></template>
+    </div>
+  </dialog>
+</template>

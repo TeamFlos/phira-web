@@ -18,7 +18,7 @@ export enum Permission {
   SET_SUPERVISOR = 0x00004000,
 }
 
-class Permissions {
+export class Permissions {
   private permissions: number;
 
   constructor(permission: Permission, ...rest: Permission[]) {
