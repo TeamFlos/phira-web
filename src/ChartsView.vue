@@ -70,9 +70,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, fileToURL, pageCount, isString, loggedIn } from './common';
+import { useFetchApi, pageCount, isString, loggedIn, userPermissions } from './common';
 
-import { Permission, Roles } from './model';
+import { Permission } from './model';
 import type { Chart, Page, User } from './model';
 
 import ChartCard from './components/ChartCard.vue';
@@ -395,7 +395,7 @@ function saveFilters() {
             @click="tempFromMe = !tempFromMe"
             v-t="'filters.uploaded-by-me'"></button>
           <button
-            v-if="user && Roles.from(user.roles).permissions(user.banned).has(Permission.SEE_UNREVIEWED)"
+            v-if="user && userPermissions(user).has(Permission.SEE_UNREVIEWED)"
             class="btn btn-neutral btn-outline flex-1"
             :class="{ 'btn-active': tempOnlyUnreviewed }"
             @click="

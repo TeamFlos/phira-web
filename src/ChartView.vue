@@ -70,8 +70,8 @@ const { t } = useI18n();
 
 import moment from 'moment';
 
-import { useFetchApi, fileToURL, toast, toastError, loggedIn, setTitle } from './common';
-import { Permission, Roles, type Chart, type User } from './model';
+import { useFetchApi, fileToURL, toast, toastError, loggedIn, setTitle, userPermissions } from './common';
+import { Permission, type Chart, type User } from './model';
 
 import LeaderboardView from './components/LeaderboardView.vue';
 import LoadOr from './components/LoadOr.vue';
@@ -207,7 +207,7 @@ async function submitRating() {
                   <TagList class="w-full" :canEdit="false" :init="tags" />
                 </template>
               </UserCard>
-              <div v-if="me && Roles.from(me.roles).permissions(me.banned).has(Permission.SET_RANKED) && chart.stable" class="card shadow-xl">
+              <div v-if="me && userPermissions(me).has(Permission.SET_RANKED) && chart.stable" class="card shadow-xl">
                 <button v-if="chart.ranked" class="btn btn-neutral btn-active w-full" @click="setRanked(false)">
                   <LoadOr :loading="settingRanked">{{ t('set-special') }}</LoadOr>
                 </button>
