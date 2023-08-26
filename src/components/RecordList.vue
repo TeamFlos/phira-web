@@ -37,6 +37,34 @@ async function fetchRecords() {
 await fetchRecords();
 
 watch(() => props.params, fetchRecords);
+
+import icon_a from '@/assets/rank/a.webp';
+import icon_b from '@/assets/rank/b.webp';
+import icon_c from '@/assets/rank/c.webp';
+import icon_f from '@/assets/rank/f.webp';
+import icon_s from '@/assets/rank/s.webp';
+import icon_v from '@/assets/rank/v.webp';
+import icon_fc from '@/assets/rank/fc.webp';
+import icon_phi from '@/assets/rank/phi.webp';
+
+function getRankIcon(record: PlayRecord): string {
+  if (record.score < 700000) {
+    return icon_f;
+  } else if (record.score < 820000) {
+    return icon_c;
+  } else if (record.score < 880000) {
+    return icon_b;
+  } else if (record.score < 920000) {
+    return icon_a;
+  } else if (record.score < 960000) {
+    return icon_s;
+  } else if (record.score < 1000000) {
+    return record.full_combo ? icon_fc : icon_v;
+  } else {
+    return icon_phi;
+  }
+}
+
 </script>
 
 <template>
@@ -51,21 +79,7 @@ watch(() => props.params, fetchRecords);
         <img class="w-full aspect-[4/1] lg:aspect-[8/3]" :src="fileToURL(record?.chartDetail?.illustration) + '.thumbnail'" />
       </figure>
       <div class="card-body flex flex-row items-center justify-start p-4 gap-0 group aspect-[4/1] lg:aspect-[8/3] min-h-0 min-w-0">
-        <p
-          class="font-tektur text-7xl text-center flex-none mx-2 w-12"
-          :class="{
-            '-mt-4': record.score >= 1000000,
-            'drop-shadow-[0_0_4px_#1e7fff]': 960000 <= record.score && record.score < 1000000 && record.full_combo,
-            'drop-shadow-[0_0_4px_#fffc14]': record.score >= 1000000,
-          }">
-          <span v-if="record.score < 700000">F</span>
-          <span v-else-if="record.score < 820000">C</span>
-          <span v-else-if="record.score < 880000">B</span>
-          <span v-else-if="record.score < 920000">A</span>
-          <span v-else-if="record.score < 960000">S</span>
-          <span v-else-if="record.score < 1000000" :class="{ 'text-[#1e7fff]': record.full_combo }">V</span>
-          <span v-else class="text-[#fffc14] -ml-1">φ</span>
-        </p>
+        <img :src="getRankIcon(record)" class="h-24 p-4">
         <div class="grow min-w-0">
           <p class="group-hover:link truncate w-auto">
             {{ record?.chartDetail?.name }}

@@ -9,7 +9,6 @@ export default {
       halva: ["Halva", "sans-serif"],
       mono: ["Roboto Mono", ...defaultTheme.fontFamily.mono],
       ubuntu: ["Ubuntu", "sans-serif"],
-      tektur: ["Tektur"],
     },
   },
   plugins: [require("@tailwindcss/typography"), require("daisyui")],
