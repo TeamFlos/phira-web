@@ -165,11 +165,11 @@ function tryCloseReport() {
                 </span>
                 <div class="flex flex-row join min-w-[12rem] lg:min-w-0 gap-[0.15rem]">
                   <FollowButton class="join-item grow btn-md lg:btn-sm" :id="id" :initFollowing="user.following" />
-                  <div class="dropdown">
+                  <div class="dropdown dropdown-end">
                     <label tabindex="0" class="btn btn-secondary btn-md lg:btn-sm rounded-s-none">
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </label>
-                    <ul tabindex="0" class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-52">
+                    <ul tabindex="0" class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-48 lg:!right-auto">
                       <li>
                         <a
                           @click="
