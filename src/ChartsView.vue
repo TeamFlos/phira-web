@@ -17,9 +17,19 @@ en:
 
   filter-opts: Filter options
   filters:
-    uploaded-by-me: Uploaded by me
-    unreviewed-only: Unreviewed only
-    stb-req-only: Stb. requests only
+    from-me:
+      any: Uploaded by me
+      yes: Only uploaded by me
+    unreviewed:
+      any: Unreviewed
+      no: Only reviewed
+      yes: Only unreviewed
+    stb:
+      any: Stb.
+      stb: Only stb.
+      ranked: Only ranked
+      unranked: Only unranked
+      req: Only stb. request
 
   tags:
     wanted: Wanted tags
@@ -49,9 +59,19 @@ zh-CN:
 
   filter-opts: 过滤条件
   filters:
-    uploaded-by-me: 我上传的
-    unreviewed-only: 只看未审核的
-    stb-req-only: 只看上架申请
+    from-me:
+      any: 我上传的
+      yes: 只看我上传的
+    unreviewed:
+      any: 未审核
+      no: 只看审核过的
+      yes: 只看未审核的
+    stb:
+      any: 上架申请
+      stb: 全部上架谱
+      ranked: 只看非特殊
+      unranked: 只看特殊
+      req: 只看上架申请
 
   tags:
     wanted: 想包含的标签
@@ -107,9 +127,9 @@ const wantedTagsEl = ref<typeof TagList>(),
   unwantedTagsEl = ref<typeof TagList>();
 const tempRatingLower = ref(3),
   tempRatingUpper = ref(10);
-const fromMe = ref(false),
-  onlyUnreviewed = ref(false),
-  onlyStableRequest = ref(false);
+const fromMe = ref('any'),
+  unreviewed = ref('any'),
+  stable = ref('any');
 const uploader = ref<number>();
 
 let initWanted: string[] = [],
@@ -185,16 +205,28 @@ watch(
       unwantedTagsEl.value!.tags.push(...unwanted);
     }
 
-    fromMe.value = false;
+    fromMe.value = 'any';
+    if (isString(q.fromMe) && ['any', 'yes'].includes(q.fromMe)) {
+      fromMe.value = q.fromMe as string;
+    }
+    unreviewed.value = 'any';
+    if (isString(q.unreviewed) && ['any', 'no', 'yes'].includes(q.unreviewed)) {
+      unreviewed.value = q.unreviewed as string;
+    }
+    stable.value = 'any';
+    if (isString(q.stable) && ['any', 'stb', 'ranked', 'unranked', 'req'].includes(q.stable)) {
+      stable.value = q.stable as string;
+    }
+
     uploader.value = undefined;
     if (isString(q.uploader)) {
-      fromMe.value = user !== null && q.uploader === String(user.id);
       try {
         uploader.value = parseInt(q.uploader);
       } catch (e) {
         // empty
       }
     }
+
     tempRatingLower.value = 3;
     tempRatingUpper.value = 10;
     if (isString(q.rating)) {
@@ -209,10 +241,6 @@ watch(
       }
     }
 
-    onlyUnreviewed.value = q.reviewed === 'false';
-    onlyStableRequest.value = q.stableRequest === 'true';
-    if (onlyUnreviewed.value) onlyStableRequest.value = false;
-
     order.value = '-updated';
     if (['updated', '-updated', 'rating', '-rating', 'name', '-name'].includes(q.order as string)) {
       order.value = q.order as string;
@@ -222,8 +250,8 @@ watch(
 );
 
 const tempFromMe = ref(fromMe.value),
-  tempOnlyUnreviewed = ref(onlyUnreviewed.value),
-  tempOnlyStableRequest = ref(onlyStableRequest.value);
+  tempUnreviewed = ref(unreviewed.value),
+  tempStable = ref(stable.value);
 const ratingLower = ref(tempRatingLower.value),
   ratingUpper = ref(tempRatingUpper.value);
 
@@ -248,15 +276,14 @@ const parameters = computed(() => {
   if (uploader.value) {
     res.uploader = String(uploader.value);
   }
-  if (fromMe.value && user) {
-    res.uploader = String(user?.id);
+  if (fromMe.value !== 'any') {
+    res.fromMe = fromMe.value;
   }
-  if (onlyUnreviewed.value) {
-    res.reviewed = 'false';
-    res.stableRequest = 'false';
+  if (unreviewed.value !== 'any') {
+    res.unreviewed = unreviewed.value;
   }
-  if (onlyStableRequest.value) {
-    res.stableRequest = 'true';
+  if (stable.value !== 'any') {
+    res.stable = stable.value;
   }
   if (ratingLower.value !== 3 || ratingUpper.value !== 10) {
     res.rating = ratingLower.value / 10 + ',' + ratingUpper.value / 10;
@@ -266,10 +293,38 @@ const parameters = computed(() => {
 
 async function fetchCharts() {
   charts.value = undefined;
-  let params = {
+  let params: Record<string, string> = {
     pageNum: String(PAGE_NUM),
     ...parameters.value,
   };
+  delete params.fromMe;
+  delete params.unreviewed;
+  delete params.stable;
+
+  let fromMe = parameters.value.fromMe,
+    unreviewed = parameters.value.unreviewed,
+    stable = parameters.value.stable;
+  if (fromMe === 'yes' && user) {
+    params.uploader = String(user?.id);
+  }
+  if (unreviewed && unreviewed !== 'any') {
+    params.reviewed = unreviewed === 'yes' ? 'false' : 'true';
+  }
+  if (stable && !['any', 'req'].includes(stable)) {
+    params.stable = 'true';
+  }
+  switch (stable) {
+    case 'ranked':
+      params.ranked = 'true';
+      break;
+    case 'unranked':
+      params.ranked = 'false';
+      break;
+    case 'req':
+      params.stableRequest = 'true';
+      break;
+  }
+
   const resp = (await fetchApi('/chart?' + new URLSearchParams(params))) as Page<Chart>;
   totalCount.value = resp.count;
   charts.value = resp.results;
@@ -294,11 +349,15 @@ function saveFilters() {
   wantedTags.value = [...wantedTagsEl.value!.tags];
   unwantedTags.value = [...unwantedTagsEl.value!.tags];
   fromMe.value = tempFromMe.value;
-  onlyUnreviewed.value = tempOnlyUnreviewed.value;
-  onlyStableRequest.value = tempOnlyStableRequest.value;
+  unreviewed.value = tempUnreviewed.value;
+  stable.value = tempStable.value;
   ratingLower.value = tempRatingLower.value;
   ratingUpper.value = tempRatingUpper.value;
   pagination.value!.current = 1;
+}
+
+function rotate(value: string, choices: string[]): string {
+  return choices[choices.indexOf(value) + 1] ?? choices[0];
 }
 </script>
 
@@ -391,28 +450,20 @@ function saveFilters() {
           <button
             v-if="user"
             class="btn btn-neutral btn-outline flex-1"
-            :class="{ 'btn-active': tempFromMe }"
-            @click="tempFromMe = !tempFromMe"
-            v-t="'filters.uploaded-by-me'"></button>
+            :class="{ 'btn-active': tempFromMe !== 'any' }"
+            @click="tempFromMe = rotate(tempFromMe, ['any', 'yes'])"
+            v-t="'filters.from-me.' + tempFromMe"></button>
           <button
             v-if="user && userPermissions(user).has(Permission.SEE_UNREVIEWED)"
             class="btn btn-neutral btn-outline flex-1"
-            :class="{ 'btn-active': tempOnlyUnreviewed }"
-            @click="
-              () => {
-                if ((tempOnlyUnreviewed = !tempOnlyUnreviewed)) tempOnlyStableRequest = false;
-              }
-            "
-            v-t="'filters.unreviewed-only'"></button>
+            :class="{ 'btn-active': tempUnreviewed !== 'any' }"
+            @click="tempUnreviewed = rotate(tempUnreviewed, ['any', 'no', 'yes'])"
+            v-t="'filters.unreviewed.' + tempUnreviewed"></button>
           <button
             class="btn btn-neutral btn-outline flex-1"
-            :class="{ 'btn-active': tempOnlyStableRequest }"
-            @click="
-              () => {
-                if ((tempOnlyStableRequest = !tempOnlyStableRequest)) tempOnlyUnreviewed = false;
-              }
-            "
-            v-t="'filters.stb-req-only'"></button>
+            :class="{ 'btn-active': tempStable !== 'any' }"
+            @click="tempStable = rotate(tempStable, ['any', 'stb', 'ranked', 'unranked', 'req'])"
+            v-t="'filters.stb.' + tempStable"></button>
         </div>
         <div class="divider my-0"></div>
         <div>

@@ -64,7 +64,6 @@ function getRankIcon(record: PlayRecord): string {
     return icon_phi;
   }
 }
-
 </script>
 
 <template>
@@ -79,7 +78,7 @@ function getRankIcon(record: PlayRecord): string {
         <img class="w-full aspect-[4/1] lg:aspect-[8/3]" :src="fileToURL(record?.chartDetail?.illustration) + '.thumbnail'" />
       </figure>
       <div class="card-body flex flex-row items-center justify-start p-4 gap-0 group aspect-[4/1] lg:aspect-[8/3] min-h-0 min-w-0">
-        <img :src="getRankIcon(record)" class="h-24 p-4">
+        <img :src="getRankIcon(record)" class="h-24 p-4" />
         <div class="grow min-w-0">
           <p class="group-hover:link truncate w-auto">
             {{ record?.chartDetail?.name }}
