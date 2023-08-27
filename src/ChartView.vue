@@ -245,7 +245,7 @@ async function submitRating() {
                 <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': contentTab === 'ldb' }" @click="switchTab('ldb')" v-t="'leaderboard'"></a>
                 <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': contentTab === 'stb' }" @click="switchTab('stb')" v-t="'stb-history'"></a>
               </div>
-              <div class="card bg-base-100 shadow-xl p-4 rounded-t-none">
+              <div class="card bg-base-100 shadow-xl p-4 rounded-ss-none">
                 <LoadSuspense v-if="contentTab === 'ldb'">
                   <LeaderboardView :chart="chart.id" />
                 </LoadSuspense>
