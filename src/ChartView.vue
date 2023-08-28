@@ -101,15 +101,9 @@ if (loggedIn()) {
   fetchApi('/me', {}, (user) => (me.value = user as User));
 }
 
-const chartRating = ref<typeof RatingBar>();
-const rating = ref<number>();
-
-onMounted(() => {
-  watch(
-    () => chartRating.value?.selected,
-    (r) => (rating.value = r),
-  );
-});
+const rating = ref(Math.round((chart.rating ?? 0) * 10));
+const ratingChanged = ref(false);
+watch(rating, () => (ratingChanged.value = true));
 
 const contentTab = ref('ldb');
 watch(
@@ -234,8 +228,8 @@ async function submitRating() {
                     })
                   }}
                 </p>
-                <RatingBar name="chart-rating" :init="Math.round((chart.rating ?? 0) * 10)" ref="chartRating" />
-                <button v-if="rating" class="btn btn-primary mt-2" @click="submitRating">
+                <RatingBar name="chart-rating" v-model="rating" />
+                <button v-if="ratingChanged" class="btn btn-primary mt-2" @click="submitRating">
                   <LoadOr :loading="submittingRating">{{ t('submit') }}</LoadOr>
                 </button>
               </div>
