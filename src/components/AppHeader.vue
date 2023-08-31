@@ -106,7 +106,7 @@ function doLogout() {
     <div class="drawer">
       <input id="drawer" type="checkbox" class="drawer-toggle" v-model="drawerOpened" />
       <div class="drawer-content flex flex-col">
-        <div class="w-full navbar h-16 fixed top-0 backdrop-blur z-30">
+        <div class="w-full navbar h-16 fixed top-0 backdrop-blur-lg z-30">
           <div class="navbar-start">
             <label for="drawer" class="btn btn-square btn-ghost md:hidden">
               <i class="fa-solid fa-bars text-xl"></i>
