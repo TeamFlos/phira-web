@@ -142,7 +142,7 @@ export type Chart = {
   composer: string;
   illustrator: string;
   charter: string;
-  description: string;
+  description?: string;
   level: string;
   difficulty: number;
   reviewed: boolean;
