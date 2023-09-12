@@ -30,7 +30,7 @@ zh-CN:
 </i18n>
 
 <script lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
@@ -98,6 +98,16 @@ function doLogout() {
   logout();
   toast(t('logged-out'));
 }
+
+const atTop = ref(true);
+function onScroll() {
+  atTop.value = window.scrollY < 10;
+}
+window.addEventListener('scroll', onScroll);
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll);
+});
+
 </script>
 
 <template>
@@ -106,7 +116,7 @@ function doLogout() {
     <div class="drawer">
       <input id="drawer" type="checkbox" class="drawer-toggle" v-model="drawerOpened" />
       <div class="drawer-content flex flex-col">
-        <div class="w-full navbar h-16 fixed top-0 backdrop-blur-lg z-30">
+        <div class="w-full navbar h-16 fixed top-0 z-30 transition-all" :class="{ 'shadow-xl': !atTop, 'backdrop-blur-lg': !atTop }" >
           <div class="navbar-start">
             <label for="drawer" class="btn btn-square btn-ghost md:hidden">
               <i class="fa-solid fa-bars text-xl"></i>
