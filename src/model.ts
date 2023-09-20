@@ -127,6 +127,8 @@ export type User = {
   roles: number;
   banned: boolean;
 
+  rks: number;
+
   follower_count: number;
   following_count: number;
 

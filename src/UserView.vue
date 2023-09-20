@@ -3,6 +3,7 @@
 en:
   play-count: Play Count
   avg-accuracy: Avg. Accuracy
+  rks: rks
 
   recent-records: Recent Records
 
@@ -27,6 +28,7 @@ en:
 zh-CN:
   play-count: 总游玩次数
   avg-accuracy: 平均准确率
+  rks: rks
 
   recent-records: 最近游玩记录
 
@@ -192,7 +194,7 @@ function tryCloseReport() {
                 <span v-if="user.bio" class="whitespace-nowrap max-w-xs truncate">{{ user.bio }}</span> <span v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></span>
               </div>
             </div>
-            <div class="flex flex-row justify-center flex-wrap lg:flex-nowrap overflow-x-hidden lg:-mt-4 lg:ml-4">
+            <div class="flex flex-row justify-center flex-wrap overflow-x-hidden lg:-mt-4 lg:ml-4">
               <a class="stat w-fit group cursor-pointer" :href="`/user/?following=${id}`" target="_blank">
                 <div class="stat-title text-center group-hover:link" v-t="'num-follower'"></div>
                 <div class="stat-value text-center">
@@ -213,6 +215,12 @@ function tryCloseReport() {
                 <div class="stat-title text-center" v-t="'avg-accuracy'"></div>
                 <div class="stat-value text-center">
                   {{ (stats.avgAccuracy * 100).toFixed(2) + '%' }}
+                </div>
+              </div>
+              <div class="stat w-fit">
+                <div class="stat-title text-center" v-t="'rks'"></div>
+                <div class="stat-value tex-center">
+                  {{ (user.rks).toFixed(2) }}
                 </div>
               </div>
             </div>
