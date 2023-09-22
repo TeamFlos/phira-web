@@ -189,6 +189,24 @@ export type PlayRecord = {
   time: string;
 };
 
+export type PoolItem = {
+  record: number,
+  chart: number,
+  rks: number,
+}
+
+export type PoolItemEx = {
+  record?: PlayRecord,
+  chart?: Chart,
+  rks: number,
+}
+
+export type RecordPool = {
+  bestPool: PoolItem[],
+  recentPool: PoolItem[],
+  rks: number,
+}
+
 export type StbHistory = {
   id: number;
   reviewer?: number;

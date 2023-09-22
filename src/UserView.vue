@@ -6,6 +6,7 @@ en:
   rks: rks
 
   recent-records: Recent Records
+  record-pool: Record Pool
 
   report:
     button: Report User
@@ -31,6 +32,7 @@ zh-CN:
   rks: rks
 
   recent-records: 最近游玩记录
+  record-pool: 记录池
 
   report:
     button: 举报用户
@@ -69,6 +71,7 @@ import LoadView from './components/LoadView.vue';
 import ModifyRoleButton from './components/ModifyRoleButton.vue';
 import PropItem from './components/PropItem.vue';
 import RecordList from './components/RecordList.vue';
+import RecordPool from './components/RecordPool.vue';
 import UserAvatar from './components/UserAvatar.vue';
 
 const route = useRoute();
@@ -267,6 +270,10 @@ function tryCloseReport() {
           <div class="card bg-base-100 shadow-xl p-4">
             <h2 class="text-2xl" v-t="'recent-records'"></h2>
             <RecordList class="mt-2" :params="{ player: String(user.id) }" :limit="12" />
+          </div>
+          <div class="card bg-base-100 shadow-xl p-4">
+            <h2 class="text-2xl" v-t="'record-pool'"></h2>
+            <RecordPool class="mt-2" :player=user.id />
           </div>
         </div>
       </div>
