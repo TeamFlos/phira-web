@@ -2,7 +2,7 @@
 import { fileToURL } from '../common';
 import type { Chart } from '../model';
 
-const props = defineProps<{ chart: Chart }>();
+defineProps<{ chart: Chart }>();
 </script>
 
 <template>

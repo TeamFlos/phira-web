@@ -6,7 +6,8 @@ en:
   rks: rks
 
   recent-records: Recent Records
-  record-pool: Record Pool
+  best-pool: Best 20
+  recent-pool: Recent 10
 
   report:
     button: Report User
@@ -32,7 +33,8 @@ zh-CN:
   rks: rks
 
   recent-records: 最近游玩记录
-  record-pool: 记录池
+  best-pool: Best 20
+  recent-pool: Recent 10
 
   report:
     button: 举报用户
@@ -55,14 +57,15 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle, userPermissions } from './common';
-import { Permission, Roles, type Chart, type User, type UserView, type Page, Role } from './model';
+import { Permission, Roles, type Chart, type User, type UserView, type Page, Role, type PlayRecord, type RecordPool, type PoolItem } from './model';
+import { type PlayRecordEx } from './components/RecordList.vue';
 
 import ChartCard from './components/ChartCard.vue';
 import FollowButton from './components/FollowButton.vue';
@@ -71,7 +74,6 @@ import LoadView from './components/LoadView.vue';
 import ModifyRoleButton from './components/ModifyRoleButton.vue';
 import PropItem from './components/PropItem.vue';
 import RecordList from './components/RecordList.vue';
-import RecordPool from './components/RecordPool.vue';
 import UserAvatar from './components/UserAvatar.vue';
 
 const route = useRoute();
@@ -147,6 +149,31 @@ async function report() {
 function tryCloseReport() {
   if (!reporting.value) reportDialog.value!.close();
 }
+
+const recentRecords = ref<PlayRecordEx[]>();
+fetchApi(`/record/?player=${id}`, {}, (resp) => {
+  let records = resp as PlayRecordEx[];
+  if (records.length > 12) records.splice(12);
+  recentRecords.value = records;
+});
+
+const bestPool = ref<PlayRecord[]>(),
+  recentPool = ref<PlayRecord[]>();
+fetchApi(`/record/get-pool/${id}`, {}, (resp) => {
+  let pool = resp as RecordPool;
+  async function dispatch(pool: PoolItem[], dest: Ref<PlayRecordEx[] | undefined>) {
+    let charts = (await fetchApi(`/chart/multi-get?ids=${pool.map((p) => p.chart).join(',')}`)) as Chart[];
+    let res = (await fetchApi(`/record/multi-get?ids=${pool.map((p) => p.record).join(',')}`)) as PlayRecordEx[];
+    for (let i = 0; i < pool.length; i++) {
+      res[i].label = `${pool[i].rks.toFixed(2)} / ${charts[i].difficulty.toFixed(2)}`;
+    }
+    dest.value = res;
+  }
+  dispatch(pool.bestPool, bestPool);
+  dispatch(pool.recentPool, recentPool);
+});
+
+const currentBestPool = ref(true);
 </script>
 
 <template>
@@ -223,7 +250,7 @@ function tryCloseReport() {
               <div class="stat w-fit">
                 <div class="stat-title text-center" v-t="'rks'"></div>
                 <div class="stat-value tex-center">
-                  {{ (user.rks).toFixed(2) }}
+                  {{ user.rks.toFixed(2) }}
                 </div>
               </div>
             </div>
@@ -269,11 +296,19 @@ function tryCloseReport() {
           </div>
           <div class="card bg-base-100 shadow-xl p-4">
             <h2 class="text-2xl" v-t="'recent-records'"></h2>
-            <RecordList class="mt-2" :params="{ player: String(user.id) }" :limit="12" />
+            <RecordList class="mt-2" :records="recentRecords" />
           </div>
-          <div class="card bg-base-100 shadow-xl p-4">
+          <!-- <div class="card bg-base-100 shadow-xl p-4">
             <h2 class="text-2xl" v-t="'record-pool'"></h2>
-            <RecordPool class="mt-2" :player=user.id />
+            <RecordList class="mt-2" :records="bestPool"></RecordList>
+          </div> -->
+          <div class="tabs">
+            <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': currentBestPool }" @click="currentBestPool = true" v-t="'best-pool'"></a>
+            <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': !currentBestPool }" @click="currentBestPool = false" v-t="'recent-pool'"></a>
+          </div>
+          <div class="card bg-base-100 shadow-xl p-4 rounded-ss-none">
+            <RecordList v-if="currentBestPool" :records="bestPool"></RecordList>
+            <RecordList v-if="!currentBestPool" :records="recentPool"></RecordList>
           </div>
         </div>
       </div>

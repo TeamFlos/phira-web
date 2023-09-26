@@ -1,5 +1,17 @@
+<i18n>
+en:
+  empty: No records
+
+zh-CN:
+  empty: 暂无记录
+
+</i18n>
+
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, watch } from 'vue';
+
+import { useI18n } from 'vue-i18n';
+useI18n();
 
 import { useFetchApi, fileToURL } from '../common';
 import type { Chart, PlayRecord } from '../model';
@@ -7,36 +19,41 @@ import type { Chart, PlayRecord } from '../model';
 import LoadView from './LoadView.vue';
 
 const props = defineProps<{
-  params?: Record<string, string>;
-  limit?: number;
+  records?: PlayRecordEx[];
 }>();
 
 const fetchApi = useFetchApi();
 
-type PlayRecordEx = PlayRecord & { chartDetail?: Chart };
+export type PlayRecordEx = PlayRecord & { label?: string; chartDetail?: Chart };
 
-const records = ref<ReturnType<typeof reactive<PlayRecordEx>>[]>();
+const records = ref<PlayRecordEx[]>();
 
-async function fetchRecords() {
-  records.value = undefined;
-  let resp = (await fetchApi('/record?' + new URLSearchParams(props.params ?? {}))) as PlayRecordEx[];
-  if (props.limit && resp.length > props.limit) {
-    resp.splice(props.limit);
+function fetchRecords() {
+  records.value = props.records;
+  if (props.records) {
+    fetchApi(
+      `/chart/multi-get?` +
+        new URLSearchParams({
+          ids: props.records.map((r) => r.chart).join(','),
+        }),
+      {},
+      (resp) => {
+        let charts = resp as Chart[];
+        if (records.value) {
+          for (let i = 0; i < charts.length; i++) {
+            if (records.value[i].chart == charts[i].id) {
+              records.value[i].chartDetail = charts[i];
+            }
+          }
+        }
+      },
+    );
   }
-  let transformed = [];
-  for (let record of resp) {
-    let r = reactive(record);
-    fetchApi(`/chart/${record.chart}`, {}, (chart) => {
-      r.chartDetail = chart as Chart;
-    });
-    transformed.push(r);
-  }
-  records.value = transformed;
 }
 
-await fetchRecords();
+fetchRecords();
 
-watch(() => props.params, fetchRecords);
+watch(() => props.records, fetchRecords);
 
 import icon_a from '@/assets/rank/a.webp';
 import icon_b from '@/assets/rank/b.webp';
@@ -67,8 +84,13 @@ function getRankIcon(record: PlayRecord): string {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
-    <LoadView v-if="!records" />
+  <div v-if="!records" class="flex justify-center">
+    <LoadView />
+  </div>
+  <div v-if="records && !records.length" class="flex justify-center">
+    <p class="text-xl italic" v-t="'empty'"></p>
+  </div>
+  <div v-if="records" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
     <router-link
       v-for="record in records"
       :key="record.id"
@@ -79,6 +101,9 @@ function getRankIcon(record: PlayRecord): string {
       </figure>
       <div class="card-body flex flex-row items-center justify-start p-4 gap-0 group aspect-[4/1] lg:aspect-[8/3] min-h-0 min-w-0">
         <img :src="getRankIcon(record)" class="h-10 xl:h-16 mr-2" />
+        <div v-if="record.label" class="absolute right-0 top-0 badge badge-primary z-[11] m-2 text-lg p-3 opacity-60">
+          {{ record.label }}
+        </div>
         <div class="grow min-w-0">
           <p class="group-hover:link truncate w-auto">
             {{ record?.chartDetail?.name }}
