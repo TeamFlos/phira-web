@@ -46,6 +46,7 @@ const router = createRouter({
       component: PrivacyPolicy,
     },
     { path: '/terms-of-use', name: 'terms-of-use', component: TermsOfUse },
+    { path: '/warma', component: warma2023Vue}
   ],
   scrollBehavior(_to, from, savedPosition) {
     return new Promise((resolve) => {
@@ -58,6 +59,7 @@ const router = createRouter({
 
 import { i18n } from '../main';
 import { setTitle } from '../common';
+import warma2023Vue from '@/events/warma2023/warma2023.vue';
 
 router.afterEach((to) => {
   nextTick(() => {
