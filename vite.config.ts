@@ -23,5 +23,13 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
+    build: {
+      rollupOptions: {
+        input: {
+          main: resolve(__dirname, 'index.html'),
+          warma2023: resolve(__dirname, 'event/warma2023/index.html'),
+        },
+      },
+    },
   };
 });
