@@ -60,18 +60,18 @@ function alterShowQuiz() {
             <div class="choice ml-8 text-l md:text-xl">
               <div class="form-control mt-1">
                 <div v-if="question.type === 'oneChoice'">
-                  <div v-for="(choice, key) in question.choices" :key="key">
+                  <div v-for="(key, id) in question.choices" :key="key">
                     <label class="flex flex-row items-center mt-1" :for="key">
                       <input type="radio" class="radio radio-error" :name="String(index)" :id="key" />
-                      <span class="ml-2">{{ choice }}</span>
+                      <span class="ml-2">{{ String.fromCharCode(65 + id) }}</span>
                     </label>
                   </div>
                 </div>
                 <div v-else-if="question.type === 'multiChoice'">
-                  <div v-for="(choice, key) in question.choices" :key="key">
+                  <div v-for="(key, id) in question.choices" :key="key">
                     <label class="flex flex-row items-center mt-1" :for="key">
                       <input type="checkbox" class="checkbox checkbox-error" :name="String(index)" :id="key" />
-                      <span class="ml-2">{{ choice }}</span>
+                      <span class="ml-2">{{ String.fromCharCode(65 + id) }}</span>
                     </label>
                   </div>
                 </div>
