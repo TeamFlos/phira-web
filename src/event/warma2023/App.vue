@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
 
 import warma from '@/assets/warma2023/warma.png';
 import spider from '@/assets/warma2023/spider.svg';
@@ -7,43 +7,90 @@ import spider from '@/assets/warma2023/spider.svg';
 type Questions = {
   type: 'oneChoice' | 'multiChoice' | 'text';
   question: string;
-  answer: string;
+  answer: string | string[];
   choices?: string[];
+  user_selected?: boolean[];
+  user_answer?: string;
+  result_class?: Ref<string>;
+  result_text?: Ref<string>;
 };
 type Quiz = {
   title: string;
   questions: Questions[];
 };
 
-import quizzes from './quizzes.json';
+import untypedQuizzes from './quizzes.json';
 
-quizzes as Quiz[];
+const quizzes: Quiz[] = untypedQuizzes as Quiz[];
+
+for (let quiz of quizzes) {
+  for (let q of quiz.questions) {
+    if (q.type === 'multiChoice') {
+      q.user_selected = Array(q.choices!!.length).fill(false);
+    }
+    q.result_class = ref('');
+    q.result_text = ref('');
+  }
+}
 
 // Randomly pick a quiz
 
 const quizIndex = ref(0);
 quizIndex.value = Math.floor(Math.random() * quizzes.length);
-// quizIndex.value = 1;
-const quiz = quizzes[quizIndex.value] as Quiz;
 
-const showQuiz = ref(false);
-function alterShowQuiz() {
-  showQuiz.value = !showQuiz.value;
-  const quizExpand = document.querySelector('.quiz-expand');
-  if (quizExpand) {
-    if (quizExpand.classList.contains('open')) {
-      quizExpand.classList.remove('open');
-    } else {
-      quizExpand.classList.add('open');
+const allCorrect = ref(false);
+
+function check() {
+  let allCorrect = true;
+  for (let q of quizzes[quizIndex.value].questions) {
+    let correct = false,
+      message = '';
+    switch (q.type) {
+      case 'oneChoice': {
+        if (q.user_answer === q.answer) {
+          correct = true;
+          message = '正确';
+        } else {
+          correct = false;
+          message = '错误，正确答案为 ' + q.answer;
+        }
+        break;
+      }
+      case 'multiChoice': {
+        let userAnswer = '';
+        for (let i = 0; i < q.user_selected!!.length; i++) {
+          if (q.user_selected!![i]) {
+            userAnswer += String.fromCharCode(65 + i);
+          }
+        }
+        let answer = (q.answer as string[]).join('');
+        if (userAnswer === answer) {
+          correct = true;
+          message = '正确';
+        } else {
+          correct = false;
+          message = '错误，正确答案为 ' + answer;
+        }
+        break;
+      }
+      case 'text': {
+        if (q.user_answer?.toLowerCase().trim() === (q.answer as string).toLowerCase().trim()) {
+          correct = true;
+          message = '正确';
+        } else {
+          correct = false;
+          message = '错误，正确答案为 ' + q.answer;
+        }
+        break;
+      }
     }
-  }
-  const hint = document.querySelector('.hint');
-  if (hint) {
-    if (showQuiz.value) {
-      hint.textContent = '这里什么也没有...吗?';
+    q.result_text!!.value = message;
+    if (correct) {
+      q.result_class!!.value = 'text-green-500';
     } else {
-      hint.textContent = '这里什么也没有......';
+      q.result_class!!.value = 'text-red-500';
     }
+    allCorrect &&= correct;
   }
 }
 </script>
@@ -51,36 +98,46 @@ function alterShowQuiz() {
 <template>
   <div class="board relative flex flex-col z-0">
     <div class="relative min-h-screen flex flex-col items-center">
-      <img :src="spider" @click="alterShowQuiz()" class="z-10 w-1/12" />
+      <img :src="spider" class="z-10 w-1/12" />
       <div class="quiz-expand flex-grow mx-4 md:mx-8 lg:mx-12">
-        <div v-if="showQuiz" class="quiz">
-          <p class="text-3xl md:text-4xl lg:text-5xl font-bold quiz-title">{{ quiz.title }}</p>
-          <div v-for="(question, index) in quiz.questions" :key="index" class="question mt-4 ml-8">
+        <div class="quiz">
+          <p class="text-3xl md:text-4xl lg:text-5xl font-bold quiz-title">{{ quizzes[quizIndex].title }}</p>
+          <div v-for="(question, index) in quizzes[quizIndex].questions" :key="index" class="question mt-4 ml-8">
             <p class="text-xl md:text-2xl lg:text-3xl font-bold">{{ question.question }}</p>
             <div class="choice ml-8 text-l md:text-xl">
-              <div class="form-control mt-1">
-                <div v-if="question.type === 'oneChoice'">
-                  <div v-for="(key, id) in question.choices" :key="key">
-                    <label class="flex flex-row items-center mt-1" :for="key">
-                      <input type="radio" class="radio radio-error" :name="String(index)" :id="key" />
-                      <span class="ml-2">{{ String.fromCharCode(65 + id) }}</span>
+              <form class="form-control mt-1 flex gap-1">
+                <template v-if="question.type === 'oneChoice'">
+                  <div class="flex items-center" v-for="(choice, id) in question.choices" :key="id">
+                    <input
+                      type="radio"
+                      class="radio radio-error"
+                      :id="index + ':' + id"
+                      :name="String(index)"
+                      :value="String.fromCharCode(65 + id)"
+                      v-model="question.user_answer" />
+                    <label :for="index + ':' + id">
+                      <span class="ml-2">{{ choice }}</span>
                     </label>
                   </div>
-                </div>
-                <div v-else-if="question.type === 'multiChoice'">
-                  <div v-for="(key, id) in question.choices" :key="key">
-                    <label class="flex flex-row items-center mt-1" :for="key">
-                      <input type="checkbox" class="checkbox checkbox-error" :name="String(index)" :id="key" />
-                      <span class="ml-2">{{ String.fromCharCode(65 + id) }}</span>
+                </template>
+                <template v-else-if="question.type === 'multiChoice'">
+                  <div class="flex items-center" v-for="(choice, id) in question.choices" :key="id">
+                    <input type="checkbox" class="checkbox checkbox-error" :id="index + ':' + id" :name="String(index)" v-model="question.user_selected!![id]" />
+                    <label :for="index + ':' + id">
+                      <span class="ml-2">{{ choice }}</span>
                     </label>
                   </div>
-                </div>
+                </template>
                 <div v-else-if="question.type === 'text'">
-                  <input type="text" placeholder="是什么呢..." class="input input-error input-bordered w-5/6 mt-1 mb-2"
-                    :name="String(index)" />
+                  <input type="text" placeholder="是什么呢..." class="input input-error input-bordered w-5/6 mt-1 mb-2" :name="String(index)" v-model="question.user_answer" />
                 </div>
-              </div>
+              </form>
             </div>
+            <p class="mt-1 font-black" :class="question.result_class!!.value">{{ question.result_text!!.value }}</p>
+          </div>
+          <div class="w-full flex justify-end mt-2 gap-2">
+            <button class="btn bg-[#ff7b6f] text-white" @click="check">检查</button>
+            <button v-if="allCorrect" class="btn btn-success text-white" @click="quizIndex = Math.floor(Math.random() * quizzes.length)">再来一次</button>
           </div>
         </div>
       </div>
@@ -88,7 +145,7 @@ function alterShowQuiz() {
         <img :src="warma" class="relative left-0 z-10 w-1/3" />
         <div class="split-line" />
         <div class="hint-board absolute mt-0.5">
-          <span class="hint absolute right-0 mr-10 md:mr-20 lg:mr-30 text-xl md:text-3xl lg:text-5xl">这里什么也没有...</span>
+          <span class="text-white absolute right-0 mr-10 md:mr-20 lg:mr-30 text-xl md:text-3xl lg:text-5xl">WARMA 的小测验</span>
         </div>
       </div>
     </div>
@@ -117,10 +174,6 @@ function alterShowQuiz() {
   bottom: 0%;
   width: 100%;
   z-index: 5;
-}
-
-.hint {
-  color: #ffffff;
 }
 
 .quiz-expand {
