@@ -41,7 +41,7 @@ quizIndex.value = Math.floor(Math.random() * quizzes.length);
 const allCorrect = ref(false);
 
 function check() {
-  let allCorrect = true;
+  allCorrect.value = true;
   for (let q of quizzes[quizIndex.value].questions) {
     let correct = false,
       message = '';
@@ -90,7 +90,7 @@ function check() {
     } else {
       q.result_class!!.value = 'text-red-500';
     }
-    allCorrect &&= correct;
+    allCorrect.value &&= correct;
   }
 }
 </script>
