@@ -298,17 +298,15 @@ const currentBestPool = ref(true);
             <h2 class="text-2xl" v-t="'recent-records'"></h2>
             <RecordList class="mt-2" :records="recentRecords" />
           </div>
-          <!-- <div class="card bg-base-100 shadow-xl p-4">
-            <h2 class="text-2xl" v-t="'record-pool'"></h2>
-            <RecordList class="mt-2" :records="bestPool"></RecordList>
-          </div> -->
-          <div class="tabs">
+          <div>
+            <div class="tabs">
             <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': currentBestPool }" @click="currentBestPool = true" v-t="'best-pool'"></a>
             <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': !currentBestPool }" @click="currentBestPool = false" v-t="'recent-pool'"></a>
           </div>
           <div class="card bg-base-100 shadow-xl p-4 rounded-ss-none">
             <RecordList v-if="currentBestPool" :records="bestPool"></RecordList>
             <RecordList v-if="!currentBestPool" :records="recentPool"></RecordList>
+          </div>
           </div>
         </div>
       </div>
