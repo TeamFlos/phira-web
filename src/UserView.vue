@@ -300,13 +300,13 @@ const currentBestPool = ref(true);
           </div>
           <div>
             <div class="tabs">
-            <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': currentBestPool }" @click="currentBestPool = true" v-t="'best-pool'"></a>
-            <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': !currentBestPool }" @click="currentBestPool = false" v-t="'recent-pool'"></a>
-          </div>
-          <div class="card bg-base-100 shadow-xl p-4 rounded-ss-none">
-            <RecordList v-if="currentBestPool" :records="bestPool"></RecordList>
-            <RecordList v-if="!currentBestPool" :records="recentPool"></RecordList>
-          </div>
+              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': currentBestPool }" @click="currentBestPool = true" v-t="'best-pool'"></a>
+              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': !currentBestPool }" @click="currentBestPool = false" v-t="'recent-pool'"></a>
+            </div>
+            <div class="card bg-base-100 shadow-xl p-4 rounded-ss-none">
+              <RecordList v-if="currentBestPool" :records="bestPool"></RecordList>
+              <RecordList v-if="!currentBestPool" :records="recentPool"></RecordList>
+            </div>
           </div>
         </div>
       </div>
