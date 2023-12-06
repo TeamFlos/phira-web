@@ -28,3 +28,4 @@ coverage
 *.sw?
 
 /deploy.sh
+/bun.lockb
