@@ -16,6 +16,7 @@ export enum Permission {
   SET_ROLES = 0x00001000,
   SET_REVIEWER = 0x00002000,
   SET_SUPERVISOR = 0x00004000,
+  BAN_AVATAR = 0x00008000,
 }
 
 export class Permissions {
@@ -190,16 +191,16 @@ export type PlayRecord = {
 };
 
 export type PoolItem = {
-  record: number,
-  chart: number,
-  rks: number,
-}
+  record: number;
+  chart: number;
+  rks: number;
+};
 
 export type RecordPool = {
-  bestPool: PoolItem[],
-  recentPool: PoolItem[],
-  rks: number,
-}
+  bestPool: PoolItem[];
+  recentPool: PoolItem[];
+  rks: number;
+};
 
 export type StbHistory = {
   id: number;

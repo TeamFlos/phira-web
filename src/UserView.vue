@@ -19,6 +19,10 @@ en:
     confirm: 'Are you sure to ban this user?'
     done: Banned
 
+  ban-avatar:
+    button: Ban Avatar
+    done: Banned
+
   upload:
     title: Uploaded charts
     more: See More
@@ -44,6 +48,10 @@ zh-CN:
   ban:
     button: 封禁用户
     confirm: 你确定要封禁该用户吗？
+    done: 已封禁
+
+  ban-avatar:
+    button: 封禁用户头像
     done: 已封禁
 
   upload:
@@ -174,6 +182,15 @@ fetchApi(`/record/get-pool/${id}`, {}, (resp) => {
 });
 
 const currentBestPool = ref(true);
+
+async function banAvatar() {
+  try {
+    await fetchApi(`/user/${id}/ban-avatar`, { method: 'POST' });
+    toast(t('ban-avatar.done'));
+  } catch (e) {
+    toastError(e);
+  }
+}
 </script>
 
 <template>
@@ -216,6 +233,9 @@ const currentBestPool = ref(true);
                         <li v-if="!user.banned"><a @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></a></li>
                         <li v-else class="disabled"><a v-t="'ban.done'"></a></li>
                       </template>
+                      <li v-if="me && userPermissions(me).has(Permission.BAN_AVATAR)">
+                        <a @click="banAvatar" v-t="'ban-avatar.button'"></a>
+                      </li>
                     </ul>
                   </div>
                 </div>
