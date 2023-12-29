@@ -106,7 +106,7 @@ export class Roles {
       perms.grant(Permission.STABILIZE_JUDGE, Permission.DELETE_STABLE, Permission.SET_RANKED, Permission.SET_SUPERVISOR);
     }
     if (this.has(Role.HEAD_REVIEWER)) {
-      perms.grant(Permission.SET_REVIEWER, Permission.BAN_USER);
+      perms.grant(Permission.SET_REVIEWER, Permission.BAN_USER, Permission.BAN_AVATAR);
     }
     return perms;
   }
