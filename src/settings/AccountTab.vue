@@ -3,12 +3,16 @@
 en:
   language: Language
 
+  char: Character
+
   update-avatar: Update avatar
   avatar-updated: Avatar updated
   profile-updated: Profile updated
 
 zh-CN:
   language: 语言
+
+  char: 角色
 
   update-avatar: 更新头像
   avatar-updated: 头像已更新
@@ -34,12 +38,33 @@ const user: User = (await fetchApi('/me')) as User;
 const avatarImage = ref<HTMLImageElement>();
 const updateAvatarButton = ref<HTMLElement>();
 
+interface Character {
+  id: string;
+  name: string;
+}
+
 const avatarFile = ref<File>();
-const updatingAvatar = ref(false);
+const updatingAvatar = ref(false),
+  loadingChars = ref(false);
+const chars = ref<Character[]>([]);
 
 const username = ref(user.name);
 const language = ref(user.language);
 const bio = ref(user.bio ?? '');
+const char = ref('');
+
+(async () => {
+  loadingChars.value = true;
+  try {
+    let characters = (await fetchApi('/me/chars?locale=' + (localStorage.getItem('locale') || 'en-US'))) as Character[];
+    char.value = ((await fetchApi('/me/char')) as Character).id;
+    chars.value = characters;
+  } catch (e) {
+    toastError(e);
+  } finally {
+    loadingChars.value = false;
+  }
+})();
 
 const savingProfile = ref(false);
 
@@ -81,6 +106,7 @@ async function saveProfile() {
         name: username.value,
         language: language.value,
         bio: bio.value.length ? bio.value : null,
+        char: loadingChars.value ? null : char.value,
       },
     });
     changeLocale(language.value);
@@ -131,9 +157,20 @@ const initAvatar = user.avatar ? fileToURL(user.avatar) : defaultAvatar;
       </div>
       <div class="form-control grow">
         <div class="label">
+          <span class="label-text text-inherit" v-t="'char'"></span>
+          <div v-if="loadingChars" class="loading loading-sm"></div>
+        </div>
+        <select class="select select-bordered w-full" v-model="char">
+          <option v-for="char in chars" :key="char.id" :value="char.id">
+            {{ char.name }}
+          </option>
+        </select>
+      </div>
+      <div class="form-control grow">
+        <div class="label">
           <span class="label-text text-inherit" v-t="'bio.label'"></span>
         </div>
-        <textarea :placeholder="t('bio.hint')" class="textarea textarea-bordered" v-model="bio"></textarea>
+        <textarea :placeholder="t('bio.hint')" class="textarea textarea-bordered min-h-[240px]" v-model="bio"></textarea>
       </div>
       <div class="flex justify-end">
         <button class="btn btn-primary mt-2" @click="saveProfile">
