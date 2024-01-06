@@ -21,7 +21,8 @@ en:
 
   ban-avatar:
     button: Ban Avatar
-    done: Banned
+    confirm: Are you sure to ban this user's avatar?
+    done: Avatar Banned
 
   upload:
     title: Uploaded charts
@@ -48,11 +49,12 @@ zh-CN:
   ban:
     button: 封禁用户
     confirm: 你确定要封禁该用户吗？
-    done: 已封禁
+    done: 用户已封禁
 
   ban-avatar:
     button: 封禁用户头像
-    done: 已封禁
+    confirm: 你确定要封禁该用户的头像吗？
+    done: 头像已封禁
 
   upload:
     title: 上传的谱面
@@ -133,6 +135,27 @@ function tryCloseBan() {
   if (!banning.value) confirmBanDialog.value!.close();
 }
 
+const confirmAvatarBanDialog = ref<HTMLDialogElement>();
+const avatarBanning = ref(false);
+async function banAvatar() {
+  if (avatarBanning.value) return;
+  avatarBanning.value = true;
+  try {
+    await fetchApi(`/user/${id}/ban-avatar`, { method: 'POST' });
+    toast(t('ban-avatar.done'));
+    user.banned = true;
+    confirmAvatarBanDialog.value!.close();
+  } catch (e) {
+    toastError(e);
+  } finally {
+    avatarBanning.value = false;
+  }
+}
+
+function tryCloseAvatarBan() {
+  if (!avatarBanning.value) confirmAvatarBanDialog.value!.close();
+}
+
 const reportDialog = ref<HTMLDialogElement>();
 const reportReason = ref('');
 const reporting = ref(false);
@@ -183,14 +206,6 @@ fetchApi(`/record/get-pool/${id}`, {}, (resp) => {
 
 const currentBestPool = ref(true);
 
-async function banAvatar() {
-  try {
-    await fetchApi(`/user/${id}/ban-avatar`, { method: 'POST' });
-    toast(t('ban-avatar.done'));
-  } catch (e) {
-    toastError(e);
-  }
-}
 </script>
 
 <template>
@@ -233,9 +248,9 @@ async function banAvatar() {
                         <li v-if="!user.banned"><a @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></a></li>
                         <li v-else class="disabled"><a v-t="'ban.done'"></a></li>
                       </template>
-                      <li v-if="me && userPermissions(me).has(Permission.BAN_AVATAR)">
-                        <a @click="banAvatar" v-t="'ban-avatar.button'"></a>
-                      </li>
+                      <template v-if="me && userPermissions(me).has(Permission.BAN_AVATAR)">
+                        <li><a @click="confirmAvatarBanDialog!.showModal()" v-t="'ban-avatar.button'"></a></li>
+                      </template>
                     </ul>
                   </div>
                 </div>
@@ -345,6 +360,21 @@ async function banAvatar() {
     </div>
     <div class="modal-backdrop">
       <button class="cursor-default" @click="tryCloseBan"></button>
+    </div>
+  </dialog>
+  <dialog class="modal modal-bottom sm:modal-middle" ref="confirmAvatarBanDialog" id="ban-avatar" @close.prevent="tryCloseAvatarBan">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg" v-t="'warning'"></h3>
+      <p class="py-4" v-t="'ban-avatar.confirm'"></p>
+      <div class="modal-action">
+        <button class="btn btn-neutral" :disabled="avatarBanning" @click="tryCloseAvatarBan" v-t="'cancel'"></button>
+        <button class="btn btn-error" @click="banAvatar">
+          <LoadOr :loading="avatarBanning">{{ t('confirm') }}</LoadOr>
+        </button>
+      </div>
+    </div>
+    <div class="modal-backdrop">
+      <button class="cursor-default" @click="tryCloseAvatarBan"></button>
     </div>
   </dialog>
   <dialog class="modal modal-bottom sm:modal-middle" id="report" ref="reportDialog" @close.prevent="tryCloseReport">
