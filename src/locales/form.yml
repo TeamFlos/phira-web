@@ -41,3 +41,25 @@ zh-CN:
   password-short: 密码过短
   password-inconsistent: 两次输入的密码不一致
   please-login: 请登录
+
+ru-RU:
+  email:
+    label: Электронная почта
+    hint: Адрес электронной почты
+  password:
+    label: Пароль
+    hint: Пароль
+  password-confirm:
+    label: Подтверждение пароля
+    hint: Пароль
+  username:
+    label: Имя пользователя
+    hint: Имя пользователя
+  bio:
+    label: Биография
+    hint: Расскажите что-нибудь о себе…
+
+  invalid-email: Невозможный адрес электронной почты
+  password-short: Пароль слишком короткий
+  password-inconsistent: Пароли не совпадают
+  please-login: Войдите, пожалуйста
