@@ -28,6 +28,7 @@ export default defineConfig(({ mode }) => {
         input: {
           main: resolve(__dirname, 'index.html'),
           warma2023: resolve(__dirname, 'event/warma2023/index.html'),
+          yyc2024: resolve(__dirname, 'event/yyc2024/index.html'),
         },
       },
     },
