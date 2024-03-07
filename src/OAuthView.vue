@@ -76,11 +76,11 @@ async function auth() {
     <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-gradient-to-r from-sky-400 to-blue-500 mt-16">
       <div class="form-control mt-6">
         <div class="flex justify-center items-center">
-          <img :src="app.avatar" alt="AppIcon" class="shadow-2xl rounded-lg lg:me-14 w-1/6 mx-4" />
+          <img :src="app.avatar" alt="AppIcon" class="shadow-2xl rounded-lg max-h-16 sm:max-h-20 md:max-h-24 lg:max-h-24 mx-2 sm:mx-4" />
           <i class="fa-solid fa-ellipsis mx-2" style="color: #cccccc" />
           <i class="fa-solid fa-link mx-1" style="color: #ffffff" />
           <i class="fa-solid fa-ellipsis mx-2" style="color: #cccccc" />
-          <img src="./assets/icon.png" alt="Phira" class="shadow-2xl rounded-lg lg:me-14 w-1/6 mx-4" />
+          <img src="./assets/icon.png" alt="Phira" class="shadow-2xl rounded-lg max-h-16 sm:max-h-20 md:max-h-24 lg:max-h-24 mx-2 sm:mx-4" />
         </div>
       </div>
       <div class="card-body">
