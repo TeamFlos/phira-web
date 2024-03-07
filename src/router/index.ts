@@ -18,6 +18,8 @@ import DMCA from '../DMCA.vue';
 import PrivacyPolicy from '../PrivacyPolicy.vue';
 import TermsOfUse from '../TermsOfUse.vue';
 
+import OAuthView from '../OAuthView.vue';
+
 import { useOnLoaded } from '../App.vue';
 
 const onLoaded = useOnLoaded();
@@ -46,6 +48,8 @@ const router = createRouter({
       component: PrivacyPolicy,
     },
     { path: '/terms-of-use', name: 'terms-of-use', component: TermsOfUse },
+
+    { path: '/oauth', name: 'oauth', component: OAuthView },
   ],
   scrollBehavior(_to, from, savedPosition) {
     return new Promise((resolve) => {

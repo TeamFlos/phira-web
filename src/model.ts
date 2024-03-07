@@ -230,3 +230,14 @@ export type EmailSubs = {
   review: boolean;
   stb: boolean;
 };
+
+export type OAuthApp = {
+  id: number;
+  name: string;
+  clientId: string;
+  redirectUri: string;
+  maxPerm: number;
+  avatar: string;
+  creator: number;
+  created: string;
+};

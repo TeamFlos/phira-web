@@ -47,6 +47,7 @@ const i18n = createI18n({
       'title-dmca': 'DMCA',
       'title-terms-of-use': 'Terms of Use',
       'title-privacy-policy': 'Privacy Policy',
+      'title-oauth': 'OAuth',
     },
     'zh-CN': {
       login: '登录',
@@ -71,6 +72,7 @@ const i18n = createI18n({
       'title-dmca': 'DMCA',
       'title-terms-of-use': '使用条款',
       'title-privacy-policy': '隐私政策',
+      'title-oauth': 'OAuth',
     },
   },
   legacy: false,
