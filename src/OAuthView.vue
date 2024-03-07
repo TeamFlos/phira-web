@@ -21,15 +21,15 @@ const state = router.currentRoute.value.query.state as string | undefined;
 
 const fetchApi = useFetchApi();
 
-const app = reactive<OAuthApp>(await fetchApi(`/oauth/${clientId}`) as OAuthApp);
+const app = reactive<OAuthApp>((await fetchApi(`/oauth/${clientId}`)) as OAuthApp);
 
 const errorMessage = ref<string>();
 
 const doingAuth = ref(false);
 
-let location = "/";
+let location = '/';
 
-const perms = "";
+const perms = '';
 
 async function auth() {
   if (doingAuth.value) {
@@ -46,19 +46,26 @@ async function auth() {
       scope,
     });
     let resp = (await fetchApi(`/oauth/authorize?${q}`, {
-      method: 'GET'
-    })) as { code: string, state: string, location: string };
-    if (state != undefined && (state !== resp.state)) {
+      method: 'GET',
+    })) as { code: string; state: string; location: string };
+    if (state != undefined && state !== resp.state) {
       throw new Error('Invalid state');
     }
-    location = resp.location;
-    console.log("ok");
+    let old_param = new URLSearchParams(redirectURI.split('?')[1] ?? '');
+    let redir_param = {
+      ...Object.fromEntries(old_param),
+      code: resp.code,
+      state: resp.state,
+    };
+    q = new URLSearchParams(redir_param);
+    location = redirectURI.split('?')[0] + '?' + q;
+    console.log('ok');
   } catch (e) {
     errorMessage.value = e instanceof Error ? e.message : String(e);
   } finally {
     doingAuth.value = false;
     setTimeout(() => {
-        window.location.href = location;
+      window.location.href = location;
     }, 1000);
   }
 }
