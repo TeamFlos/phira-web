@@ -14,14 +14,14 @@ import LoadOr from './components/LoadOr.vue';
 
 const router = useRouter();
 
-const clientId = router.currentRoute.value.query.clientId as string;
+const clientID = router.currentRoute.value.query.clientID as string;
 const redirectURI = router.currentRoute.value.query.redirectURI as string;
 const scope = router.currentRoute.value.query.scope as string;
 const state = router.currentRoute.value.query.state as string | undefined;
 
 const fetchApi = useFetchApi();
 
-const app = reactive<OAuthApp>((await fetchApi(`/oauth/${clientId}`)) as OAuthApp);
+const app = reactive<OAuthApp>((await fetchApi(`/oauth/${clientID}`)) as OAuthApp);
 
 const errorMessage = ref<string>();
 
@@ -41,7 +41,7 @@ async function auth() {
   try {
     let q = new URLSearchParams({
       response_type: 'code',
-      client_id: clientId,
+      client_id: clientID,
       redirect_uri: redirectURI,
       scope,
     });
