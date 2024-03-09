@@ -19,6 +19,8 @@ const redirectURI = router.currentRoute.value.query.redirectURI as string;
 const scope = router.currentRoute.value.query.scope as string;
 const state = router.currentRoute.value.query.state as string | undefined;
 
+console.log(state);
+
 const fetchApi = useFetchApi();
 
 const app = reactive<OAuthApp>((await fetchApi(`/oauth/${clientID}`)) as OAuthApp);
@@ -45,6 +47,9 @@ async function auth() {
       redirect_uri: redirectURI,
       scope,
     });
+    if (state != undefined) {
+      q.append('state', state);
+    }
     let resp = (await fetchApi(`/oauth/authorize?${q}`, {
       method: 'GET',
     })) as { code: string; state: string; location: string };
