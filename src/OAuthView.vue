@@ -15,7 +15,7 @@ import LoadOr from './components/LoadOr.vue';
 const router = useRouter();
 
 const clientID = router.currentRoute.value.query.clientID as string;
-const redirectURI = router.currentRoute.value.query.redirectURI as string;
+const redirectURI: URL = new URL(router.currentRoute.value.query.redirectURI as string);
 const scope = router.currentRoute.value.query.scope as string;
 const state = router.currentRoute.value.query.state as string | undefined;
 
@@ -44,7 +44,7 @@ async function auth() {
     let q = new URLSearchParams({
       response_type: 'code',
       client_id: clientID,
-      redirect_uri: redirectURI,
+      redirect_uri: redirectURI.toString(),
       scope,
     });
     if (state != undefined) {
@@ -56,22 +56,16 @@ async function auth() {
     if (state != undefined && state !== resp.state) {
       throw new Error('Invalid state');
     }
-    let old_param = new URLSearchParams(redirectURI.split('?')[1] ?? '');
-    let redir_param = {
-      ...Object.fromEntries(old_param),
-      code: resp.code,
-      state: resp.state,
-    };
-    q = new URLSearchParams(redir_param);
-    location = redirectURI.split('?')[0] + '?' + q;
-    console.log('ok');
+    redirectURI.searchParams.append('code', resp.code);
+    redirectURI.searchParams.append('state', resp.state);
+    location = redirectURI.toString();
   } catch (e) {
     errorMessage.value = e instanceof Error ? e.message : String(e);
   } finally {
     doingAuth.value = false;
     setTimeout(() => {
       window.location.href = location;
-    }, 1000);
+    }, 100);
   }
 }
 </script>
