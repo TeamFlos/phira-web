@@ -48,6 +48,7 @@ const i18n = createI18n({
       'title-terms-of-use': 'Terms of Use',
       'title-privacy-policy': 'Privacy Policy',
       'title-oauth': 'OAuth',
+      'title-staff': 'Staff',
     },
     'zh-CN': {
       login: '登录',
@@ -73,6 +74,7 @@ const i18n = createI18n({
       'title-terms-of-use': '使用条款',
       'title-privacy-policy': '隐私政策',
       'title-oauth': 'OAuth',
+      'title-staff': '团队成员',
     },
   },
   legacy: false,

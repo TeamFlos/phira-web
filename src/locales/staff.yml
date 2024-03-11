@@ -1,0 +1,23 @@
+en:
+  staff-title: Staff
+  admins: Admins
+  head-supervisors: Head Supervisors
+  supervisors: Supervisors
+  head-reviewers: Head Reviewers
+  reviewers: Reviewers
+
+zh-CN:
+  staff-title: 团队成员
+  admins: 管理员
+  head-supervisors: 评议组长
+  supervisors: 评议员
+  head-reviewers: 审核组长
+  reviewers: 审核员
+
+zh-TW:
+  staff-title: 團隊成員
+  admins: 管理員
+  head-supervisors: 評議組長
+  supervisors: 評議員
+  head-reviewers: 審核組長
+  reviewers: 審核員

@@ -19,6 +19,7 @@ import PrivacyPolicy from '../PrivacyPolicy.vue';
 import TermsOfUse from '../TermsOfUse.vue';
 
 import OAuthView from '../OAuthView.vue';
+import StaffView from '../StaffView.vue';
 
 import { useOnLoaded } from '../App.vue';
 
@@ -50,6 +51,7 @@ const router = createRouter({
     { path: '/terms-of-use', name: 'terms-of-use', component: TermsOfUse },
 
     { path: '/oauth', name: 'oauth', component: OAuthView },
+    { path: '/staff', name: 'staff', component: StaffView },
   ],
   scrollBehavior(_to, from, savedPosition) {
     return new Promise((resolve) => {

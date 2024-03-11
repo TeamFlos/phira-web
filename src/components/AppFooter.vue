@@ -5,6 +5,7 @@ en:
   privacy-policy: Privacy Policy
   server-status: Server Status
   contact-us: Contact Us
+  staff: Staff
 
   copyright: 'Phira 2023. All rights reserved by TeamFlos.'
 
@@ -14,6 +15,7 @@ zh-CN:
   privacy-policy: 隐私政策
   server-status: 服务器状态
   contact-us: 联系我们
+  staff: 团队
 
   copyright: 'Phira 2023. TeamFlos 版权所有.'
 
@@ -32,6 +34,7 @@ useI18n();
       <router-link to="/privacy-policy" class="link link-hover" v-t="'privacy-policy'"></router-link>
       <a href="https://status.phira.cn/" target="_blank" class="link link-hover" v-t="'server-status'"></a>
       <a href="mailto:contact@phira.cn" class="link link-hover" v-t="'contact-us'"></a>
+      <router-link to="/staff" class="link link-hover" v-t="'staff'"></router-link>
     </div>
     <div>
       <div class="grid grid-flow-col gap-4">
