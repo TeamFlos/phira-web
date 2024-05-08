@@ -8,6 +8,9 @@ import { changeLocale } from './common';
 import App from './App.vue';
 import router from './router';
 
+import FloatingVue from 'floating-vue';
+import 'floating-vue/dist/style.css';
+
 export const SUPPORTED_LOCALES = ['en', 'zh-CN', 'zh-TW'];
 
 let locale = localStorage.getItem('locale');
@@ -86,7 +89,7 @@ const i18n = createI18n({
 changeLocale(locale);
 
 const app = createApp(App);
-app.use(i18n).use(router);
+app.use(i18n).use(router).use(FloatingVue);
 
 app.mount('#app');
 

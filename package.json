@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.9",
+    "floating-vue": "^5.2.2",
     "moment": "^2.29.4",
     "prettier": "^3.0.2",
     "vue": "^3.3.4",

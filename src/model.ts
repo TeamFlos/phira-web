@@ -127,6 +127,7 @@ export type User = {
   badges: string[];
   roles: number;
   banned: boolean;
+  login_banned: boolean;
 
   rks: number;
 

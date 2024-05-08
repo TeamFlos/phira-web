@@ -14,6 +14,9 @@ en:
     hint: Report reason. 10 to 200 characters.
     done: Reported successfully. Thank you for your contribution to the health of the Phira community!
 
+  login-ban:
+    banned: This users is banned. Please contact the administrator if you have any questions.
+
   ban:
     button: Ban User
     confirm: 'Are you sure to ban this user?'
@@ -45,6 +48,9 @@ zh-CN:
     button: 举报用户
     hint: 请填写举报理由，10 - 200 字
     done: 举报成功，感谢你对 Phira 社区健康作出的贡献！
+
+  login-ban:
+    banned: 人生自古谁无死？不幸地，该账号已被封禁，因此无法继续与您互动。如有疑问，请联系管理员。
 
   ban:
     button: 封禁用户
@@ -225,7 +231,8 @@ const currentBestPool = ref(true);
             <div class="flex flex-col items-center mt-3 lg:mt-0 lg:ml-4 lg:items-start grow">
               <div class="flex flex-col lg:flex-row items-center lg:items-end gap-2">
                 <span class="font-black text-3xl max-w-sm truncate" :class="[userNameClass(user.badges)]">
-                  {{ user.name }}
+                  <del v-if="user.login_banned" v-tooltip="t('login-ban.banned')">{{ user.name }}</del>
+                  <span v-else>{{ user.name }}</span>
                 </span>
                 <div class="flex flex-row join min-w-[12rem] lg:min-w-0 gap-[0.15rem]">
                   <FollowButton class="join-item grow btn-md lg:btn-sm" :id="id" :initFollowing="user.following" />

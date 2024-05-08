@@ -88,7 +88,10 @@ onMounted(() => {
                   </div>
                 </div>
                 <div class="ml-2 flex flex-col">
-                  <span :class="[userNameClass(user.badges)]" class="group-hover:link font-black text-xl">{{ user.name }}</span>
+                  <span :class="[userNameClass(user.badges)]" class="group-hover:link font-black text-xl">
+                    <del v-if="user.login_banned">{{ user.name }}</del>
+                    <span v-else>{{ user.name }}</span>
+                  </span>
                   <span v-if="user.bio" class="text-xs truncate">{{ user.bio }}</span>
                 </div>
               </router-link>

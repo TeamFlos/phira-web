@@ -32,9 +32,10 @@ fetchApi(`/user/${props.id}`, {}, (u) => {
             <UserAvatar :url="user.avatar" />
           </div>
         </div>
-        <p class="font-black text-xl group-hover:link mt-2" :class="[userNameClass(user.badges)]">
-          {{ user.name }}
-        </p>
+        <span class="font-black text-xl group-hover:link mt-2" :class="[userNameClass(user.badges)]">
+          <del v-if="user.login_banned">{{ user.name }}</del>
+          <span v-else>{{ user.name }}</span>
+        </span>
       </router-link>
       <p v-if="user.bio" class="text-sm text-gray-500">{{ user.bio }}</p>
       <p v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></p>
