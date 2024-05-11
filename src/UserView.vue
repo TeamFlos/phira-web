@@ -16,6 +16,9 @@ en:
 
   login-ban:
     banned: This users is banned. Please contact the administrator if you have any questions.
+    button: Ban User Login
+    confirm: Are you sure to ban this user from login?
+    done: User Login Banned
 
   ban:
     button: Ban User
@@ -51,6 +54,9 @@ zh-CN:
 
   login-ban:
     banned: 人生自古谁无死？不幸地，该账号已被封禁，因此无法继续与您互动。如有疑问，请联系管理员。
+    button: 封禁用户登录
+    confirm: 你确定要封禁该用户的登录吗？
+    done: 用户登录已封禁
 
   ban:
     button: 封禁用户
@@ -162,6 +168,27 @@ function tryCloseAvatarBan() {
   if (!avatarBanning.value) confirmAvatarBanDialog.value!.close();
 }
 
+const confirmLoginBanDialog = ref<HTMLDialogElement>();
+const loginBanning = ref(false);
+async function banLogin() {
+  if (loginBanning.value) return;
+  loginBanning.value = true;
+  try {
+    await fetchApi(`/user/${id}/ban-login`, { method: 'POST' });
+    toast(t('login-ban.done'));
+    user.login_banned = true;
+    confirmLoginBanDialog.value!.close();
+  } catch (e) {
+    toastError(e);
+  } finally {
+    loginBanning.value = false;
+  }
+}
+
+function tryCloseLoginBan() {
+  if (!loginBanning.value) confirmLoginBanDialog.value!.close();
+}
+
 const reportDialog = ref<HTMLDialogElement>();
 const reportReason = ref('');
 const reporting = ref(false);
@@ -257,6 +284,10 @@ const currentBestPool = ref(true);
                       </template>
                       <template v-if="me && userPermissions(me).has(Permission.BAN_AVATAR)">
                         <li><a @click="confirmAvatarBanDialog!.showModal()" v-t="'ban-avatar.button'"></a></li>
+                      </template>
+                      <template v-if="me && userPermissions(me).has(Permission.BAN_USER_LOGIN)">
+                        <li v-if="!user.login_banned"><a @click="confirmLoginBanDialog!.showModal()" v-t="'login-ban.button'"></a></li>
+                        <li v-else class="disabled"><a v-t="'login-ban.done'"></a></li>
                       </template>
                     </ul>
                   </div>
@@ -382,6 +413,21 @@ const currentBestPool = ref(true);
     </div>
     <div class="modal-backdrop">
       <button class="cursor-default" @click="tryCloseAvatarBan"></button>
+    </div>
+  </dialog>
+  <dialog class="modal modal-bottom sm:modal-middle" ref="confirmLoginBanDialog" id="ban-login" @close.prevent="tryCloseLoginBan">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg" v-t="'warning'"></h3>
+      <p class="py-4" v-t="'login-ban.confirm'"></p>
+      <div class="modal-action">
+        <button class="btn btn-neutral" :disabled="loginBanning" @click="tryCloseLoginBan" v-t="'cancel'"></button>
+        <button class="btn btn-error" @click="banLogin">
+          <LoadOr :loading="loginBanning">{{ t('confirm') }}</LoadOr>
+        </button>
+      </div>
+    </div>
+    <div class="modal-backdrop">
+      <button class="cursor-default" @click="tryCloseLoginBan"></button>
     </div>
   </dialog>
   <dialog class="modal modal-bottom sm:modal-middle" id="report" ref="reportDialog" @close.prevent="tryCloseReport">
