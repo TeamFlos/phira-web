@@ -1,5 +1,6 @@
 <i18n lang="yml" src="@/locales/staff.yml"></i18n>
 <script setup lang="ts">
+import { useFetchApi } from './common'
 import { ref } from 'vue';
 
 import { useI18n } from 'vue-i18n';
@@ -7,6 +8,7 @@ import { useI18n } from 'vue-i18n';
 import SimpleUserCard from './components/SimpleUserCard.vue';
 
 const { t } = useI18n();
+const fetchApi = useFetchApi()
 
 type Roles = {
   admins: number[];
@@ -16,7 +18,7 @@ type Roles = {
   reviewers: number[];
 };
 
-let staff = ref((await fetch('/staff.json').then((res) => res.json())) as Roles);
+let staff = ref(await fetchApi('/staff') as Roles);
 let roles: (keyof Roles)[] = ['admins', 'headSupervisors', 'supervisors', 'headReviewers', 'reviewers'];
 
 function toKebab(str: string) {
