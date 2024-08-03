@@ -194,6 +194,12 @@ async function doModifyRoles() {
   user.roles = Roles.from_selection(newRoles).roles;
   toast(t('roles.done'));
 }
+function cancelModifyRoles() {
+  const ns = new Roles(user.roles).to_selection();
+  for (let r in ns) {
+    newRoles[r] = ns[r];
+  }
+}
 
 const recentRecords = ref<PlayRecordEx[]>();
 fetchApi(`/record/?player=${id}`, {}, (resp) => {
@@ -379,7 +385,7 @@ const currentBestPool = ref(true);
     <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')"
       v-model="reportReason"></textarea>
   </ConfirmDialog>
-  <ConfirmDialog :do="doModifyRoles" ref="modifyRolesDialog">
+  <ConfirmDialog :do="doModifyRoles" ref="modifyRolesDialog" :onError="cancelModifyRoles">
     <h3 class="font-bold text-lg" v-t="'roles.modify'"></h3>
     <div>
       <div v-for="r of Roles.all().iter()" :key="r">

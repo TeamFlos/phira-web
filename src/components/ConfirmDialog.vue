@@ -6,6 +6,7 @@ const { t } = useI18n();
 
 let props = defineProps<{
     do: () => Promise<void>;
+    onError?: () => void;
 }>();
 
 defineExpose({ showModal: () => dialogE.value!.showModal() });
@@ -21,6 +22,7 @@ async function onConfirm() {
         dialogE.value!.close();
     } catch (e) {
         toastError(e);
+        if (props.onError) props.onError();
     } finally {
         doing.value = false;
     }
