@@ -34,6 +34,10 @@ en:
     title: Uploaded charts
     more: See More
     no-charts: This user did not upload any charts.
+  
+  roles:
+    done: Roles updated
+    modify: Modify Roles
 
   num-follower: Follower
   num-following: Following
@@ -73,6 +77,10 @@ zh-CN:
     more: 查看更多
     no-charts: 该用户没有上传谱面
 
+  roles:
+    done: 角色已更新
+    modify: 修改角色
+
   num-follower: 粉丝
   num-following: 关注的人
 
@@ -86,14 +94,13 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, loggedIn, setTitle, userPermissions, type IConfirmDialog } from './common';
-import { Permission, Roles, type Chart, type User, type UserView, type Page, Role, type PlayRecord, type RecordPool, type PoolItem } from './model';
+import { Permission, Roles, type Chart, type User, type UserView, type Page, type PlayRecord, type RecordPool, type PoolItem } from './model';
 import { type PlayRecordEx } from './components/RecordList.vue';
 
 import ChartCard from './components/ChartCard.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import FollowButton from './components/FollowButton.vue';
 import LoadView from './components/LoadView.vue';
-import ModifyRoleButton from './components/ModifyRoleButton.vue';
 import PropItem from './components/PropItem.vue';
 import RecordList from './components/RecordList.vue';
 import UserAvatar from './components/UserAvatar.vue';
@@ -159,6 +166,33 @@ async function doReport() {
     },
   });
   toast(t('report.done'));
+}
+
+let showModifyRoles = false;
+if (me.value && userPermissions(me.value).has(Permission.SET_REVIEWER)) {
+  showModifyRoles = true;
+}
+if (me.value && userPermissions(me.value).has(Permission.SET_SUPERVISOR)) {
+  showModifyRoles = true;
+}
+if (me.value && userPermissions(me.value).has(Permission.SET_ROLES)) {
+  showModifyRoles = true;
+}
+
+const modifyRolesDialog = ref<IConfirmDialog>();
+const newRoles = reactive((new Roles(user.roles)).to_selection());
+console.log(newRoles)
+async function doModifyRoles() {
+  const diff = Roles.from_selection(newRoles).diff(new Roles(user.roles));
+  await fetchApi(`/user/${id}/update-roles`, {
+    method: 'POST',
+    json: {
+      add: diff.added.roles,
+      remove: diff.removed.roles,
+    },
+  });
+  user.roles = Roles.from_selection(newRoles).roles;
+  toast(t('roles.done'));
 }
 
 const recentRecords = ref<PlayRecordEx[]>();
@@ -280,10 +314,8 @@ const currentBestPool = ref(true);
       <div class="flex flex-col lg:flex-row mt-4 gap-4">
         <div class="lg:w-1/4 flex flex-col gap-3">
           <div class="gap-1 join join-vertical">
-            <ModifyRoleButton :id="id" role="reviewer" :permission="Permission.SET_REVIEWER"
-              :initHasRole="Roles.from(user.roles).has(Role.REVIEWER)" :me="me" class="join-item" />
-            <ModifyRoleButton :id="id" role="supervisor" :permission="Permission.SET_SUPERVISOR"
-              :initHasRole="Roles.from(user.roles).has(Role.SUPERVISOR)" :me="me" class="join-item" />
+            <button v-if="showModifyRoles" class="btn btn-secondary" @click="modifyRolesDialog!.showModal()"
+              v-t="'roles.modify'" />
           </div>
 
           <div class="card bg-base-100 shadow-xl p-4">
@@ -346,5 +378,16 @@ const currentBestPool = ref(true);
     <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
     <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')"
       v-model="reportReason"></textarea>
+  </ConfirmDialog>
+  <ConfirmDialog :do="doModifyRoles" ref="modifyRolesDialog">
+    <h3 class="font-bold text-lg" v-t="'roles.modify'"></h3>
+    <div>
+      <div v-for="r of Roles.all().iter()" :key="r">
+        <label className="label cursor-pointer">
+          <span className="label-text">{{ t('roles.' + r) }}</span>
+          <input type="checkbox" v-model="newRoles[r]" className="checkbox" />
+        </label>
+      </div>
+    </div>
   </ConfirmDialog>
 </template>

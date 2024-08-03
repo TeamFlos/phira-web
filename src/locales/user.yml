@@ -3,7 +3,21 @@ en:
   registered-at: Registered at
   language: Language
 
+  roles:
+    ADMIN: Admin
+    REVIEWER: Reviewer
+    HEAD_REVIEWER: Head Reviewer
+    SUPERVISOR: Supervisor
+    HEAD_SUPERVISOR: Head Supervisor
+
 zh-CN:
   last-login: 上次登录于
   registered-at: 注册于
   language: 语言
+
+  roles:
+    ADMIN: 管理员
+    REVIEWER: 审核员
+    HEAD_REVIEWER: 审核组长
+    SUPERVISOR: 评议员
+    HEAD_SUPERVISOR: 评议组长

@@ -76,7 +76,7 @@ export enum Role {
 }
 
 export class Roles {
-  private roles: number;
+  roles: number;
 
   constructor(roles: number) {
     this.roles = roles;
@@ -84,6 +84,63 @@ export class Roles {
 
   static from(roles: number) {
     return new Roles(roles);
+  }
+
+  static all() {
+    let res = 0
+    for (const roleFlag in Role) {
+      if (!isNaN(Number(roleFlag))) {
+        res |= Number(roleFlag)
+      }
+    }
+    return new Roles(res)
+  }
+
+  *iter () {
+    for (const roleName in Role) {
+      if (isNaN(Number(roleName))) {
+        if (Number(Role[roleName]) === Role.USER) {
+          continue
+        }
+        yield roleName
+      }
+    }
+  }
+
+  *iter_flags () {
+    for (const roleFlag in Role) {
+      if (!isNaN(Number(roleFlag))) {
+        if (Number(roleFlag) === Role.USER) {
+          continue
+        }
+        yield Number(roleFlag)
+      }
+    }
+  }
+
+  diff (older: Roles) {
+    return {
+      added: Roles.from(this.roles & (older.roles ^ Roles.all().roles)),
+      removed: Roles.from((this.roles ^ Roles.all().roles) & older.roles)
+    }
+  }
+
+  to_selection () {
+    const res: {[key: string]: boolean} = {}
+    for (const r of Roles.all().iter_flags()) {
+      res[Role[r]] = (this.roles & r) == r;
+    }
+    return res
+  }
+
+  static from_selection (selection: {[key: string]: boolean}) {
+    let res = 0
+    for (const r of Roles.all().iter_flags()) {
+      if (selection[Role[r]]) {
+        res |= r
+      }
+    }
+    return new Roles(res)
   }
 
   has(role: Role): boolean {
