@@ -85,13 +85,13 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle, userPermissions } from './common';
+import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, loggedIn, setTitle, userPermissions, type IConfirmDialog } from './common';
 import { Permission, Roles, type Chart, type User, type UserView, type Page, Role, type PlayRecord, type RecordPool, type PoolItem } from './model';
 import { type PlayRecordEx } from './components/RecordList.vue';
 
 import ChartCard from './components/ChartCard.vue';
+import ConfirmDialog from './components/ConfirmDialog.vue';
 import FollowButton from './components/FollowButton.vue';
-import LoadOr from './components/LoadOr.vue';
 import LoadView from './components/LoadView.vue';
 import ModifyRoleButton from './components/ModifyRoleButton.vue';
 import PropItem from './components/PropItem.vue';
@@ -126,92 +126,39 @@ const stats = (await fetchApi(`/user/${id}/stats`)) as {
   avgAccuracy: number;
 };
 
-const confirmBanDialog = ref<HTMLDialogElement>();
-const banning = ref(false);
-async function ban() {
-  if (banning.value) return;
-  banning.value = true;
-  try {
-    await fetchApi(`/user/${id}/ban`, { method: 'POST' });
-    toast(t('ban.done'));
-    user.banned = true;
-    confirmBanDialog.value!.close();
-  } catch (e) {
-    toastError(e);
-  } finally {
-    banning.value = false;
-  }
+// type IConfirmDialog = InstanceType<typeof ConfirmDialog>;
+
+const confirmBanDialog = ref<IConfirmDialog>();
+async function doBan() {
+  await fetchApi(`/user/${id}/ban`, { method: 'POST' });
+  toast(t('ban.done'));
+  user.banned = true;
 }
 
-function tryCloseBan() {
-  if (!banning.value) confirmBanDialog.value!.close();
+const confirmAvatarBanDialog = ref<IConfirmDialog>();
+async function doBanAvatar() {
+  await fetchApi(`/user/${id}/ban-avatar`, { method: 'POST' });
+  toast(t('ban-avatar.done'));
+  user.banned = true;
 }
 
-const confirmAvatarBanDialog = ref<HTMLDialogElement>();
-const avatarBanning = ref(false);
-async function banAvatar() {
-  if (avatarBanning.value) return;
-  avatarBanning.value = true;
-  try {
-    await fetchApi(`/user/${id}/ban-avatar`, { method: 'POST' });
-    toast(t('ban-avatar.done'));
-    user.banned = true;
-    confirmAvatarBanDialog.value!.close();
-  } catch (e) {
-    toastError(e);
-  } finally {
-    avatarBanning.value = false;
-  }
+const confirmLoginBanDialog = ref<IConfirmDialog>();
+async function doBanLogin() {
+  await fetchApi(`/user/${id}/ban-login`, { method: 'POST' });
+  toast(t('login-ban.done'));
+  user.login_banned = true;
 }
 
-function tryCloseAvatarBan() {
-  if (!avatarBanning.value) confirmAvatarBanDialog.value!.close();
-}
-
-const confirmLoginBanDialog = ref<HTMLDialogElement>();
-const loginBanning = ref(false);
-async function banLogin() {
-  if (loginBanning.value) return;
-  loginBanning.value = true;
-  try {
-    await fetchApi(`/user/${id}/ban-login`, { method: 'POST' });
-    toast(t('login-ban.done'));
-    user.login_banned = true;
-    confirmLoginBanDialog.value!.close();
-  } catch (e) {
-    toastError(e);
-  } finally {
-    loginBanning.value = false;
-  }
-}
-
-function tryCloseLoginBan() {
-  if (!loginBanning.value) confirmLoginBanDialog.value!.close();
-}
-
-const reportDialog = ref<HTMLDialogElement>();
+const reportDialog = ref<IConfirmDialog>();
 const reportReason = ref('');
-const reporting = ref(false);
-async function report() {
-  if (reporting.value) return;
-  reporting.value = true;
-  try {
-    await fetchApi(`/user/${id}/report`, {
-      method: 'POST',
-      json: {
-        reason: reportReason.value!,
-      },
-    });
-    toast(t('report.done'));
-    reportDialog.value!.close();
-  } catch (e) {
-    toastError(e);
-  } finally {
-    reporting.value = false;
-  }
-}
-function tryCloseReport() {
-  if (!reporting.value) reportDialog.value!.close();
+async function doReport() {
+  await fetchApi(`/user/${id}/report`, {
+    method: 'POST',
+    json: {
+      reason: reportReason.value!,
+    },
+  });
+  toast(t('report.done'));
 }
 
 const recentRecords = ref<PlayRecordEx[]>();
@@ -267,16 +214,14 @@ const currentBestPool = ref(true);
                     <label tabindex="0" class="btn btn-secondary btn-md lg:btn-sm rounded-s-none">
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </label>
-                    <ul tabindex="0" class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-48 lg:!right-auto">
+                    <ul tabindex="0"
+                      class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-48 lg:!right-auto">
                       <li>
-                        <a
-                          @click="
-                            () => {
-                              reportReason = '';
-                              reportDialog!.showModal();
-                            }
-                          "
-                          v-t="'report.button'"></a>
+                        <a @click="() => {
+                          reportReason = '';
+                          reportDialog!.showModal();
+                        }
+                          " v-t="'report.button'"></a>
                       </li>
                       <template v-if="me && userPermissions(me).has(Permission.BAN_USER)">
                         <li v-if="!user.banned"><a @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></a></li>
@@ -286,7 +231,8 @@ const currentBestPool = ref(true);
                         <li><a @click="confirmAvatarBanDialog!.showModal()" v-t="'ban-avatar.button'"></a></li>
                       </template>
                       <template v-if="me && userPermissions(me).has(Permission.BAN_USER_LOGIN)">
-                        <li v-if="!user.login_banned"><a @click="confirmLoginBanDialog!.showModal()" v-t="'login-ban.button'"></a></li>
+                        <li v-if="!user.login_banned"><a @click="confirmLoginBanDialog!.showModal()"
+                            v-t="'login-ban.button'"></a></li>
                         <li v-else class="disabled"><a v-t="'login-ban.done'"></a></li>
                       </template>
                     </ul>
@@ -294,7 +240,8 @@ const currentBestPool = ref(true);
                 </div>
               </div>
               <div class="mt-2 lg:mt-0">
-                <span v-if="user.bio" class="whitespace-nowrap max-w-xs truncate">{{ user.bio }}</span> <span v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></span>
+                <span v-if="user.bio" class="whitespace-nowrap max-w-xs truncate">{{ user.bio }}</span> <span v-else
+                  class="text-sm italic text-gray-500" v-t="'bio-empty'"></span>
               </div>
             </div>
             <div class="flex flex-row justify-center flex-wrap overflow-x-hidden lg:-mt-4 lg:ml-4">
@@ -333,14 +280,10 @@ const currentBestPool = ref(true);
       <div class="flex flex-col lg:flex-row mt-4 gap-4">
         <div class="lg:w-1/4 flex flex-col gap-3">
           <div class="gap-1 join join-vertical">
-            <ModifyRoleButton :id="id" role="reviewer" :permission="Permission.SET_REVIEWER" :initHasRole="Roles.from(user.roles).has(Role.REVIEWER)" :me="me" class="join-item" />
-            <ModifyRoleButton
-              :id="id"
-              role="supervisor"
-              :permission="Permission.SET_SUPERVISOR"
-              :initHasRole="Roles.from(user.roles).has(Role.SUPERVISOR)"
-              :me="me"
-              class="join-item" />
+            <ModifyRoleButton :id="id" role="reviewer" :permission="Permission.SET_REVIEWER"
+              :initHasRole="Roles.from(user.roles).has(Role.REVIEWER)" :me="me" class="join-item" />
+            <ModifyRoleButton :id="id" role="supervisor" :permission="Permission.SET_SUPERVISOR"
+              :initHasRole="Roles.from(user.roles).has(Role.SUPERVISOR)" :me="me" class="join-item" />
           </div>
 
           <div class="card bg-base-100 shadow-xl p-4">
@@ -373,8 +316,10 @@ const currentBestPool = ref(true);
           </div>
           <div>
             <div class="tabs">
-              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': currentBestPool }" @click="currentBestPool = true" v-t="'best-pool'"></a>
-              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': !currentBestPool }" @click="currentBestPool = false" v-t="'recent-pool'"></a>
+              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': currentBestPool }"
+                @click="currentBestPool = true" v-t="'best-pool'"></a>
+              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': !currentBestPool }"
+                @click="currentBestPool = false" v-t="'recent-pool'"></a>
             </div>
             <div class="card bg-base-100 shadow-xl p-4 rounded-ss-none">
               <RecordList v-if="currentBestPool" :records="bestPool"></RecordList>
@@ -385,64 +330,21 @@ const currentBestPool = ref(true);
       </div>
     </div>
   </div>
-  <dialog class="modal modal-bottom sm:modal-middle" ref="confirmBanDialog" id="ban" @close.prevent="tryCloseBan">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg" v-t="'warning'"></h3>
-      <p class="py-4" v-t="'ban.confirm'"></p>
-      <div class="modal-action">
-        <button class="btn btn-neutral" :disabled="banning" @click="tryCloseBan" v-t="'cancel'"></button>
-        <button class="btn btn-error" @click="ban">
-          <LoadOr :loading="banning">{{ t('confirm') }}</LoadOr>
-        </button>
-      </div>
-    </div>
-    <div class="modal-backdrop">
-      <button class="cursor-default" @click="tryCloseBan"></button>
-    </div>
-  </dialog>
-  <dialog class="modal modal-bottom sm:modal-middle" ref="confirmAvatarBanDialog" id="ban-avatar" @close.prevent="tryCloseAvatarBan">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg" v-t="'warning'"></h3>
-      <p class="py-4" v-t="'ban-avatar.confirm'"></p>
-      <div class="modal-action">
-        <button class="btn btn-neutral" :disabled="avatarBanning" @click="tryCloseAvatarBan" v-t="'cancel'"></button>
-        <button class="btn btn-error" @click="banAvatar">
-          <LoadOr :loading="avatarBanning">{{ t('confirm') }}</LoadOr>
-        </button>
-      </div>
-    </div>
-    <div class="modal-backdrop">
-      <button class="cursor-default" @click="tryCloseAvatarBan"></button>
-    </div>
-  </dialog>
-  <dialog class="modal modal-bottom sm:modal-middle" ref="confirmLoginBanDialog" id="ban-login" @close.prevent="tryCloseLoginBan">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg" v-t="'warning'"></h3>
-      <p class="py-4" v-t="'login-ban.confirm'"></p>
-      <div class="modal-action">
-        <button class="btn btn-neutral" :disabled="loginBanning" @click="tryCloseLoginBan" v-t="'cancel'"></button>
-        <button class="btn btn-error" @click="banLogin">
-          <LoadOr :loading="loginBanning">{{ t('confirm') }}</LoadOr>
-        </button>
-      </div>
-    </div>
-    <div class="modal-backdrop">
-      <button class="cursor-default" @click="tryCloseLoginBan"></button>
-    </div>
-  </dialog>
-  <dialog class="modal modal-bottom sm:modal-middle" id="report" ref="reportDialog" @close.prevent="tryCloseReport">
-    <div class="modal-box">
-      <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
-      <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
-      <div class="modal-action">
-        <button class="btn btn-neutral" :disabled="reporting" @click="tryCloseReport" v-t="'cancel'"></button>
-        <button class="btn btn-error" @click="report">
-          <LoadOr :loading="reporting">{{ t('confirm') }}</LoadOr>
-        </button>
-      </div>
-    </div>
-    <div class="modal-backdrop">
-      <button class="cursor-default" @click="tryCloseReport"></button>
-    </div>
-  </dialog>
+  <ConfirmDialog :do="doBan" ref="confirmBanDialog">
+    <h3 class="font-bold text-lg" v-t="'warning'"></h3>
+    <p class="py-4" v-t="'ban.confirm'"></p>
+  </ConfirmDialog>
+  <ConfirmDialog :do="doBanAvatar" ref="confirmAvatarBanDialog">
+    <h3 class="font-bold text-lg" v-t="'warning'"></h3>
+    <p class="py-4" v-t="'ban-avatar.confirm'"></p>
+  </ConfirmDialog>
+  <ConfirmDialog :do="doBanLogin" ref="confirmLoginBanDialog">
+    <h3 class="font-bold text-lg" v-t="'warning'"></h3>
+    <p class="py-4" v-t="'login-ban.confirm'"></p>
+  </ConfirmDialog>
+  <ConfirmDialog :do="doReport" ref="reportDialog">
+    <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
+    <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')"
+      v-model="reportReason"></textarea>
+  </ConfirmDialog>
 </template>

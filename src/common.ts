@@ -11,6 +11,8 @@ import moment from 'moment';
 import 'moment/dist/locale/zh-cn';
 import 'moment/dist/locale/zh-hk';
 
+import ConfirmDialog from './components/ConfirmDialog.vue';
+
 export const LANGUAGES = {
   'zh-CN': '简体中文',
   'zh-TW': '繁體中文',
@@ -70,7 +72,7 @@ const KIND_CLASS_NAME = {
 };
 
 export function toast(msg: string, kind?: 'error' | 'success') {
-  let func = kind === 'error' ? toastSonner.error : kind === 'success' ? toastSonner.success : toastSonner;
+  const func = kind === 'error' ? toastSonner.error : kind === 'success' ? toastSonner.success : toastSonner;
   func(msg, {
     duration: 2000,
   });
@@ -206,3 +208,5 @@ export function useFetchApi(): FetchApi {
     }
   };
 }
+
+export type IConfirmDialog = InstanceType<typeof ConfirmDialog>;
