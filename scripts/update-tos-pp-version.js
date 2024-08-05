@@ -4,20 +4,31 @@ const crypto = require('crypto');
 
 const projectRoot = path.resolve(__dirname, '../');
 
-const inputFilePath = path.join(projectRoot, 'dist/tos_and_pp_plaintext');
-const outputFilePath = path.join(projectRoot, 'dist/tos_policy_version');
+const distDir = path.join(projectRoot, 'dist');
+const outputFilePath = path.join(distDir, 'tos_policy_version');
 
-if (!fs.existsSync(inputFilePath)) {
-    console.error(`File does not exist: ${inputFilePath}`);
+const filePrefix = 'tos_and_pp_plaintext_';
+const files = fs.readdirSync(distDir);
+const targetFiles = files
+    .filter(file => file.startsWith(filePrefix))
+    .sort();
+
+if (targetFiles.length === 0) {
+    console.error('fild does not exist');
     process.exit(1);
 }
 
-const fileBuffer = fs.readFileSync(inputFilePath);
+let combinedContent = '';
+targetFiles.forEach(file => {
+    const filePath = path.join(distDir, file);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    combinedContent += fileContent;
+});
 
 const hashSum = crypto.createHash('sha256');
-hashSum.update(fileBuffer);
+hashSum.update(combinedContent);
 const hex = hashSum.digest('hex');
 
 fs.writeFileSync(outputFilePath, hex);
 
-console.log(`Hash updated: ${outputFilePath}`);
+console.log(`version updated: ${outputFilePath}`);
