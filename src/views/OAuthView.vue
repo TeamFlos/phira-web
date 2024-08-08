@@ -7,10 +7,10 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toast } from './common';
-import type { OAuthApp } from './model';
+import { useFetchApi, toast } from '../common';
+import type { OAuthApp } from '../model';
 
-import LoadOr from './components/LoadOr.vue';
+import LoadOr from '../components/LoadOr.vue';
 
 const router = useRouter();
 

@@ -57,7 +57,7 @@ async function changePassword() {
   }
 }
 
-import tabLoading from '../SettingsView.vue';
+import tabLoading from '../views/SettingsView.vue';
 tabLoading.value = false;
 </script>
 

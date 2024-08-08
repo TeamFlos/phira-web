@@ -90,16 +90,16 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, pageCount, isString, loggedIn, userPermissions } from './common';
+import { useFetchApi, pageCount, isString, loggedIn, userPermissions } from '../common';
 
-import { Permission } from './model';
-import type { Chart, Page, User } from './model';
+import { Permission } from '../model';
+import type { Chart, Page, User } from '../model';
 
-import ChartCard from './components/ChartCard.vue';
-import LoadView from './components/LoadView.vue';
-import PageIndicator from './components/PageIndicator.vue';
-import RatingBar from './components/RatingBar.vue';
-import TagList from './components/TagList.vue';
+import ChartCard from '../components/ChartCard.vue';
+import LoadView from '../components/LoadView.vue';
+import PageIndicator from '../components/PageIndicator.vue';
+import RatingBar from '../components/RatingBar.vue';
+import TagList from '../components/TagList.vue';
 
 const PAGE_NUM = 28;
 
@@ -415,25 +415,21 @@ function rotate(value: string, choices: string[]): string {
           <i class="fa-solid fa-filter"></i>
         </button>
         <div class="ml-auto join w-full lg:w-auto">
-          <input
-            class="input input-bordered join-item rounded-l-full w-full"
-            :placeholder="t('search')"
-            v-model="tempSearchValue"
-            @keyup.enter="
+          <input class="input input-bordered join-item rounded-l-full w-full" :placeholder="t('search')"
+            v-model="tempSearchValue" @keyup.enter="
               pagination!.current = 1;
-              searchValue = tempSearchValue!;
+            searchValue = tempSearchValue!;
             " />
-          <button
-            class="btn btn-secondary join-item rounded-r-full"
-            @click="
-              pagination!.current = 1;
-              searchValue = tempSearchValue!;
-            ">
+          <button class="btn btn-secondary join-item rounded-r-full" @click="
+            pagination!.current = 1;
+          searchValue = tempSearchValue!;
+          ">
             <i class="fa-solid fa-search"></i>
           </button>
         </div>
       </div>
-      <div v-if="charts" class="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-0 min-w-0">
+      <div v-if="charts"
+        class="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-0 min-w-0">
         <ChartCard v-for="chart in charts" :key="chart.id" :chart="chart"></ChartCard>
       </div>
       <div v-else class="flex flex-col items-center w-full h-16 mb-8 p-8">
@@ -447,21 +443,13 @@ function rotate(value: string, choices: string[]): string {
       <h3 class="font-bold text-lg" v-t="'filter-opts'"></h3>
       <div class="flex flex-col gap-4 mt-4">
         <div class="flex flex-row gap-2">
-          <button
-            v-if="user"
-            class="btn btn-neutral btn-outline flex-1"
-            :class="{ 'btn-active': tempFromMe !== 'any' }"
-            @click="tempFromMe = rotate(tempFromMe, ['any', 'yes'])"
-            v-t="'filters.from-me.' + tempFromMe"></button>
-          <button
-            v-if="user && userPermissions(user).has(Permission.SEE_UNREVIEWED)"
-            class="btn btn-neutral btn-outline flex-1"
-            :class="{ 'btn-active': tempUnreviewed !== 'any' }"
+          <button v-if="user" class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempFromMe !== 'any' }"
+            @click="tempFromMe = rotate(tempFromMe, ['any', 'yes'])" v-t="'filters.from-me.' + tempFromMe"></button>
+          <button v-if="user && userPermissions(user).has(Permission.SEE_UNREVIEWED)"
+            class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempUnreviewed !== 'any' }"
             @click="tempUnreviewed = rotate(tempUnreviewed, ['any', 'no', 'yes'])"
             v-t="'filters.unreviewed.' + tempUnreviewed"></button>
-          <button
-            class="btn btn-neutral btn-outline flex-1"
-            :class="{ 'btn-active': tempStable !== 'any' }"
+          <button class="btn btn-neutral btn-outline flex-1" :class="{ 'btn-active': tempStable !== 'any' }"
             @click="tempStable = rotate(tempStable, ['any', 'stb', 'ranked', 'unranked', 'req'])"
             v-t="'filters.stb.' + tempStable"></button>
         </div>

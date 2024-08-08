@@ -70,17 +70,17 @@ const { t } = useI18n();
 
 import moment from 'moment';
 
-import { useFetchApi, fileToURL, toast, toastError, loggedIn, setTitle, userPermissions } from './common';
-import { Permission, type Chart, type User } from './model';
+import { useFetchApi, fileToURL, toast, toastError, loggedIn, setTitle, userPermissions } from '../common';
+import { Permission, type Chart, type User } from '../model';
 
-import LeaderboardView from './components/LeaderboardView.vue';
-import LoadOr from './components/LoadOr.vue';
-import LoadSuspense from './components/LoadSuspense.vue';
-import PropItem from './components/PropItem.vue';
-import RatingBar from './components/RatingBar.vue';
-import StbStatus from './components/StbStatus.vue';
-import TagList from './components/TagList.vue';
-import UserCard from './components/UserCard.vue';
+import LeaderboardView from '../components/LeaderboardView.vue';
+import LoadOr from '../components/LoadOr.vue';
+import LoadSuspense from '../components/LoadSuspense.vue';
+import PropItem from '../components/PropItem.vue';
+import RatingBar from '../components/RatingBar.vue';
+import StbStatus from '../components/StbStatus.vue';
+import TagList from '../components/TagList.vue';
+import UserCard from '../components/UserCard.vue';
 
 const fetchApi = useFetchApi();
 

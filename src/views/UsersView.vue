@@ -5,9 +5,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { isString } from './common';
+import { isString } from '../common';
 
-import UserList from './components/UserList.vue';
+import UserList from '../components/UserList.vue';
 
 const route = useRoute();
 const router = useRouter();

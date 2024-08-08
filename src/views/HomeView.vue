@@ -19,7 +19,7 @@ const { t } = useI18n();
 <template>
   <div class="hero min-h-[calc(100vh-5rem)]">
     <div class="hero-content justify-center flex-col lg:flex-row">
-      <img class="shadow-2xl rounded-lg lg:me-14 max-h-64" src="./assets/icon.png" />
+      <img class="shadow-2xl rounded-lg lg:me-14 max-h-64" src="@/assets/icon.png" />
       <div class="flex-col text-center">
         <h1
           class="font-title font-black text-left text-8xl tracking-widest bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 bg-clip-text [-webkit-text-fill-color:transparent]">

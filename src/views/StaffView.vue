@@ -1,11 +1,11 @@
 <i18n lang="yml" src="@/locales/staff.yml"></i18n>
 <script setup lang="ts">
-import { useFetchApi } from './common'
+import { useFetchApi } from '../common'
 import { ref } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 
-import SimpleUserCard from './components/SimpleUserCard.vue';
+import SimpleUserCard from '../components/SimpleUserCard.vue';
 
 const { t } = useI18n();
 const fetchApi = useFetchApi()

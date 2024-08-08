@@ -93,17 +93,17 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, loggedIn, setTitle, userPermissions, type IConfirmDialog } from './common';
-import { Permission, Roles, type Chart, type User, type UserView, type Page, type PlayRecord, type RecordPool, type PoolItem } from './model';
-import { type PlayRecordEx } from './components/RecordList.vue';
+import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, loggedIn, setTitle, userPermissions, type IConfirmDialog } from '../common';
+import { Permission, Roles, type Chart, type User, type UserView, type Page, type PlayRecord, type RecordPool, type PoolItem } from '../model';
+import { type PlayRecordEx } from '../components/RecordList.vue';
 
-import ChartCard from './components/ChartCard.vue';
-import ConfirmDialog from './components/ConfirmDialog.vue';
-import FollowButton from './components/FollowButton.vue';
-import LoadView from './components/LoadView.vue';
-import PropItem from './components/PropItem.vue';
-import RecordList from './components/RecordList.vue';
-import UserAvatar from './components/UserAvatar.vue';
+import ChartCard from '../components/ChartCard.vue';
+import ConfirmDialog from '../components/ConfirmDialog.vue';
+import FollowButton from '../components/FollowButton.vue';
+import LoadView from '../components/LoadView.vue';
+import PropItem from '../components/PropItem.vue';
+import RecordList from '../components/RecordList.vue';
+import UserAvatar from '../components/UserAvatar.vue';
 
 const route = useRoute();
 

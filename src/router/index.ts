@@ -1,25 +1,25 @@
 import { nextTick } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
-import HomeView from '../HomeView.vue';
+import HomeView from '../views/HomeView.vue';
 
-import LoginView from '../LoginView.vue';
-import RegisterView from '../RegisterView.vue';
+import LoginView from '../views/LoginView.vue';
+import RegisterView from '../views/RegisterView.vue';
 
-import ChartsView from '../ChartsView.vue';
-import ChartView from '../ChartView.vue';
+import ChartsView from '../views/ChartsView.vue';
+import ChartView from '../views/ChartView.vue';
 
-import UsersView from '../UsersView.vue';
-import UserView from '../UserView.vue';
+import UsersView from '../views/UsersView.vue';
+import UserView from '../views/UserView.vue';
 
-import SettingsView from '../SettingsView.vue';
+import SettingsView from '../views/SettingsView.vue';
+
+import OAuthView from '../views/OAuthView.vue';
+import StaffView from '../views/StaffView.vue';
 
 import DMCA from '../DMCA.vue';
 import PrivacyPolicy from '../PrivacyPolicy.vue';
 import TermsOfUse from '../TermsOfUse.vue';
-
-import OAuthView from '../OAuthView.vue';
-import StaffView from '../StaffView.vue';
 
 import { useOnLoaded } from '../App.vue';
 

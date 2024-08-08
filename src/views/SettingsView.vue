@@ -12,17 +12,17 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import LoadSuspense from './components/LoadSuspense.vue';
+import LoadSuspense from '../components/LoadSuspense.vue';
 
-import AccountTab from './settings/AccountTab.vue';
-import SecurityTab from './settings/SecurityTab.vue';
-import EmailTab from './settings/EmailTab.vue';
+import AccountTab from '../settings/AccountTab.vue';
+import SecurityTab from '../settings/SecurityTab.vue';
+import EmailTab from '../settings/EmailTab.vue';
 
 const route = useRoute();
 const category = computed(() => {
