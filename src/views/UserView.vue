@@ -233,7 +233,7 @@ const currentBestPool = ref(true);
     <div class="lg:w-3/4 mx-8">
       <div class="card card-compact bg-base-100 shadow-xl">
         <figure>
-          <img src="./assets/banner.jpg" class="object-cover max-h-[30vh] w-full" />
+          <img src="@/assets/banner.jpg" class="object-cover max-h-[30vh] w-full" />
         </figure>
         <div class="card-body">
           <div class="flex flex-col lg:flex-row items-center lg:items-start">
