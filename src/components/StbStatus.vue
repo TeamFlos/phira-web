@@ -84,7 +84,7 @@ const uploader = (await fetchApi(`/user/${props.uploader}`)) as User;
           v-if="item.approve === null || item.reviewer !== null"
           class="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 bg-base-100 ring-8 ring-base-100"
           :to="`/user/${item.reviewer ?? uploader.id}`">
-          <UserAvatar class="rounded-full shadow-lg" :url="item.reviewerAvatar ?? uploader.avatar" />
+          <UserAvatar class="rounded-full shadow-lg" :url="item.reviewer ? item.reviewerAvatar : (item.approve === null ? uploader.avatar : undefined)" />
         </router-link>
         <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ detailedTime(item.time) }}</time>
         <br />
