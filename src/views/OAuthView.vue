@@ -79,7 +79,7 @@ async function auth() {
           <i class="fa-solid fa-ellipsis mx-2" style="color: #cccccc" />
           <i class="fa-solid fa-link mx-1" style="color: #ffffff" />
           <i class="fa-solid fa-ellipsis mx-2" style="color: #cccccc" />
-          <img src="./assets/icon.png" alt="Phira" class="shadow-2xl rounded-lg max-h-16 sm:max-h-20 md:max-h-24 lg:max-h-24 mx-2 sm:mx-4" />
+          <img src="../assets/icon.png" alt="Phira" class="shadow-2xl rounded-lg max-h-16 sm:max-h-20 md:max-h-24 lg:max-h-24 mx-2 sm:mx-4" />
         </div>
       </div>
       <div class="card-body">
