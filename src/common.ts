@@ -83,7 +83,8 @@ export function toastError(error: any) {
 }
 
 export function fileToURL(file: string) {
-  return file.replace(/https:\/\/api.phira.cn\/files\//g, 'https://files-cf.phira.cn/');
+  return file;
+  // return file.replace(/https:\/\/api.phira.cn\/files\//g, 'https://files-cf.phira.cn/');
 }
 
 export type FetchApi = (
