@@ -92,7 +92,8 @@ async function submit() {
           </div>
           <input type="password" :placeholder="t('password.hint')" class="input input-bordered" v-model="password" />
           <label class="label">
-            <a href="https://api.phira.cn/reset-password" target="_blank" class="label-text-alt link link-hover" style="color: white !important" v-t="'forget-password'"></a>
+            <a href="https://phira.5wyxi.com/reset-password" target="_blank" class="label-text-alt link link-hover"
+              style="color: white !important" v-t="'forget-password'"></a>
           </label>
         </div>
         <div class="form-control">

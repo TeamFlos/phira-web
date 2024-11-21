@@ -178,7 +178,7 @@ export function useFetchApi(): FetchApi {
     }
     request.headers = headers;
     try {
-      const resp = await fetch('https://api.phira.cn' + path, request);
+      const resp = await fetch('https://phira.5wyxi.com' + path, request);
       const text = await resp.text();
       let json: any = { text };
       try {
