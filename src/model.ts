@@ -20,6 +20,7 @@ export enum Permission {
   REVIEW_PECJAM = 0x00010000,
   UPLOAD_RECORD = 0x00020000,
   BAN_USER_LOGIN = 0x00040000,
+  HIDE_CHART = 0x00080000,
 }
 
 export class Permissions {
@@ -87,60 +88,60 @@ export class Roles {
   }
 
   static all() {
-    let res = 0
+    let res = 0;
     for (const roleFlag in Role) {
       if (!isNaN(Number(roleFlag))) {
-        res |= Number(roleFlag)
+        res |= Number(roleFlag);
       }
     }
-    return new Roles(res)
+    return new Roles(res);
   }
 
-  *iter () {
+  *iter() {
     for (const roleName in Role) {
       if (isNaN(Number(roleName))) {
         if (Number(Role[roleName]) === Role.USER) {
-          continue
+          continue;
         }
-        yield roleName
+        yield roleName;
       }
     }
   }
 
-  *iter_flags () {
+  *iter_flags() {
     for (const roleFlag in Role) {
       if (!isNaN(Number(roleFlag))) {
         if (Number(roleFlag) === Role.USER) {
-          continue
+          continue;
         }
-        yield Number(roleFlag)
+        yield Number(roleFlag);
       }
     }
   }
 
-  diff (older: Roles) {
+  diff(older: Roles) {
     return {
       added: Roles.from(this.roles & (older.roles ^ Roles.all().roles)),
-      removed: Roles.from((this.roles ^ Roles.all().roles) & older.roles)
-    }
+      removed: Roles.from((this.roles ^ Roles.all().roles) & older.roles),
+    };
   }
 
-  to_selection () {
-    const res: {[key: string]: boolean} = {}
+  to_selection() {
+    const res: { [key: string]: boolean } = {};
     for (const r of Roles.all().iter_flags()) {
       res[Role[r]] = (this.roles & r) == r;
     }
-    return res
+    return res;
   }
 
-  static from_selection (selection: {[key: string]: boolean}) {
-    let res = 0
+  static from_selection(selection: { [key: string]: boolean }) {
+    let res = 0;
     for (const r of Roles.all().iter_flags()) {
       if (selection[Role[r]]) {
-        res |= r
+        res |= r;
       }
     }
-    return new Roles(res)
+    return new Roles(res);
   }
 
   has(role: Role): boolean {

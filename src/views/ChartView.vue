@@ -20,6 +20,9 @@ en:
   censor: Censor
   censored: Censored
 
+  hide: Hide
+  hidden: Hidden
+
   status:
     title: Status
     unreviewed: Unreviewed
@@ -52,6 +55,9 @@ zh-CN:
 
   censor: 过滤
   censored: 已过滤
+
+  hide: 隐藏
+  hidden: 已隐藏
 
   status:
     title: 状态
@@ -184,6 +190,25 @@ async function doCensor() {
     censoring.value = false;
   }
 }
+
+const hiding = ref(false);
+async function doHide() {
+  if (hiding.value) return;
+  hiding.value = true;
+  try {
+    await fetchApi(`/chart/${id}/hide`, {
+      method: 'POST',
+      json: {
+        hide: true,
+      },
+    });
+    toast(t('hidden'));
+  } catch (e) {
+    toastError(e);
+  } finally {
+    hiding.value = false;
+  }
+}
 </script>
 
 <template>
@@ -203,6 +228,9 @@ async function doCensor() {
             <h1 class="text-5xl font-black">{{ chart.name }}</h1>
             <button class="btn btn-neutral ml-4" v-if="me && userPermissions(me).has(Permission.REVIEW)" @click="doCensor">
               <LoadOr :loading="censoring">{{ t('censor') }}</LoadOr>
+            </button>
+            <button class="btn btn-error ml-4" v-if="me && userPermissions(me).has(Permission.HIDE_CHART)" @click="doHide">
+              <LoadOr :loading="hiding">{{ t('hide') }}</LoadOr>
             </button>
           </div>
           <div class="mt-16 flex flex-col lg:flex-row-reverse gap-8">
