@@ -17,6 +17,9 @@ en:
   set-special: Set special
   div-updated: Division updated
 
+  censor: Censor
+  censored: Censored
+
   status:
     title: Status
     unreviewed: Unreviewed
@@ -46,6 +49,9 @@ zh-CN:
   set-ranked: 设置为常规
   set-special: 设置为特殊
   div-updated: 分区已更新
+
+  censor: 过滤
+  censored: 已过滤
 
   status:
     title: 状态
@@ -159,6 +165,25 @@ async function submitRating() {
     submittingRating.value = false;
   }
 }
+
+const censoring = ref(false);
+async function doCensor() {
+  if (censoring.value) return;
+  censoring.value = true;
+  try {
+    await fetchApi(`/chart/${id}/censor`, {
+      method: 'POST',
+      json: {
+        censor: true,
+      },
+    });
+    toast(t('censored'));
+  } catch (e) {
+    toastError(e);
+  } finally {
+    censoring.value = false;
+  }
+}
 </script>
 
 <template>
@@ -174,7 +199,12 @@ async function submitRating() {
       <div class="px-8 w-full lg:px-0 lg:w-3/4 gap-8">
         <div class="flex flex-col">
           <h1>{{ chart.composer }}</h1>
-          <h1 class="text-5xl font-black">{{ chart.name }}</h1>
+          <div class="flex">
+            <h1 class="text-5xl font-black">{{ chart.name }}</h1>
+            <button class="btn btn-neutral ml-4" v-if="me && userPermissions(me).has(Permission.REVIEW)" @click="doCensor">
+              <LoadOr :loading="censoring">{{ t('censor') }}</LoadOr>
+            </button>
+          </div>
           <div class="mt-16 flex flex-col lg:flex-row-reverse gap-8">
             <div class="flex flex-col lg:w-1/4 gap-4">
               <UserCard :id="chart.uploader">
