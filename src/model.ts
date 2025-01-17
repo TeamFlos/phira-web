@@ -74,6 +74,8 @@ export enum Role {
   SUPERVISOR = 0x0004,
   HEAD_SUPERVISOR = 0x0008,
   HEAD_REVIEWER = 0x0010,
+  PECJAM_REVIEWER = 0x0020,
+  MODERATOR = 0x0040,
 }
 
 export class Roles {
@@ -168,6 +170,12 @@ export class Roles {
     }
     if (this.has(Role.HEAD_REVIEWER)) {
       perms.grant(Permission.SET_REVIEWER, Permission.BAN_USER, Permission.BAN_AVATAR);
+    }
+    if (this.has(Role.PECJAM_REVIEWER)) {
+      perms.grant(Permission.SEE_UNREVIEWED, Permission.REVIEW_PECJAM);
+    }
+    if (this.has(Role.MODERATOR)) {
+      perms.grant(Permission.HIDE_CHART);
     }
     return perms;
   }
