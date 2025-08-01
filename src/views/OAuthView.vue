@@ -14,8 +14,8 @@ import LoadOr from '../components/LoadOr.vue';
 
 const router = useRouter();
 
-const clientID = router.currentRoute.value.query.clientID as string;
-const redirectURI: URL = new URL(router.currentRoute.value.query.redirectURI as string);
+const clientID = (router.currentRoute.value.query.clientID || router.currentRoute.value.query.client_id) as string;
+const redirectURI: URL = new URL((router.currentRoute.value.query.redirectURI || router.currentRoute.value.query.redirect_uri) as string);
 const scope = router.currentRoute.value.query.scope as string;
 const state = router.currentRoute.value.query.state as string | undefined;
 
