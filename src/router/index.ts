@@ -9,6 +9,8 @@ import RegisterView from '../views/RegisterView.vue';
 import ChartsView from '../views/ChartsView.vue';
 import ChartView from '../views/ChartView.vue';
 
+import CollectionView from '../views/CollectionView.vue';
+
 import UsersView from '../views/UsersView.vue';
 import UserView from '../views/UserView.vue';
 
@@ -35,6 +37,8 @@ const router = createRouter({
 
     { path: '/chart', name: 'charts', component: ChartsView },
     { path: '/chart/:id(\\d+)', name: 'chart', component: ChartView },
+
+    { path: '/collection/:id(\\d+)', name: 'collection', component: CollectionView },
 
     { path: '/user', name: 'users', component: UsersView },
     { path: '/user/:id(\\d+)', name: 'user', component: UserView },

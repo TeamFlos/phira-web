@@ -44,6 +44,7 @@ const i18n = createI18n({
 
       'title-default': 'Phira',
       'title-charts': 'Charts',
+      'title-collection': 'Collection',
       'title-users': 'User',
       'title-settings': 'Settings',
 
@@ -70,6 +71,7 @@ const i18n = createI18n({
 
       'title-default': 'Phira',
       'title-charts': '谱面',
+      'title-collection': '合集',
       'title-users': '用户',
       'title-settings': '设置',
 

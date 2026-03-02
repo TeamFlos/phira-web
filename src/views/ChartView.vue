@@ -82,9 +82,10 @@ const { t } = useI18n();
 
 import moment from 'moment';
 
-import { useFetchApi, fileToURL, toast, toastError, loggedIn, setTitle, userPermissions } from '../common';
+import { useFetchApi, toast, toastError, loggedIn, setTitle, userPermissions } from '../common';
 import { Permission, type Chart, type User } from '../model';
 
+import CoverBackdrop from '../components/CoverBackdrop.vue';
 import LeaderboardView from '../components/LeaderboardView.vue';
 import LoadOr from '../components/LoadOr.vue';
 import LoadSuspense from '../components/LoadSuspense.vue';
@@ -213,13 +214,11 @@ async function doHide() {
 
 <template>
   <div class="relative">
-    <div
-      :style="{
-        'background-image': 'url(' + fileToURL(chart.illustration) + ')',
-      }"
-      class="-mt-24 illustration w-full h-screen bg-fixed bg-blend-overlay bg-[#bbbbbb] dark:bg-[#000000bb]"
-      style="transition: background-color 0.5s"></div>
-    <div class="w-full h-48 -mt-48 bg-gradient-to-b from-transparent to-base-200"></div>
+    <CoverBackdrop
+      :image="chart.illustration"
+      backdropClass="-mt-24 h-screen bg-fixed bg-blend-overlay bg-[#bbbbbb] dark:bg-[#000000bb]"
+      fadeHeightClass="h-48 -mt-48"
+      :backdropStyle="{ transition: 'background-color 0.5s' }" />
     <div class="flex flex-col items-center -mt-[35vh] mb-24">
       <div class="px-8 w-full lg:px-0 lg:w-3/4 gap-8">
         <div class="flex flex-col">
