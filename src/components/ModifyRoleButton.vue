@@ -68,10 +68,10 @@ async function switchSetReviewer() {
 <template>
   <button v-if="me && userPermissions(me).has(permission)" class="btn" :class="{ 'btn-secondary': !hasRole }" @click="switchSetReviewer">
     <LoadOr :loading="doing">
-      <template v-if="!hasRole">{{ t('set', { 'role': t('role.' + role) }) }}</template>
+      <template v-if="!hasRole">{{ t('set', { role: t('role.' + role) }) }}</template>
       <template v-if="hasRole">
         <i class="fa-solid fa-check"></i>
-        {{ t('cancel', { 'role': t('role.' + role) }) }}
+        {{ t('cancel', { role: t('role.' + role) }) }}
       </template>
     </LoadOr>
   </button>

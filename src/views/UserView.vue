@@ -180,8 +180,8 @@ if (me.value && userPermissions(me.value).has(Permission.SET_ROLES)) {
 }
 
 const modifyRolesDialog = ref<IConfirmDialog>();
-const newRoles = reactive((new Roles(user.roles)).to_selection());
-console.log(newRoles)
+const newRoles = reactive(new Roles(user.roles).to_selection());
+console.log(newRoles);
 async function doModifyRoles() {
   const diff = Roles.from_selection(newRoles).diff(new Roles(user.roles));
   await fetchApi(`/user/${id}/update-roles`, {
@@ -225,7 +225,6 @@ fetchApi(`/record/get-pool/${id}`, {}, (resp) => {
 });
 
 const currentBestPool = ref(true);
-
 </script>
 
 <template>
@@ -254,14 +253,16 @@ const currentBestPool = ref(true);
                     <label tabindex="0" class="btn btn-secondary btn-md lg:btn-sm rounded-s-none">
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </label>
-                    <ul tabindex="0"
-                      class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-48 lg:!right-auto">
+                    <ul tabindex="0" class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-48 lg:!right-auto">
                       <li>
-                        <a @click="() => {
-                          reportReason = '';
-                          reportDialog!.showModal();
-                        }
-                          " v-t="'report.button'"></a>
+                        <a
+                          @click="
+                            () => {
+                              reportReason = '';
+                              reportDialog!.showModal();
+                            }
+                          "
+                          v-t="'report.button'"></a>
                       </li>
                       <template v-if="me && userPermissions(me).has(Permission.BAN_USER)">
                         <li v-if="!user.banned"><a @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></a></li>
@@ -271,8 +272,7 @@ const currentBestPool = ref(true);
                         <li><a @click="confirmAvatarBanDialog!.showModal()" v-t="'ban-avatar.button'"></a></li>
                       </template>
                       <template v-if="me && userPermissions(me).has(Permission.BAN_USER_LOGIN)">
-                        <li v-if="!user.login_banned"><a @click="confirmLoginBanDialog!.showModal()"
-                            v-t="'login-ban.button'"></a></li>
+                        <li v-if="!user.login_banned"><a @click="confirmLoginBanDialog!.showModal()" v-t="'login-ban.button'"></a></li>
                         <li v-else class="disabled"><a v-t="'login-ban.done'"></a></li>
                       </template>
                     </ul>
@@ -280,8 +280,7 @@ const currentBestPool = ref(true);
                 </div>
               </div>
               <div class="mt-2 lg:mt-0">
-                <span v-if="user.bio" class="whitespace-nowrap max-w-xs truncate">{{ user.bio }}</span> <span v-else
-                  class="text-sm italic text-gray-500" v-t="'bio-empty'"></span>
+                <span v-if="user.bio" class="whitespace-nowrap max-w-xs truncate">{{ user.bio }}</span> <span v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></span>
               </div>
             </div>
             <div class="flex flex-row justify-center flex-wrap overflow-x-hidden lg:-mt-4 lg:ml-4">
@@ -320,8 +319,7 @@ const currentBestPool = ref(true);
       <div class="flex flex-col lg:flex-row mt-4 gap-4">
         <div class="lg:w-1/4 flex flex-col gap-3">
           <div class="gap-1 join join-vertical">
-            <button v-if="showModifyRoles" class="btn btn-secondary" @click="modifyRolesDialog!.showModal()"
-              v-t="'roles.modify'" />
+            <button v-if="showModifyRoles" class="btn btn-secondary" @click="modifyRolesDialog!.showModal()" v-t="'roles.modify'" />
           </div>
 
           <div class="card bg-base-100 shadow-xl p-4">
@@ -354,10 +352,8 @@ const currentBestPool = ref(true);
           </div>
           <div>
             <div class="tabs">
-              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': currentBestPool }"
-                @click="currentBestPool = true" v-t="'best-pool'"></a>
-              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': !currentBestPool }"
-                @click="currentBestPool = false" v-t="'recent-pool'"></a>
+              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': currentBestPool }" @click="currentBestPool = true" v-t="'best-pool'"></a>
+              <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': !currentBestPool }" @click="currentBestPool = false" v-t="'recent-pool'"></a>
             </div>
             <div class="card bg-base-100 shadow-xl p-4 rounded-ss-none">
               <RecordList v-if="currentBestPool" :records="bestPool"></RecordList>
@@ -382,8 +378,7 @@ const currentBestPool = ref(true);
   </ConfirmDialog>
   <ConfirmDialog :do="doReport" ref="reportDialog">
     <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
-    <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')"
-      v-model="reportReason"></textarea>
+    <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
   </ConfirmDialog>
   <ConfirmDialog :do="doModifyRoles" ref="modifyRolesDialog" :onError="cancelModifyRoles">
     <h3 class="font-bold text-lg" v-t="'roles.modify'"></h3>
