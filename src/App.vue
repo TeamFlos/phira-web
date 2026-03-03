@@ -1,5 +1,5 @@
 <script lang="ts">
-import { ref, watch } from 'vue';
+import { onErrorCaptured, ref, watch } from 'vue';
 
 const onLoaded = ref<() => void>();
 const component = ref();
@@ -16,9 +16,15 @@ export default {};
 </script>
 
 <script setup lang="ts">
+import { toastError } from './common';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
 import LoadView from './components/LoadView.vue';
+
+onErrorCaptured((err) => {
+  toastError(err);
+  return false;
+});
 </script>
 
 <template>
