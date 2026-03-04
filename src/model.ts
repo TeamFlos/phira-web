@@ -311,3 +311,18 @@ export type OAuthApp = {
   creator: number;
   created: string;
 };
+
+export type PartialCollection = {
+  id: number;
+  owner: number;
+  name: string;
+  description: string | null;
+  created: string;
+  updated: string;
+  cover: string | null;
+  public: boolean;
+};
+
+export type Collection = PartialCollection & {
+  charts: Chart[];
+};

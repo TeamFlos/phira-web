@@ -3,7 +3,7 @@ en:
   logged-out: Logged out
 
   chart: Charts
-  event: Events
+  collection: Collections
   user: Users
 
   wip: Work in progress
@@ -17,7 +17,7 @@ zh-CN:
   logged-out: 已登出
 
   chart: 谱面
-  event: 活动
+  collection: 合集
   user: 用户
 
   wip: 功能暂未开放
@@ -75,7 +75,7 @@ const user = ref<User>();
 const drawerOpened = ref(false);
 const NAVS = [
   { path: '/chart', icon: 'fa-book', text: 'chart', enabled: true },
-  { path: '/', icon: 'fa-star', text: 'event', enabled: false },
+  { path: '/collection', icon: 'fa-folder', text: 'collection', enabled: true },
   { path: '/user', icon: 'fa-user', text: 'user', enabled: true },
 ];
 

@@ -36,24 +36,12 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { detailedTime, setTitle, useFetchApi } from '../common';
-import type { Chart } from '../model';
+import type { Collection } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
 import ChartCard from '../components/ChartCard.vue';
 import PropItem from '../components/PropItem.vue';
 import SimpleUserCard from '../components/SimpleUserCard.vue';
-
-type Collection = {
-  id: number;
-  owner: number;
-  name: string;
-  description: string | null;
-  created: string;
-  updated: string;
-  cover: string | null;
-  public: boolean;
-  charts: Chart[];
-};
 
 const route = useRoute();
 const fetchApi = useFetchApi();

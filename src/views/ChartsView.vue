@@ -14,6 +14,8 @@ en:
     rating-rev: Rating asc.
     name: Name asc.
     name-rev: Name desc.
+    difficulty: Difficulty asc.
+    difficulty-rev: Difficulty desc.
 
   filter-opts: Filter options
   filters:
@@ -54,6 +56,8 @@ zh-CN:
     rating-rev: 评分倒序
     name: 名字正序
     name-rev: 名字倒序
+    difficulty: 难度顺序
+    difficulty-rev: 难度倒序
 
   search: 搜索
 
@@ -242,7 +246,7 @@ watch(
     }
 
     order.value = '-updated';
-    if (['updated', '-updated', 'rating', '-rating', 'name', '-name'].includes(q.order as string)) {
+    if (['updated', '-updated', 'rating', '-rating', 'name', '-name', 'difficulty', '-difficulty'].includes(q.order as string)) {
       order.value = q.order as string;
     }
   },
@@ -409,6 +413,8 @@ function rotate(value: string, choices: string[]): string {
             <option value="rating" v-t="'order.rating-rev'"></option>
             <option value="name" v-t="'order.name'"></option>
             <option value="-name" v-t="'order.name-rev'"></option>
+            <option value="difficulty" v-t="'order.difficulty'"></option>
+            <option value="-difficulty" v-t="'order.difficulty-rev'"></option>
           </select>
         </div>
         <button class="btn bg-base-100 btn-outline" @click="filterDialog!.showModal()">
@@ -434,7 +440,7 @@ function rotate(value: string, choices: string[]): string {
         </div>
       </div>
       <div v-if="charts" class="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-0 min-w-0">
-        <ChartCard v-for="chart in charts" :key="chart.id" :chart="chart"></ChartCard>
+        <ChartCard v-for="chart in charts" :key="chart.id" :chart="chart" />
       </div>
       <div v-else class="flex flex-col items-center w-full h-16 mb-8 p-8">
         <LoadView class="loading-lg" />
