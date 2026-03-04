@@ -19,7 +19,7 @@ import type { Chart, PlayRecord } from '../model';
 import LoadView from './LoadView.vue';
 
 const props = defineProps<{
-  records?: PlayRecordEx[];
+  initialRecords?: PlayRecordEx[];
 }>();
 
 const fetchApi = useFetchApi();
@@ -29,12 +29,12 @@ export type PlayRecordEx = PlayRecord & { label?: string; chartDetail?: Chart };
 const records = ref<PlayRecordEx[]>();
 
 function fetchRecords() {
-  records.value = props.records;
-  if (props.records) {
+  records.value = props.initialRecords;
+  if (props.initialRecords) {
     fetchApi(
       `/chart/multi-get?` +
         new URLSearchParams({
-          ids: props.records.map((r) => r.chart).join(','),
+          ids: props.initialRecords.map((r) => r.chart).join(','),
         }),
       {},
       (resp) => {
@@ -53,7 +53,7 @@ function fetchRecords() {
 
 fetchRecords();
 
-watch(() => props.records, fetchRecords);
+watch(() => props.initialRecords, fetchRecords);
 
 import icon_a from '@/assets/rank/a.webp';
 import icon_b from '@/assets/rank/b.webp';

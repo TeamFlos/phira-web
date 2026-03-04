@@ -348,7 +348,7 @@ const currentBestPool = ref(true);
           </div>
           <div class="card bg-base-100 shadow-xl p-4">
             <h2 class="text-2xl" v-t="'recent-records'"></h2>
-            <RecordList class="mt-2" :records="recentRecords" />
+            <RecordList class="mt-2" :initial-records="recentRecords" />
           </div>
           <div>
             <div class="tabs">
@@ -356,8 +356,8 @@ const currentBestPool = ref(true);
               <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': !currentBestPool }" @click="currentBestPool = false" v-t="'recent-pool'"></a>
             </div>
             <div class="card bg-base-100 shadow-xl p-4 rounded-ss-none">
-              <RecordList v-if="currentBestPool" :records="bestPool"></RecordList>
-              <RecordList v-if="!currentBestPool" :records="recentPool"></RecordList>
+              <RecordList v-if="currentBestPool" :initial-records="bestPool"></RecordList>
+              <RecordList v-if="!currentBestPool" :initial-records="recentPool"></RecordList>
             </div>
           </div>
         </div>

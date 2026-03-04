@@ -64,13 +64,6 @@ export function pageCount(count: number, pageNum: number) {
   return count ? Math.floor((count - 1) / pageNum) + 1 : 0;
 }
 
-const KIND_CLASS_NAME = {
-  info: 'alert-info',
-  error: 'alert-error',
-  warning: 'alert-warning',
-  success: 'alert-success',
-};
-
 export function toast(msg: string, kind?: 'error' | 'success') {
   const func = kind === 'error' ? toastSonner.error : kind === 'success' ? toastSonner.success : toastSonner;
   func(msg, {

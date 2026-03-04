@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref, type Ref } from 'vue';
-
 import bg from '@/assets/yyc2024/bg.png';
 </script>
 

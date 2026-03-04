@@ -20,7 +20,6 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toast, toastError, useFetchApi } from '../common';
-import type { User } from '../model';
 
 import LoadOr from './LoadOr.vue';
 
