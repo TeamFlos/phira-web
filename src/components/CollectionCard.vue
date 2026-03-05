@@ -6,7 +6,10 @@ defineProps<{ collection: PartialCollection }>();
 </script>
 
 <template>
-  <router-link :key="collection.id" :to="`/collection/${collection.id}`" class="group card relative image-full bg-base-100 shadow-xl aspect-[8/5] illustration chart-card min-h-0 min-w-0">
+  <router-link
+    :key="collection.id"
+    :to="`/collection/${collection.id}`"
+    class="group card relative image-full bg-base-100 shadow-xl aspect-[8/5] illustration chart-card min-h-0 min-w-0">
     <figure v-if="collection.cover">
       <img class="w-full aspect-[8/5]" :src="fileToURL(collection.cover) + '.thumbnail'" />
     </figure>

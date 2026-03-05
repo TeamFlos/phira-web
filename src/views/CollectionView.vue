@@ -6,6 +6,10 @@ en:
   chart-count: Chart Count
   description-empty: This collection does not have a description.
   no-charts: This collection does not include any charts.
+  report:
+    button: Report Collection
+    hint: Report reason. 10 to 200 characters.
+    done: Reported successfully. Thank you for your contribution to the health of the Phira community!
   visibility:
     title: Visibility
     public: Public
@@ -20,6 +24,10 @@ zh-CN:
   chart-count: 谱面数量
   description-empty: 该合集没有简介。
   no-charts: 该合集没有收录谱面。
+  report:
+    button: 举报合集
+    hint: 请填写举报理由，10 - 200 字
+    done: 举报成功，感谢你对 Phira 社区健康作出的贡献！
   visibility:
     title: 可见性
     public: 公开
@@ -29,40 +37,59 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { detailedTime, setTitle, useFetchApi } from '../common';
+import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, useFetchApi, type IConfirmDialog } from '../common';
 import type { Collection } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
 import ChartCard from '../components/ChartCard.vue';
+import ConfirmDialog from '../components/ConfirmDialog.vue';
 import PropItem from '../components/PropItem.vue';
 import SimpleUserCard from '../components/SimpleUserCard.vue';
 
 const route = useRoute();
+const router = useRouter();
 const fetchApi = useFetchApi();
 
 const id = parseInt(String(route.params.id));
-const collection = (await fetchApi(`/collection/${id}`)) as Collection;
+const collection = ref<Collection>();
 
-setTitle(collection.name);
+if (!loggedIn()) {
+  pleaseLogin(router);
+} else {
+  collection.value = (await fetchApi(`/collection/${id}`)) as Collection;
+  setTitle(collection.value.name);
+}
 
-const hasCover = computed(() => Boolean(collection.cover));
+const hasCover = computed(() => Boolean(collection.value?.cover));
 
 const description = computed(() => {
-  const text = (collection.description ?? '').trim();
+  const text = (collection.value?.description ?? '').trim();
   return text.length ? text : t('description-empty');
 });
 
-const visibilityLabel = computed(() => (collection.public ? t('visibility.public') : t('visibility.private')));
+const visibilityLabel = computed(() => (collection.value?.public ? t('visibility.public') : t('visibility.private')));
+
+const reportDialog = ref<IConfirmDialog>();
+const reportReason = ref('');
+async function doReport() {
+  await fetchApi(`/collection/${id}/report`, {
+    method: 'POST',
+    json: {
+      reason: reportReason.value!,
+    },
+  });
+  toast(t('report.done'));
+}
 </script>
 
 <template>
-  <div class="relative">
+  <div v-if="collection" class="relative">
     <CoverBackdrop
       :image="collection.cover"
       backdropClass="-mt-24 h-screen bg-fixed bg-blend-overlay bg-[#bbbbbb] dark:bg-[#000000bb]"
@@ -74,6 +101,17 @@ const visibilityLabel = computed(() => (collection.public ? t('visibility.public
         <div class="badge badge-outline">
           {{ visibilityLabel }}
         </div>
+        <button
+          class="btn btn-secondary btn-sm ml-auto bg-base-300/70 backdrop-blur border border-base-content/10"
+          @click="
+            () => {
+              reportReason = '';
+              reportDialog!.showModal();
+            }
+          ">
+          <i class="fa-regular fa-flag mr-2"></i>
+          {{ t('report.button') }}
+        </button>
       </div>
       <p class="max-w-3xl whitespace-pre-line break-words text-base-content/70">{{ description }}</p>
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -102,4 +140,8 @@ const visibilityLabel = computed(() => (collection.public ? t('visibility.public
       </div>
     </div>
   </div>
+  <ConfirmDialog :do="doReport" ref="reportDialog">
+    <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
+    <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
+  </ConfirmDialog>
 </template>
