@@ -5,6 +5,7 @@ en:
   chart: Charts
   collection: Collections
   user: Users
+  censor: Censor tool
 
   wip: Work in progress
 
@@ -19,6 +20,7 @@ zh-CN:
   chart: 谱面
   collection: 合集
   user: 用户
+  censor: 审核工具
 
   wip: 功能暂未开放
 
@@ -30,13 +32,13 @@ zh-CN:
 </i18n>
 
 <script lang="ts">
-import { ref, watch, onUnmounted } from 'vue';
+import { ref, watch, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 
-import { useFetchApi, getCookie, addCookieListener, logout, toast } from '../common';
-import type { User } from '../model';
+import { useFetchApi, getCookie, addCookieListener, logout, toast, userPermissions } from '../common';
+import { Permission, type User } from '../model';
 
 import { Toaster } from 'vue-sonner';
 
@@ -73,11 +75,17 @@ const fetchApi = useFetchApi();
 const accessToken = ref<string>();
 const user = ref<User>();
 const drawerOpened = ref(false);
-const NAVS = [
-  { path: '/chart', icon: 'fa-book', text: 'chart', enabled: true },
-  { path: '/collection', icon: 'fa-folder', text: 'collection', enabled: true },
-  { path: '/user', icon: 'fa-user', text: 'user', enabled: true },
-];
+const NAVS = computed(() => {
+  let routes = [
+    { path: '/chart', icon: 'fa-book', text: 'chart' },
+    { path: '/collection', icon: 'fa-folder', text: 'collection' },
+    { path: '/user', icon: 'fa-user', text: 'user' },
+  ];
+  if (user.value && userPermissions(user.value).has(Permission.CENSOR_DETAIL)) {
+    routes.push({ path: '/censor', icon: 'fa-gavel', text: 'censor' });
+  }
+  return routes;
+});
 
 addCookieListener(() => {
   accessToken.value = getCookie('access_token');
@@ -124,14 +132,13 @@ onUnmounted(() => {
             <div class="ms-8 gap-2 hidden md:flex">
               <router-link
                 v-for="nav in NAVS"
-                :to="nav.enabled ? nav.path : route"
+                :to="nav.path"
                 :key="nav.text"
                 :value="nav.text"
                 class="btn btn-ghost normal-case text-lg"
                 :class="{
                   'btn-active': route.path.startsWith(nav.path) && nav.enabled,
-                }"
-                @click="!nav.enabled && toast(t('wip'), 'error')">
+                }">
                 <i :class="nav.icon" class="fa-solid"></i>
                 {{ t(nav.text) }}
               </router-link>

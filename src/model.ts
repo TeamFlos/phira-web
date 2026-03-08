@@ -21,6 +21,7 @@ export enum Permission {
   UPLOAD_RECORD = 0x00020000,
   BAN_USER_LOGIN = 0x00040000,
   HIDE_CHART = 0x00080000,
+  CENSOR_DETAIL = 0x00100000,
 }
 
 export class Permissions {
@@ -160,10 +161,10 @@ export class Roles {
       return perms;
     }
     if (this.has(Role.REVIEWER)) {
-      perms.grant(Permission.SEE_UNREVIEWED, Permission.DELETE_STABLE, Permission.REVIEW, Permission.EDIT_TAGS);
+      perms.grant(Permission.SEE_UNREVIEWED, Permission.DELETE_STABLE, Permission.REVIEW, Permission.EDIT_TAGS, Permission.CENSOR_DETAIL);
     }
     if (this.has(Role.SUPERVISOR)) {
-      perms.grant(Permission.SEE_UNREVIEWED, Permission.SEE_STABLE_REQ, Permission.STABILIZE_CHART, Permission.EDIT_TAGS);
+      perms.grant(Permission.SEE_UNREVIEWED, Permission.SEE_STABLE_REQ, Permission.STABILIZE_CHART, Permission.EDIT_TAGS, Permission.CENSOR_DETAIL);
     }
     if (this.has(Role.HEAD_SUPERVISOR)) {
       perms.grant(Permission.STABILIZE_JUDGE, Permission.DELETE_STABLE, Permission.SET_RANKED, Permission.SET_SUPERVISOR);

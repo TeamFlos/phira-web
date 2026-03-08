@@ -58,6 +58,7 @@ const router = createRouter({
 
     { path: '/oauth', name: 'oauth', component: OAuthView },
     { path: '/staff', name: 'staff', component: StaffView },
+    { path: '/censor', name: 'censor', component: CensorView },
   ],
   scrollBehavior(_to, from, savedPosition) {
     return new Promise((resolve) => {
@@ -70,6 +71,7 @@ const router = createRouter({
 
 import { i18n } from '../main';
 import { setTitle } from '../common';
+import CensorView from '@/views/CensorView.vue';
 
 router.afterEach((to) => {
   nextTick(() => {
