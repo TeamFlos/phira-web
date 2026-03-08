@@ -137,7 +137,7 @@ onUnmounted(() => {
                 :value="nav.text"
                 class="btn btn-ghost normal-case text-lg"
                 :class="{
-                  'btn-active': route.path.startsWith(nav.path) && nav.enabled,
+                  'btn-active': route.path.startsWith(nav.path),
                 }">
                 <i :class="nav.icon" class="fa-solid"></i>
                 {{ t(nav.text) }}
@@ -178,16 +178,15 @@ onUnmounted(() => {
         <ul class="menu p-4 w-80 h-full bg-base-200 gap-2">
           <router-link
             v-for="nav in NAVS"
-            :to="nav.enabled ? nav.path : route"
+            :to="nav.path"
             :key="nav.text"
             :value="nav.text"
             class="btn btn-ghost normal-case text-lg justify-start"
             :class="{
-              'btn-active': nav.enabled && route.path.startsWith(nav.path),
+              'btn-active': route.path.startsWith(nav.path),
             }"
             @click="
               () => {
-                !nav.enabled && toast(t('wip'), 'error');
                 drawerOpened = false;
               }
             ">
