@@ -7,7 +7,7 @@ en:
   description-empty: This collection does not have a description.
   no-charts: This collection does not include any charts.
   report:
-    button: Report Collection
+    button: Report
     hint: Report reason. 10 to 200 characters.
     done: Reported successfully. Thank you for your contribution to the health of the Phira community!
   visibility:
@@ -25,7 +25,7 @@ zh-CN:
   description-empty: 该合集没有简介。
   no-charts: 该合集没有收录谱面。
   report:
-    button: 举报合集
+    button: 举报
     hint: 请填写举报理由，10 - 200 字
     done: 举报成功，感谢你对 Phira 社区健康作出的贡献！
   visibility:
