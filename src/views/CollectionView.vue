@@ -10,6 +10,9 @@ en:
     button: Report
     hint: Report reason. 10 to 200 characters.
     done: Reported successfully. Thank you for your contribution to the health of the Phira community!
+  import:
+    label: Import
+    tooltip: Copy the URL or ID into the game.
   visibility:
     title: Visibility
     public: Public
@@ -28,6 +31,9 @@ zh-CN:
     button: 举报
     hint: 请填写举报理由，10 - 200 字
     done: 举报成功，感谢你对 Phira 社区健康作出的贡献！
+  import:
+    label: 导入
+    tooltip: 复制网址或者id到游戏
   visibility:
     title: 可见性
     public: 公开
@@ -101,17 +107,23 @@ async function doReport() {
         <div class="badge badge-outline">
           {{ visibilityLabel }}
         </div>
-        <button
-          class="btn btn-secondary btn-sm ml-auto bg-base-300/70 backdrop-blur border border-base-content/10"
-          @click="
-            () => {
-              reportReason = '';
-              reportDialog!.showModal();
-            }
-          ">
-          <i class="fa-regular fa-flag mr-2"></i>
-          {{ t('report.button') }}
-        </button>
+        <div class="ml-auto flex items-center gap-2">
+          <button class="btn btn-ghost btn-sm" v-tooltip="t('import.tooltip')">
+            <i class="fa-solid fa-file-arrow-down mr-2"></i>
+            {{ t('import.label') }}
+          </button>
+          <button
+            class="btn btn-secondary btn-sm bg-base-300/70 backdrop-blur border border-base-content/10"
+            @click="
+              () => {
+                reportReason = '';
+                reportDialog!.showModal();
+              }
+            ">
+            <i class="fa-regular fa-flag mr-2"></i>
+            {{ t('report.button') }}
+          </button>
+        </div>
       </div>
       <p class="max-w-3xl whitespace-pre-line break-words text-base-content/70">{{ description }}</p>
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
