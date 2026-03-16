@@ -12,7 +12,7 @@ en:
     done: Reported successfully. Thank you for your contribution to the health of the Phira community!
   import:
     label: Import
-    tooltip: Copy the URL or ID into the game.
+    tooltip: Copied to clipboard. Please paste it in "Collections" -> "Import" in-game.
   visibility:
     title: Visibility
     public: Public
@@ -33,7 +33,7 @@ zh-CN:
     done: 举报成功，感谢你对 Phira 社区健康作出的贡献！
   import:
     label: 导入
-    tooltip: 复制网址或者id到游戏
+    toast: 已复制到剪贴板，请粘贴到游戏内“收藏夹”->“导入”中
   visibility:
     title: 可见性
     public: 公开
@@ -57,6 +57,7 @@ import ChartCard from '../components/ChartCard.vue';
 import ConfirmDialog from '../components/ConfirmDialog.vue';
 import PropItem from '../components/PropItem.vue';
 import SimpleUserCard from '../components/SimpleUserCard.vue';
+import { useClipboard } from '@vueuse/core';
 
 const route = useRoute();
 const router = useRouter();
@@ -92,6 +93,13 @@ async function doReport() {
   });
   toast(t('report.done'));
 }
+
+const { copy } = useClipboard();
+function copyUrl() {
+  const url = `${window.location.origin}/collection/${id}`;
+  copy(url);
+  toast(t('import.toast'));
+}
 </script>
 
 <template>
@@ -108,12 +116,12 @@ async function doReport() {
           {{ visibilityLabel }}
         </div>
         <div class="ml-auto flex items-center gap-2">
-          <button class="btn btn-ghost btn-sm" v-tooltip="t('import.tooltip')">
+          <button class="btn btn-sm" @click="copyUrl">
             <i class="fa-solid fa-file-arrow-down mr-2"></i>
             {{ t('import.label') }}
           </button>
           <button
-            class="btn btn-secondary btn-sm bg-base-300/70 backdrop-blur border border-base-content/10"
+            class="btn btn-secondary btn-sm"
             @click="
               () => {
                 reportReason = '';
