@@ -8,7 +8,6 @@ en:
     name-rev: Name desc.
 
   from-me: From me only
-  uploaded-by-me: Uploaded by me
 
   search: Search
 
@@ -25,7 +24,6 @@ zh-CN:
     name-rev: 名字倒序
 
   from-me: 仅我创建
-  uploaded-by-me: 我上传的
 
   search: 搜索
 
@@ -73,16 +71,6 @@ const searchValue = ref(''),
 const order = ref('-updated');
 const fromMe = ref(false);
 const uploader = ref<number>();
-const uploadedByMe = computed({
-  get: () => Boolean(user && uploader.value === user.id),
-  set: (value) => {
-    if (!user) {
-      uploader.value = undefined;
-      return;
-    }
-    uploader.value = value ? user.id : undefined;
-  },
-});
 
 let triggeredByRouteChange = false,
   preventQueryUpdate = false;
@@ -226,12 +214,6 @@ onMounted(() => {
           <label class="label cursor-pointer">
             <span class="label-text mr-2"> {{ t('from-me') }} </span>
             <input type="checkbox" class="checkbox" v-model="fromMe" />
-          </label>
-        </div>
-        <div v-if="user" class="form-control">
-          <label class="label cursor-pointer">
-            <span class="label-text mr-2"> {{ t('uploaded-by-me') }} </span>
-            <input type="checkbox" class="checkbox" v-model="uploadedByMe" />
           </label>
         </div>
         <div class="ml-auto join w-full lg:w-auto">
