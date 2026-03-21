@@ -12,7 +12,7 @@ en:
     done: Reported successfully. Thank you for your contribution to the health of the Phira community!
   import:
     label: Import
-    tooltip: Copied to clipboard. Please paste it in "Collections" -> "Import" in-game.
+    toast: Copied to clipboard. Please paste it in "Collections" -> "Import" in-game.
   visibility:
     title: Visibility
     public: Public
