@@ -13,6 +13,8 @@ en:
   import:
     label: Import
     tooltip: Copied to clipboard. Please paste it in "Collections" -> "Import" in-game.
+  like:
+    label: Like
   visibility:
     title: Visibility
     public: Public
@@ -34,6 +36,8 @@ zh-CN:
   import:
     label: 导入
     toast: 已复制到剪贴板，请粘贴到游戏内“收藏夹”->“导入”中
+  like:
+    label: 点赞
   visibility:
     title: 可见性
     public: 公开
@@ -100,6 +104,23 @@ function copyUrl() {
   copy(url);
   toast(t('import.toast'));
 }
+
+const liked = ref<boolean>();
+fetchApi(`/collection/${id}/like`, { method: 'GET' }).then((res) => {
+  liked.value = (res as { like: boolean }).like;
+});
+function doLike() {
+  if (liked.value === undefined) return;
+  fetchApi(`/collection/${id}/like`, {
+    method: 'POST',
+    json: {
+      like: !liked.value,
+    },
+  }).then((res) => {
+    liked.value = !liked.value;
+    collection.value!.likes = (res as { likes: number }).likes;
+  });
+}
 </script>
 
 <template>
@@ -116,19 +137,30 @@ function copyUrl() {
           {{ visibilityLabel }}
         </div>
         <div class="ml-auto flex items-center gap-2">
+          <button
+            class="btn btn-sm"
+            :class="{
+              'btn-disabled': liked === undefined,
+              'btn-success': liked,
+            }"
+            @click="doLike">
+            <i class="fa-solid fa-thumbs-up mr-1"></i>
+            <span class="">{{ collection.likes }}</span>
+            {{ t('like.label') }}
+          </button>
           <button class="btn btn-sm" @click="copyUrl">
-            <i class="fa-solid fa-file-arrow-down mr-2"></i>
+            <i class="fa-solid fa-file-arrow-down mr-1"></i>
             {{ t('import.label') }}
           </button>
           <button
-            class="btn btn-secondary btn-sm"
+            class="btn btn-error btn-sm"
             @click="
               () => {
                 reportReason = '';
                 reportDialog!.showModal();
               }
             ">
-            <i class="fa-regular fa-flag mr-2"></i>
+            <i class="fa-regular fa-flag mr-1"></i>
             {{ t('report.button') }}
           </button>
         </div>

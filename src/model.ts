@@ -326,4 +326,5 @@ export type PartialCollection = {
 
 export type Collection = PartialCollection & {
   charts: Chart[];
+  likes: number;
 };

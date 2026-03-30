@@ -85,7 +85,7 @@ export type FetchApi = (
   request?: RequestInitWithJson,
   onSuccess?: (json: object, resp: Response) => void,
   onError?: (json: object, resp?: Response) => boolean,
-) => object | null;
+) => Promise<object | undefined>;
 
 export function validateEmail(t: any, email: string) {
   if (!/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(email)) {
