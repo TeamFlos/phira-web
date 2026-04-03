@@ -53,6 +53,7 @@ const i18n = createI18n({
       'title-privacy-policy': 'Privacy Policy',
       'title-oauth': 'OAuth',
       'title-staff': 'Staff',
+      'title-confirm-collab': 'Collaboration Invitation',
     },
     'zh-CN': {
       login: '登录',
@@ -80,6 +81,7 @@ const i18n = createI18n({
       'title-privacy-policy': '隐私政策',
       'title-oauth': 'OAuth',
       'title-staff': '团队成员',
+      'title-confirm-collab': '协作邀请',
     },
   },
   legacy: false,

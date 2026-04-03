@@ -8,6 +8,7 @@ import RegisterView from '../views/RegisterView.vue';
 
 import ChartsView from '../views/ChartsView.vue';
 import ChartView from '../views/ChartView.vue';
+import ConfirmCollabView from '../views/ConfirmCollabView.vue';
 
 import CollectionView from '../views/CollectionView.vue';
 import CollectionsView from '../views/CollectionsView.vue';
@@ -38,6 +39,7 @@ const router = createRouter({
 
     { path: '/chart', name: 'charts', component: ChartsView },
     { path: '/chart/:id(\\d+)', name: 'chart', component: ChartView },
+    { path: '/chart/confirm-collab', name: 'confirm-collab', component: ConfirmCollabView },
 
     { path: '/collection', name: 'collections', component: CollectionsView },
     { path: '/collection/:id(\\d+)', name: 'collection', component: CollectionView },
