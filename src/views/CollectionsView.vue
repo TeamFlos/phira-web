@@ -6,6 +6,7 @@ en:
     time-rev: Time asc.
     name: Name asc.
     name-rev: Name desc.
+    likes: Most liked
 
   from-me: From me only
 
@@ -22,6 +23,7 @@ zh-CN:
     time-rev: 时间倒序
     name: 名字正序
     name-rev: 名字倒序
+    likes: 最多点赞
 
   from-me: 仅我创建
 
@@ -112,7 +114,7 @@ watch(
     }
 
     order.value = '-updated';
-    if (['updated', '-updated', 'name', '-name'].includes(q.order as string)) {
+    if (['updated', '-updated', 'name', '-name', '-likes'].includes(q.order as string)) {
       order.value = q.order as string;
     }
   },
@@ -208,6 +210,7 @@ onMounted(() => {
             <option value="updated" v-t="'order.time-rev'"></option>
             <option value="name" v-t="'order.name'"></option>
             <option value="-name" v-t="'order.name-rev'"></option>
+            <option value="-likes" v-t="'order.likes'"></option>
           </select>
         </div>
         <div v-if="user" class="form-control">

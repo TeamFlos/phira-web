@@ -14,6 +14,9 @@ defineProps<{ collection: PartialCollection }>();
       <img class="w-full aspect-[8/5]" :src="fileToURL(collection.cover) + '.thumbnail'" />
     </figure>
     <div class="card-body flex-col justify-end p-4 gap-0 min-h-0 min-w-0">
+      <p class="flex-none text-sm opacity-80">
+        <i class="fa-solid fa-thumbs-up mr-1"></i>{{ collection.likes }}
+      </p>
       <h2 class="card-title group-hover:link truncate">
         {{ collection.name }}
       </h2>

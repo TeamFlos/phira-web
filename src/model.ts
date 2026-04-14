@@ -322,9 +322,9 @@ export type PartialCollection = {
   updated: string;
   cover: string | null;
   public: boolean;
+  likes: number;
 };
 
 export type Collection = PartialCollection & {
   charts: Chart[];
-  likes: number;
 };
