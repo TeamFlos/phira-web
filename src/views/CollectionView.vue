@@ -130,7 +130,7 @@ function doLike() {
       backdropClass="-mt-24 h-screen bg-fixed bg-blend-overlay bg-[#bbbbbb] dark:bg-[#000000bb]"
       fadeHeightClass="h-48 -mt-48"
       :backdropStyle="{ transition: 'background-color 0.5s' }" />
-    <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-8" :class="hasCover ? '-mt-[35vh]' : 'pt-6'">
+    <div class="mx-auto flex lg:w-3/4 flex-col gap-6 px-4 pb-8" :class="hasCover ? '-mt-[35vh]' : 'pt-6'">
       <div class="flex flex-wrap items-center gap-3">
         <h1 class="text-4xl font-black text-base-content">{{ collection.name }}</h1>
         <div class="badge badge-outline">
@@ -191,9 +191,10 @@ function doLike() {
         </div>
       </div>
     </div>
+
+    <ConfirmDialog :do="doReport" ref="reportDialog">
+      <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
+      <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
+    </ConfirmDialog>
   </div>
-  <ConfirmDialog :do="doReport" ref="reportDialog">
-    <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
-    <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
-  </ConfirmDialog>
 </template>
