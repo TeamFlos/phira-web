@@ -16,58 +16,69 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 useI18n();
 
-import { useFetchApi, pageCount, userNameClass, LANGUAGES } from '../common';
+import { useFetchApi, userNameClass, LANGUAGES } from '../common';
 import type { Page, User } from '../model';
 
-const PAGE_NUM = 20;
+const PAGE_NUM = 30;
 
 import LoadView from './LoadView.vue';
-import PageIndicator from './PageIndicator.vue';
 import UserAvatar from './UserAvatar.vue';
 
 import moment from 'moment';
 
-const props = defineProps<{ initPage?: number; params?: object }>();
+const props = defineProps<{ params?: object }>();
 
 const fetchApi = useFetchApi();
 
-const pagination = ref<typeof PageIndicator>();
-
-const totalCount = ref(0);
 const users = ref<User[]>();
 
-const page = computed(() => pagination.value?.current ?? props.initPage ?? 1);
-
-const parameters = computed(() => {
-  return {
-    page: String(page.value),
-    ...(props.params ?? {}),
-  };
-});
+// 游标分页：page 参数是 user id 游标，后端返回 id >= page 的前 PAGE_NUM 个用户。
+// cursorStack 记录每一页的起始游标，用于支持「上一页」回退。
+const cursorStack = ref<number[]>([0]);
+const cursor = computed(() => cursorStack.value[cursorStack.value.length - 1]);
+const hasNext = ref(false);
 
 async function fetchUsers() {
   users.value = undefined;
-  let params = {
-    pageNum: String(PAGE_NUM),
-    ...parameters.value,
+  const params = {
+    page: String(cursor.value),
+    ...(props.params ?? {}),
   };
   const resp = (await fetchApi('/user/?' + new URLSearchParams(params))) as Page<User>;
-  totalCount.value = resp.count;
   users.value = resp.results;
+  // 满页则认为还有下一页（临界情况下可能多出一个空页，可接受）。
+  hasNext.value = resp.results.length >= PAGE_NUM;
 }
 
-defineExpose({ pagination });
+function nextPage() {
+  if (!hasNext.value || !users.value?.length) return;
+  cursorStack.value.push(users.value[users.value.length - 1].id + 1);
+  fetchUsers();
+}
+
+function prevPage() {
+  if (cursorStack.value.length <= 1) return;
+  cursorStack.value.pop();
+  fetchUsers();
+}
 
 await fetchUsers();
 
 onMounted(() => {
-  watch(parameters, fetchUsers);
+  // 参数（搜索、关注筛选等）变化时回到第一页。
+  watch(
+    () => props.params,
+    () => {
+      cursorStack.value = [0];
+      fetchUsers();
+    },
+  );
 });
 </script>
 
 <template>
-  <div class="overflow-x-auto flex flex-col items-end gap-2">
-    <div class="overflow-x-auto w-full">
+  <div class="flex flex-col gap-2">
+    <div class="card bg-base-100 shadow-xl p-4 overflow-x-auto w-full">
       <table class="table">
         <thead>
           <tr>
@@ -105,6 +116,10 @@ onMounted(() => {
         <LoadView />
       </div>
     </div>
-    <PageIndicator :total="pageCount(totalCount, PAGE_NUM)" ref="pagination" :init="props.initPage ?? 1" />
+    <div class="join self-center mt-2">
+      <button class="join-item btn btn-ghost" :class="{ 'btn-disabled': cursorStack.length <= 1 }" @click="prevPage">«</button>
+      <button class="join-item btn btn-ghost pointer-events-none font-normal">{{ cursorStack.length }}</button>
+      <button class="join-item btn btn-ghost" :class="{ 'btn-disabled': !hasNext }" @click="nextPage">»</button>
+    </div>
   </div>
 </template>

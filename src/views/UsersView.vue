@@ -12,12 +12,9 @@ import UserList from '../components/UserList.vue';
 const route = useRoute();
 const router = useRouter();
 
-const list = ref<typeof UserList>();
-
 const searchValue = ref(''),
   tempSearchValue = ref<string>();
 
-let initPage = 1;
 let following: number | null = null,
   followedBy: number | null = null;
 
@@ -26,19 +23,6 @@ watch(
   () => {
     let q = route.query;
     if (isString(q.search)) tempSearchValue.value = searchValue.value = q.search;
-    if (q.page) {
-      let page = 1;
-      try {
-        page = parseInt(q.page as string);
-      } catch (e) {
-        // empty
-      }
-      if (list.value) {
-        list.value!.pagination.current = page;
-      } else {
-        initPage = page;
-      }
-    }
     if (q.following) {
       try {
         following = parseInt(q.following as string);
@@ -67,16 +51,8 @@ const subParameters = computed(() => {
   return res;
 });
 
-const parameters = computed(() => {
-  let res: Record<string, string> = {
-    page: String(list.value?.pagination.current ?? 1),
-    ...subParameters.value,
-  };
-  return res;
-});
-
 onMounted(() => {
-  watch(parameters, (params) => {
+  watch(subParameters, (params) => {
     router.push({ query: params });
   });
 });
@@ -90,21 +66,13 @@ onMounted(() => {
           class="input input-bordered join-item rounded-l-full w-full"
           :placeholder="t('search')"
           v-model="tempSearchValue"
-          @keyup.enter="
-            list!.pagination.current = 1;
-            searchValue = tempSearchValue!;
-          " />
-        <button
-          class="btn btn-secondary join-item rounded-r-full"
-          @click="
-            list!.pagination.current = 1;
-            searchValue = tempSearchValue!;
-          ">
+          @keyup.enter="searchValue = tempSearchValue!" />
+        <button class="btn btn-secondary join-item rounded-r-full" @click="searchValue = tempSearchValue!">
           <i class="fa-solid fa-search"></i>
         </button>
       </div>
-      <div class="card bg-base-100 shadow-xl p-4 mt-4 w-full">
-        <UserList ref="list" :initPage="initPage" :params="subParameters" />
+      <div class="mt-4 w-full">
+        <UserList :params="subParameters" />
       </div>
     </div>
   </div>
