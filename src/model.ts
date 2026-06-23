@@ -1,3 +1,33 @@
+// Domain types are now aliases over the OpenAPI-generated schema — the schema
+// (from phira-api's Rust serde structs) is the single source of truth. Only the
+// runtime logic that has no schema counterpart (Permission/Role enums and their
+// bitmask classes) lives here as hand-written code.
+import type { components } from './api/schema';
+
+type S = components['schemas'];
+
+export type User = S['DetailedUserView']; // /me shape (UserView + email)
+export type UserView = S['GetUserR']; // /user/{id} shape (UserView + following; NO email)
+export type Chart = S['ChartView'];
+export type PlayRecord = S['RecordView'];
+export type PoolItem = S['PoolItem'];
+export type RecordPool = S['GetPoolR'];
+export type StbHistory = S['HistoryItem'];
+export type SimpleUser = S['SimpleUser'];
+export type StbStatus = S['StbStatusP'];
+export type EmailSubs = S['EmailSub'];
+export type OAuthApp = S['OAuthAppView'];
+export type PartialCollection = S['Collection']; // /collection list item
+export type Collection = S['DetailedCollection']; // /collection/{id} (with charts)
+
+// Generic page helper; structurally identical to the schema's PaginationR<T>.
+// Kept as a utility since the generated schema only emits concrete per-T page
+// types (PaginationR_ChartView, …), not a generic.
+export type Page<T> = {
+  count: number;
+  results: T[];
+};
+
 export enum Permission {
   NONE = 0x00000000,
   ALL = 0xffffffff,
@@ -182,155 +212,4 @@ export class Roles {
   }
 }
 
-export type Page<T> = {
-  count: number;
-  results: T[];
-};
 
-export type User = {
-  id: number;
-  avatar: string;
-  name: string;
-  email: string;
-  hykb_uid: number | null;
-  language: string;
-  bio: string | null;
-  badges: string[];
-  roles: number;
-  banned: boolean;
-  login_banned: boolean;
-
-  rks: number;
-
-  follower_count: number;
-  following_count: number;
-
-  joined: string;
-  last_login: string;
-};
-
-export type UserView = User & {
-  following: boolean;
-  // Localized badge display names keyed by identifier, from GET /user/{id}.
-  // Missing entries fall back to the raw identifier client-side.
-  badgeNames?: Record<string, string>;
-};
-
-export type Chart = {
-  id: number;
-  name: string;
-  composer: string;
-  illustrator: string;
-  charter: string;
-  description?: string;
-  level: string;
-  difficulty: number;
-  reviewed: boolean;
-  ranked: boolean;
-  stable: boolean;
-  stableRequest: boolean;
-
-  illustration: string;
-  preview: string;
-  file: string;
-
-  uploader: number;
-
-  tags: string[];
-  rating?: number;
-  ratingCount: number;
-
-  created: string;
-  updated: string;
-  chartUpdated: string;
-};
-
-export type PlayRecord = {
-  id: number;
-  player: number;
-  chart: number;
-  score: number;
-  accuracy: number;
-  perfect: number;
-  good: number;
-  bad: number;
-  miss: number;
-  speed: number;
-  max_combo: number;
-  mods: number;
-  full_combo: boolean;
-  std: number;
-  std_score: number;
-
-  best: boolean;
-  best_std: boolean;
-  time: string;
-};
-
-export type PoolItem = {
-  record: number;
-  chart: number;
-  rks: number;
-};
-
-export type RecordPool = {
-  bestPool: PoolItem[];
-  recentPool: PoolItem[];
-  rks: number;
-};
-
-export type StbHistory = {
-  id: number;
-  reviewer?: number;
-  reviewerName?: string;
-  reviewerAvatar?: string;
-  chart: number;
-  approve: boolean;
-  comment?: string;
-  time: string;
-};
-
-export type SimpleUser = {
-  id: number;
-  name: string;
-};
-
-export type StbStatus = {
-  stable: boolean;
-  stableRequest: boolean;
-  approves: SimpleUser[];
-  denies: SimpleUser[];
-  history: StbHistory[];
-};
-
-export type EmailSubs = {
-  review: boolean;
-  stb: boolean;
-};
-
-export type OAuthApp = {
-  id: number;
-  name: string;
-  clientId: string;
-  redirectUri: string;
-  maxPerm: number;
-  avatar: string;
-  creator: number;
-  created: string;
-};
-
-export type PartialCollection = {
-  id: number;
-  owner: number;
-  name: string;
-  description: string | null;
-  created: string;
-  updated: string;
-  cover: string | null;
-  public: boolean;
-  likes: number;
-};
-
-export type Collection = PartialCollection & {
-  charts: Chart[];
-};

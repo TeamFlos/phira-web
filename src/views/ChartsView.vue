@@ -94,7 +94,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, pageCount, isString, loggedIn, userPermissions } from '../common';
+import { pageCount, isString, loggedIn, userPermissions } from '../common';
+import { useApi } from '../api/client';
 
 import { Permission } from '../model';
 import type { Chart, Page, User } from '../model';
@@ -110,11 +111,12 @@ const PAGE_NUM = 28;
 const route = useRoute();
 const router = useRouter();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 let user: User | null = null;
 if (loggedIn()) {
-  user = (await fetchApi('/me')) as User;
+  const { data, error } = await api.GET('/me');
+  if (!error && data) user = data as User;
 }
 
 const pagination = ref<typeof PageIndicator>();
@@ -297,41 +299,48 @@ const parameters = computed(() => {
 
 async function fetchCharts() {
   charts.value = undefined;
-  let params: Record<string, string> = {
-    pageNum: String(PAGE_NUM),
-    ...parameters.value,
-  };
-  delete params.fromMe;
-  delete params.unreviewed;
-  delete params.stable;
 
   let fromMe = parameters.value.fromMe,
     unreviewed = parameters.value.unreviewed,
     stable = parameters.value.stable;
+
+  const query: Record<string, unknown> = {
+    pageNum: PAGE_NUM,
+    page: Number(parameters.value.page),
+    order: parameters.value.order,
+  };
+  if (parameters.value.division) query.division = parameters.value.division;
+  if (parameters.value.tags) query.tags = parameters.value.tags;
+  if (parameters.value.search) query.search = parameters.value.search;
+  if (parameters.value.rating) query.rating = parameters.value.rating;
   if (fromMe === 'yes' && user) {
-    params.uploader = String(user?.id);
+    query.uploader = user.id;
   }
   if (unreviewed && unreviewed !== 'any') {
-    params.reviewed = unreviewed === 'yes' ? 'false' : 'true';
+    query.reviewed = unreviewed === 'no';
   }
   if (stable && !['any', 'req'].includes(stable)) {
-    params.stable = 'true';
+    query.stable = true;
   }
   switch (stable) {
     case 'ranked':
-      params.ranked = 'true';
+      query.ranked = true;
       break;
     case 'unranked':
-      params.ranked = 'false';
+      query.ranked = false;
       break;
     case 'req':
-      params.stableRequest = 'true';
+      query.stableRequest = true;
       break;
   }
 
-  const resp = (await fetchApi('/chart?' + new URLSearchParams(params))) as Page<Chart>;
-  totalCount.value = resp.count;
-  charts.value = resp.results;
+  const resp = await api.GET('/chart', {
+    params: { query: query as any },
+  });
+  if (resp.error || !resp.data) throw new Error();
+  const data = resp.data as Page<Chart>;
+  totalCount.value = data.count;
+  charts.value = data.results;
 }
 
 await fetchCharts();

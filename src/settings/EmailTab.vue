@@ -23,24 +23,28 @@ import { ref, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError } from '../common';
+import { toast, toastError } from '../common';
+import { useApi, errMessage } from '../api/client';
 import type { EmailSubs } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
-const subs = reactive((await fetchApi('/me/subs')) as EmailSubs);
+const subsRes = await api.GET('/me/subs');
+if (subsRes.error || !subsRes.data) throw new Error();
+const subs = reactive<EmailSubs>(subsRes.data as EmailSubs);
 
 const savingSubs = ref(false);
 async function saveSubs() {
   if (savingSubs.value) return;
   savingSubs.value = true;
   try {
-    await fetchApi(`/me/subs`, {
-      method: 'PATCH',
-      json: subs,
-    });
+    const { error } = await api.PATCH('/me/subs', { body: { ...subs } });
+    if (error) {
+      toastError(new Error(errMessage(error) || 'error'));
+      return;
+    }
     toast(t('subs.done'));
   } catch (e) {
     toastError(e);

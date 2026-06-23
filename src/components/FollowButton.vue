@@ -19,26 +19,29 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { toast, toastError, useFetchApi } from '../common';
+import { toast, toastError } from '../common';
+import { useApi, errMessage } from '../api/client';
 
 import LoadOr from './LoadOr.vue';
 
 const props = defineProps<{ id: number; initFollowing: boolean }>();
 const following = ref(!!props.initFollowing);
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const doing = ref(false);
 async function switchFollow() {
   if (doing.value) return;
   doing.value = true;
   try {
-    await fetchApi(`/user/${props.id}/follow`, {
-      method: 'POST',
-      json: {
-        follow: !following.value,
-      },
+    const { error } = await api.POST('/user/{id}/follow', {
+      params: { path: { id: props.id } },
+      body: { follow: !following.value },
     });
+    if (error) {
+      toastError(new Error(errMessage(error) || 'error'));
+      return;
+    }
     toast(following.value ? t('done-unfollow') : t('done-follow'));
     following.value = !following.value;
   } catch (e) {

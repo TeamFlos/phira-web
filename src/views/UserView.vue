@@ -93,7 +93,8 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, userNameClass, detailedTime, LANGUAGES, toast, loggedIn, setTitle, userPermissions, type IConfirmDialog } from '../common';
+import { userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle, userPermissions, type IConfirmDialog } from '../common';
+import { useApi, errMessage } from '../api/client';
 import { Permission, Roles, type Chart, type User, type UserView, type Page, type PlayRecord, type RecordPool, type PoolItem } from '../model';
 import { type PlayRecordEx } from '../components/RecordList.vue';
 
@@ -108,51 +109,69 @@ import UserBadges from '../components/UserBadges.vue';
 
 const route = useRoute();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const id = parseInt(String(route.params.id));
-const user = reactive((await fetchApi(`/user/${id}`)) as UserView);
+const userRes = await api.GET('/user/{id}', { params: { path: { id } } });
+if (userRes.error || !userRes.data) throw new Error();
+const user = reactive<UserView>(userRes.data);
 const charts = ref<Chart[]>();
 const chartHasMore = ref(false);
 
-fetchApi(`/chart/?uploader=${id}&pageNum=3`, {}, (raw) => {
-  let resp = raw as Page<Chart>;
-  charts.value = resp.results;
-  chartHasMore.value = resp.results.length < resp.count;
-});
+api
+  .GET('/chart', { params: { query: { uploader: id, pageNum: 3 } as any } })
+  .then(({ data, error }) => {
+    if (error || !data) return;
+    const resp = data as Page<Chart>;
+    charts.value = resp.results;
+    chartHasMore.value = resp.results.length < resp.count;
+  });
 
 setTitle(user.name);
 
 const me = ref<User>();
 
 if (loggedIn()) {
-  fetchApi('/me', {}, (user) => (me.value = user as User));
+  api.GET('/me').then(({ data }) => {
+    if (data) me.value = data as User;
+  });
 }
 
-const stats = (await fetchApi(`/user/${id}/stats`)) as {
-  numRecords: number;
-  avgAccuracy: number;
-};
+const statsRes = await api.GET('/user/{id}/stats', { params: { path: { id } } });
+if (statsRes.error || !statsRes.data) throw new Error();
+const stats = statsRes.data;
 
 // type IConfirmDialog = InstanceType<typeof ConfirmDialog>;
 
 const confirmBanDialog = ref<IConfirmDialog>();
 async function doBan() {
-  await fetchApi(`/user/${id}/ban`, { method: 'POST' });
+  const { error } = await api.POST('/user/{id}/ban', { params: { path: { id } } });
+  if (error) {
+    toastError(new Error(errMessage(error) || 'error'));
+    return;
+  }
   toast(t('ban.done'));
   user.banned = true;
 }
 
 const confirmAvatarBanDialog = ref<IConfirmDialog>();
 async function doBanAvatar() {
-  await fetchApi(`/user/${id}/ban-avatar`, { method: 'POST' });
+  const { error } = await api.POST('/user/{id}/ban-avatar', { params: { path: { id } } });
+  if (error) {
+    toastError(new Error(errMessage(error) || 'error'));
+    return;
+  }
   toast(t('ban-avatar.done'));
   user.banned = true;
 }
 
 const confirmLoginBanDialog = ref<IConfirmDialog>();
 async function doBanLogin() {
-  await fetchApi(`/user/${id}/ban-login`, { method: 'POST' });
+  const { error } = await api.POST('/user/{id}/ban-login', { params: { path: { id } } });
+  if (error) {
+    toastError(new Error(errMessage(error) || 'error'));
+    return;
+  }
   toast(t('login-ban.done'));
   user.login_banned = true;
 }
@@ -160,12 +179,14 @@ async function doBanLogin() {
 const reportDialog = ref<IConfirmDialog>();
 const reportReason = ref('');
 async function doReport() {
-  await fetchApi(`/user/${id}/report`, {
-    method: 'POST',
-    json: {
-      reason: reportReason.value!,
-    },
+  const { error } = await api.POST('/user/{id}/report', {
+    params: { path: { id } },
+    body: { reason: reportReason.value! },
   });
+  if (error) {
+    toastError(new Error(errMessage(error) || 'error'));
+    return;
+  }
   toast(t('report.done'));
 }
 
@@ -184,13 +205,17 @@ const newRoles = reactive(new Roles(user.roles).to_selection());
 console.log(newRoles);
 async function doModifyRoles() {
   const diff = Roles.from_selection(newRoles).diff(new Roles(user.roles));
-  await fetchApi(`/user/${id}/update-roles`, {
-    method: 'POST',
-    json: {
+  const { error } = await api.POST('/user/{id}/update-roles', {
+    params: { path: { id } },
+    body: {
       add: diff.added.roles,
       remove: diff.removed.roles,
     },
   });
+  if (error) {
+    toastError(new Error(errMessage(error) || 'error'));
+    return;
+  }
   user.roles = Roles.from_selection(newRoles).roles;
   toast(t('roles.done'));
 }
@@ -202,19 +227,31 @@ function cancelModifyRoles() {
 }
 
 const recentRecords = ref<PlayRecordEx[]>();
-fetchApi(`/record/?player=${id}`, {}, (resp) => {
-  let records = resp as PlayRecordEx[];
-  if (records.length > 12) records.splice(12);
-  recentRecords.value = records;
-});
+api
+  .GET('/record', { params: { query: { player: id } as any } })
+  .then(({ data, error }) => {
+    if (error || !data) return;
+    let records = data as PlayRecordEx[];
+    if (records.length > 12) records.splice(12);
+    recentRecords.value = records;
+  });
 
 const bestPool = ref<PlayRecord[]>(),
   recentPool = ref<PlayRecord[]>();
-fetchApi(`/record/get-pool/${id}`, {}, (resp) => {
-  let pool = resp as RecordPool;
+api.GET('/record/get-pool/{id}', { params: { path: { id } } }).then(({ data, error }) => {
+  if (error || !data) return;
+  let pool = data as RecordPool;
   async function dispatch(pool: PoolItem[], dest: Ref<PlayRecordEx[] | undefined>) {
-    let charts = (await fetchApi(`/chart/multi-get?ids=${pool.map((p) => p.chart).join(',')}`)) as Chart[];
-    let res = (await fetchApi(`/record/multi-get?ids=${pool.map((p) => p.record).join(',')}`)) as PlayRecordEx[];
+    const chartsRes = await api.GET('/chart/multi-get', {
+      params: { query: { ids: pool.map((p) => p.chart).join(',') } },
+    });
+    if (chartsRes.error || !chartsRes.data) return;
+    let charts = chartsRes.data as unknown as Chart[];
+    const resRes = await api.GET('/record/multi-get', {
+      params: { query: { ids: pool.map((p) => p.record).join(',') } },
+    });
+    if (resRes.error || !resRes.data) return;
+    let res = resRes.data as unknown as PlayRecordEx[];
     for (let i = 0; i < pool.length; i++) {
       res[i].label = `${pool[i].rks.toFixed(2)} / ${charts[i].difficulty.toFixed(2)}`;
     }

@@ -15,10 +15,11 @@ zh-CN:
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useFetchApi, toastError } from '../common';
+import { toastError } from '../common';
+import { useApi } from '../api/client';
 
 const { t } = useI18n();
-const fetchApi = useFetchApi();
+const api = useApi();
 
 type CensorSegment = { text: string; censored: boolean };
 
@@ -31,8 +32,12 @@ async function submit() {
   loading.value = true;
   result.value = null;
   try {
-    const res = await fetchApi('/censor-detail', { method: 'POST', json: { text: inputText.value } });
-    result.value = res as CensorSegment[];
+    const { data, error } = await api.POST('/censor-detail', { body: { text: inputText.value } });
+    if (error || !data) {
+      toastError(new Error('error'));
+      return;
+    }
+    result.value = data as unknown as CensorSegment[];
   } catch (e) {
     toastError(e);
   } finally {

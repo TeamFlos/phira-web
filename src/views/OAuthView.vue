@@ -7,7 +7,8 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toast } from '../common';
+import { toast } from '../common';
+import { useApi, errMessage } from '../api/client';
 import type { OAuthApp } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
@@ -21,9 +22,11 @@ const state = router.currentRoute.value.query.state as string | undefined;
 
 console.log(state);
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
-const app = reactive<OAuthApp>((await fetchApi(`/oauth/${clientID}`)) as OAuthApp);
+const appRes = await api.GET('/oauth/{id}', { params: { path: { id: clientID } } });
+if (appRes.error || !appRes.data) throw new Error();
+const app = reactive<OAuthApp>(appRes.data as OAuthApp);
 
 const errorMessage = ref<string>();
 
@@ -41,18 +44,22 @@ async function auth() {
   errorMessage.value = undefined;
   doingAuth.value = true;
   try {
-    let q = new URLSearchParams({
-      response_type: 'code',
-      client_id: clientID,
-      redirect_uri: redirectURI.toString(),
-      scope,
+    const { data, error } = await api.GET('/oauth/authorize', {
+      params: {
+        query: {
+          response_type: 'code',
+          client_id: clientID,
+          redirect_uri: redirectURI.toString(),
+          scope,
+          state,
+        },
+      },
     });
-    if (state != undefined) {
-      q.append('state', state);
+    if (error || !data) {
+      errorMessage.value = errMessage(error) || 'error';
+      return;
     }
-    let resp = (await fetchApi(`/oauth/authorize?${q}`, {
-      method: 'GET',
-    })) as { code: string; state: string; location: string };
+    let resp = data;
     if (state != undefined && state !== resp.state) {
       throw new Error('Invalid state');
     }

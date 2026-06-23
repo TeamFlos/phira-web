@@ -42,7 +42,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, pageCount, isString, loggedIn } from '../common';
+import { pageCount, isString, loggedIn } from '../common';
+import { useApi } from '../api/client';
 
 import type { Page, PartialCollection, User } from '../model';
 
@@ -55,11 +56,12 @@ const PAGE_NUM = 28;
 const route = useRoute();
 const router = useRouter();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 let user: User | null = null;
 if (loggedIn()) {
-  user = (await fetchApi('/me')) as User;
+  const { data, error } = await api.GET('/me');
+  if (!error && data) user = data as User;
 }
 
 const pagination = ref<typeof PageIndicator>();
@@ -140,24 +142,26 @@ const parameters = computed(() => {
 
 async function fetchCollections() {
   collections.value = undefined;
-  let params: Record<string, string> = {
-    pageNum: String(PAGE_NUM),
-    ...parameters.value,
+
+  const query: Record<string, unknown> = {
+    pageNum: PAGE_NUM,
+    page: Number(parameters.value.page),
+    order: parameters.value.order,
   };
-  delete params.fromMe;
-  if (params.uploader) {
-    params.owner = params.uploader;
-    delete params.uploader;
-  }
+  if (parameters.value.search) query.search = parameters.value.search;
 
-  let fromMe = parameters.value.fromMe;
-  if (fromMe === 'yes' && user) {
-    params.owner = String(user?.id);
-  }
+  let ownerId: number | undefined;
+  if (parameters.value.uploader) ownerId = Number(parameters.value.uploader);
+  if (parameters.value.fromMe === 'yes' && user) ownerId = user.id;
+  if (ownerId !== undefined) query.owner = ownerId;
 
-  const resp = (await fetchApi('/collection?' + new URLSearchParams(params))) as Page<PartialCollection>;
-  totalCount.value = resp.count;
-  collections.value = resp.results;
+  const resp = await api.GET('/collection', {
+    params: { query: query as any },
+  });
+  if (resp.error || !resp.data) throw new Error();
+  const data = resp.data as Page<PartialCollection>;
+  totalCount.value = data.count;
+  collections.value = data.results;
 }
 
 await fetchCollections();

@@ -27,14 +27,14 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { API_BASE, useFetchApi, setCookie, validateEmail, validatePassword, toast, changeLocale } from '../common';
-import type { User } from '../model';
+import { API_BASE, validateEmail, validatePassword, toast, changeLocale } from '../common';
+import { useApi, storeTokens } from '../api/client';
 
 import LoadOr from '../components/LoadOr.vue';
 
 const router = useRouter();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 const resetPasswordUrl = `${API_BASE}/reset-password`;
 
 const doingLogin = ref(false);
@@ -55,18 +55,18 @@ async function submit() {
     validateEmail(t, email.value!);
     let pwd = password.value!;
     validatePassword(t, pwd);
-    let resp = (await fetchApi('/login', {
-      method: 'POST',
-      json: {
-        email: email.value!,
-        password: pwd,
-      },
-    })) as { token: string; expireAt: string };
-    setCookie('access_token', resp.token, new Date(Date.parse(resp.expireAt)).toUTCString());
+    const { data, error } = await api.POST('/login', {
+      body: { email: email.value!, password: pwd },
+    });
+    if (error || !data) {
+      errorMessage.value = t('login');
+      return;
+    }
+    storeTokens(data);
     toast(t('logged-in'));
     router.back();
-    fetchApi('/me', {}, (me) => {
-      changeLocale((me as User).language);
+    api.GET('/me').then(({ data: me }) => {
+      if (me) changeLocale(me.language);
     });
   } catch (e) {
     errorMessage.value = e instanceof Error ? e.message : String(e);

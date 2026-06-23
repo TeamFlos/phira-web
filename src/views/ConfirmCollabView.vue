@@ -37,7 +37,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toastError, toast, userNameClass } from '../common';
+import { toastError, toast, userNameClass } from '../common';
+import { useApi, errMessage } from '../api/client';
 import type { Chart, UserView } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
@@ -48,7 +49,12 @@ const route = useRoute();
 
 const hash = route.query.hash as string;
 
-const fetchApi = useFetchApi();
+const api = useApi();
+// The /chart/collab/{id} endpoints aren't yet in the generated OpenAPI schema
+// (phira-api hasn't annotated them with #[utoipa::path]); call them through an
+// untyped escape hatch so the typed client's auth/401-refresh middleware still applies.
+const getUntyped = api.GET as unknown as <T>(url: string) => Promise<{ data?: T; error?: unknown }>;
+const postUntyped = api.POST as unknown as (url: string) => Promise<{ data?: unknown; error?: unknown }>;
 
 type CollabInfo = {
   chart: Chart;
@@ -56,14 +62,19 @@ type CollabInfo = {
   confirmed: boolean;
 };
 
-const info = (await fetchApi(`/chart/collab/${hash}`)) as CollabInfo;
+const collab = await getUntyped<CollabInfo>(`/chart/collab/${hash}`);
+if (collab.error || !collab.data) throw new Error(errMessage(collab.error) || 'error');
+const info = collab.data;
 if (info.confirmed) {
   toast(t('already-confirmed'));
   router.push({ name: 'home' });
 }
 
 const inviter = ref<UserView>();
-fetchApi(`/user/${info.chart.uploader}`, {}, (u) => (inviter.value = u as UserView));
+api.GET('/user/{id}', { params: { path: { id: info.chart.uploader } } }).then(({ data, error }) => {
+  if (data) inviter.value = data;
+  else if (error) toastError(new Error(errMessage(error)));
+});
 
 const confirming = ref(false);
 
@@ -71,7 +82,8 @@ async function confirm() {
   if (confirming.value) return;
   confirming.value = true;
   try {
-    await fetchApi(`/chart/collab/${hash}/confirm`, { method: 'POST' });
+    const { error } = await postUntyped(`/chart/collab/${hash}/confirm`);
+    if (error) throw new Error(errMessage(error));
     toast(t('confirmed'));
     router.push({ name: 'home' });
   } catch (e) {
