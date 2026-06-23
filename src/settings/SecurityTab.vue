@@ -18,11 +18,12 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError, validatePassword } from '../common';
+import { toast, toastError, validatePassword } from '../common';
+import { useApi, errMessage } from '../api/client';
 
 import LoadOr from '../components/LoadOr.vue';
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const password_old = ref<string>();
 const password = ref<string>();
@@ -39,13 +40,16 @@ async function changePassword() {
       pwd2 = password2.value!;
     validatePassword(t, pwd_old);
     validatePassword(t, pwd, pwd2);
-    await fetchApi('/edit/password', {
-      method: 'POST',
-      json: {
+    const { error } = await api.POST('/edit/password', {
+      body: {
         old: pwd_old,
         new: pwd,
       },
     });
+    if (error) {
+      toastError(new Error(errMessage(error) || 'error'));
+      return;
+    }
     password_old.value = undefined;
     password.value = undefined;
     password2.value = undefined;

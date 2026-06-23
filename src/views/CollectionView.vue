@@ -49,7 +49,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, useFetchApi, type IConfirmDialog } from '../common';
+import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, toastError, type IConfirmDialog } from '../common';
+import { useApi, errMessage } from '../api/client';
 import type { Collection } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
@@ -60,7 +61,7 @@ import SimpleUserCard from '../components/SimpleUserCard.vue';
 
 const route = useRoute();
 const router = useRouter();
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const id = parseInt(String(route.params.id));
 const collection = ref<Collection>();
@@ -68,8 +69,11 @@ const collection = ref<Collection>();
 if (!loggedIn()) {
   pleaseLogin(router);
 } else {
-  collection.value = (await fetchApi(`/collection/${id}`)) as Collection;
-  setTitle(collection.value.name);
+  const { data, error } = await api.GET('/collection/{id}', { params: { path: { id } } });
+  if (!error && data) {
+    collection.value = data as Collection;
+    setTitle(collection.value.name);
+  }
 }
 
 const hasCover = computed(() => Boolean(collection.value?.cover));
@@ -84,12 +88,14 @@ const visibilityLabel = computed(() => (collection.value?.public ? t('visibility
 const reportDialog = ref<IConfirmDialog>();
 const reportReason = ref('');
 async function doReport() {
-  await fetchApi(`/collection/${id}/report`, {
-    method: 'POST',
-    json: {
-      reason: reportReason.value!,
-    },
+  const { error } = await api.POST('/collection/{id}/report', {
+    params: { path: { id } },
+    body: { reason: reportReason.value! },
   });
+  if (error) {
+    toastError(new Error(errMessage(error) || 'error'));
+    return;
+  }
   toast(t('report.done'));
 }
 </script>

@@ -37,7 +37,8 @@ import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 
-import { useFetchApi, getCookie, addCookieListener, logout, toast, userPermissions } from '../common';
+import { getCookie, addCookieListener, logout, toast, userPermissions } from '../common';
+import { useApi } from '../api/client';
 import { Permission, type User } from '../model';
 
 import { Toaster } from 'vue-sonner';
@@ -70,7 +71,7 @@ watch(
 
 const route = useRoute();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const accessToken = ref<string>();
 const user = ref<User>();
@@ -91,8 +92,8 @@ addCookieListener(() => {
   accessToken.value = getCookie('access_token');
   user.value = undefined;
   if (accessToken.value) {
-    fetchApi('/me', {}, (me) => {
-      user.value = me as User;
+    api.GET('/me').then(({ data }) => {
+      if (data) user.value = data as User;
     });
   }
 });

@@ -26,14 +26,17 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError, uploadFile, fileToURL, LANGUAGES, changeLocale } from '../common';
+import { toast, toastError, fileToURL, LANGUAGES, changeLocale } from '../common';
+import { useApi, errMessage } from '../api/client';
 import type { User } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
-const user: User = (await fetchApi('/me')) as User;
+const meRes = await api.GET('/me');
+if (meRes.error || !meRes.data) throw new Error();
+const user: User = meRes.data as User;
 
 const avatarImage = ref<HTMLImageElement>();
 const updateAvatarButton = ref<HTMLElement>();
@@ -56,9 +59,13 @@ const char = ref('');
 (async () => {
   loadingChars.value = true;
   try {
-    let characters = (await fetchApi('/me/chars?locale=' + (localStorage.getItem('locale') || 'en-US'))) as Character[];
-    char.value = ((await fetchApi('/me/char')) as Character).id;
-    chars.value = characters;
+    const charsRes = await api.GET('/me/chars', {
+      params: { query: { locale: localStorage.getItem('locale') || 'en-US' } },
+    });
+    const curRes = await api.GET('/me/char');
+    if (charsRes.error || !charsRes.data || curRes.error || !curRes.data) return;
+    chars.value = charsRes.data as unknown as Character[];
+    char.value = (curRes.data as unknown as Character).id;
   } catch (e) {
     toastError(e);
   } finally {
@@ -82,11 +89,14 @@ async function updateAvatar() {
   if (updatingAvatar.value) return;
   updatingAvatar.value = true;
   try {
-    let id = await uploadFile(fetchApi, avatarFile.value!);
-    await fetchApi('/me', {
-      method: 'PATCH',
-      json: { avatar: id },
+    const upRes = await api.POST('/upload/{name}', {
+      params: { path: { name: 'avatar' } },
+      body: avatarFile.value as unknown as number[],
     });
+    if (!upRes.data) throw new Error('error');
+    const id = upRes.data.id;
+    const { error } = await api.PATCH('/me', { body: { avatar: id } });
+    if (error) throw new Error(errMessage(error) || 'error');
     toast(t('avatar-updated'));
     avatarFile.value = undefined;
   } catch (e) {
@@ -100,15 +110,15 @@ async function saveProfile() {
   if (savingProfile.value) return;
   savingProfile.value = true;
   try {
-    await fetchApi('/me', {
-      method: 'PATCH',
-      json: {
+    const { error } = await api.PATCH('/me', {
+      body: {
         name: username.value,
         language: language.value,
         bio: bio.value.length ? bio.value : null,
         char: loadingChars.value ? null : char.value,
       },
     });
+    if (error) throw new Error(errMessage(error) || 'error');
     changeLocale(language.value);
     toast(t('profile-updated'));
   } catch (e) {

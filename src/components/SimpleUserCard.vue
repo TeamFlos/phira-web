@@ -4,18 +4,19 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 useI18n();
 
-import { useFetchApi, userNameClass } from '../common';
+import { userNameClass } from '../common';
+import { useApi } from '../api/client';
 import type { UserView } from '../model';
 
 import UserAvatar from './UserAvatar.vue';
 
 const props = defineProps<{ id: number }>();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const user = ref<UserView>();
-fetchApi(`/user/${props.id}`, {}, (u) => {
-  user.value = u as UserView;
+api.GET('/user/{id}', { params: { path: { id: props.id } } }).then(({ data }) => {
+  if (data) user.value = data;
 });
 </script>
 

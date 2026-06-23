@@ -16,8 +16,10 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 useI18n();
 
-import { useFetchApi, pageCount, userNameClass, LANGUAGES } from '../common';
+import { pageCount, userNameClass, LANGUAGES } from '../common';
+import { useApi } from '../api/client';
 import type { Page, User } from '../model';
+import type { paths } from '../api/schema';
 
 const PAGE_NUM = 20;
 
@@ -27,9 +29,11 @@ import UserAvatar from './UserAvatar.vue';
 
 import moment from 'moment';
 
+type UserListQuery = NonNullable<paths['/user']['get']['parameters']['query']>;
+
 const props = defineProps<{ initPage?: number; params?: object }>();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const pagination = ref<typeof PageIndicator>();
 
@@ -47,13 +51,17 @@ const parameters = computed(() => {
 
 async function fetchUsers() {
   users.value = undefined;
-  let params = {
-    pageNum: String(PAGE_NUM),
-    ...parameters.value,
-  };
-  const resp = (await fetchApi('/user/?' + new URLSearchParams(params))) as Page<User>;
-  totalCount.value = resp.count;
-  users.value = resp.results;
+  const resp = await api.GET('/user', {
+    params: {
+      query: {
+        pageNum: PAGE_NUM,
+        ...(parameters.value as object),
+      } as UserListQuery,
+    },
+  });
+  if (resp.error || !resp.data) throw new Error();
+  totalCount.value = resp.data.count;
+  users.value = resp.data.results as User[];
 }
 
 defineExpose({ pagination });

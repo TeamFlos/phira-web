@@ -33,7 +33,8 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, pageCount, userNameClass } from '../common';
+import { pageCount, userNameClass } from '../common';
+import { useApi } from '../api/client';
 import type { Page, PlayRecord } from '../model';
 
 const PAGE_NUM = 20;
@@ -46,7 +47,7 @@ import moment from 'moment';
 
 const props = defineProps<{ chart: number }>();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const pagination = ref<typeof PageIndicator>();
 
@@ -72,18 +73,24 @@ const parameters = computed(() => {
 
 async function fetchRecords() {
   records.value = undefined;
-  let params = {
-    pageNum: String(PAGE_NUM),
-    includePlayer: String(true),
-    best: String(true),
-    ...parameters.value,
-  };
-  const resp = (await fetchApi('/record/query/' + props.chart + '?' + new URLSearchParams(params))) as Page<RecordEx>;
-  totalCount.value = resp.count;
-  for (let i = 0; i < resp.results.length; ++i) {
-    resp.results[i].rank = ((pagination.value?.current ?? 1) - 1) * PAGE_NUM + i + 1;
+  const resp = await api.GET('/record/query/{id}', {
+    params: {
+      path: { id: props.chart },
+      query: {
+        pageNum: PAGE_NUM,
+        includePlayer: true,
+        page: pagination.value?.current ?? 1,
+        std: std.value,
+      },
+    },
+  });
+  if (resp.error || !resp.data) throw new Error();
+  const data = resp.data as Page<RecordEx> & { results: RecordEx[] };
+  totalCount.value = data.count;
+  for (let i = 0; i < data.results.length; ++i) {
+    data.results[i].rank = ((pagination.value?.current ?? 1) - 1) * PAGE_NUM + i + 1;
   }
-  records.value = resp.results;
+  records.value = data.results;
 }
 
 await fetchRecords();

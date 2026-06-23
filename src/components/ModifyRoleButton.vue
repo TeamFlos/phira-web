@@ -27,7 +27,8 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { toast, toastError, useFetchApi, userPermissions } from '../common';
+import { toast, toastError, userPermissions } from '../common';
+import { useApi, errMessage } from '../api/client';
 import { Permission, Role, type User } from '../model';
 
 import LoadOr from './LoadOr.vue';
@@ -40,7 +41,7 @@ const ROLES = {
 const props = defineProps<{ id: number; role: keyof typeof ROLES; initHasRole: boolean; me?: User; permission: Permission }>();
 const hasRole = ref(!!props.initHasRole);
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const doing = ref(false);
 async function switchSetReviewer() {
@@ -48,13 +49,17 @@ async function switchSetReviewer() {
   doing.value = true;
   try {
     let role = ROLES[props.role];
-    await fetchApi(`/user/${props.id}/update-roles`, {
-      method: 'POST',
-      json: {
+    const { error } = await api.POST('/user/{id}/update-roles', {
+      params: { path: { id: props.id } },
+      body: {
         add: !hasRole.value ? role : 0,
         remove: hasRole.value ? role : 0,
       },
     });
+    if (error) {
+      toastError(new Error(errMessage(error) || 'error'));
+      return;
+    }
     toast(hasRole.value ? t('done-cancel') : t('done-set'));
     hasRole.value = !hasRole.value;
   } catch (e) {

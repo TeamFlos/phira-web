@@ -1,4 +1,3 @@
-import { useRouter } from 'vue-router';
 import type { Router } from 'vue-router';
 
 import { toast as toastSonner } from 'vue-sonner';
@@ -80,13 +79,6 @@ export function fileToURL(file: string) {
   // return file.replace(/https:\/\/api.phira.cn\/files\//g, 'https://files-cf.phira.cn/');
 }
 
-export type FetchApi = (
-  path: string,
-  request?: RequestInitWithJson,
-  onSuccess?: (json: object, resp: Response) => void,
-  onError?: (json: object, resp?: Response) => boolean,
-) => object | null;
-
 export function validateEmail(t: any, email: string) {
   if (!/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(email)) {
     throw new Error(t('invalid-email'));
@@ -100,14 +92,6 @@ export function validatePassword(t: any, password: string, repeat?: string) {
   if (repeat && repeat !== password) {
     throw new Error(t('password-inconsistent'));
   }
-}
-
-export async function uploadFile(fetchApi: FetchApi, file: File): Promise<string> {
-  const resp = (await fetchApi('/upload/avatar', {
-    method: 'POST',
-    body: file,
-  })) as { id: string };
-  return resp.id;
 }
 
 const cookieListener: (() => void)[] = [];
@@ -142,65 +126,9 @@ export function addCookieListener(listener: () => void) {
   listener();
 }
 
-interface RequestInitWithJson extends RequestInit {
-  json?: object;
-}
-
 export function pleaseLogin(router: Router) {
   router.push('/login');
   toast(i18n.global.t('please-login'), 'error');
-}
-
-export function useFetchApi(): FetchApi {
-  const router = useRouter();
-  return async function (
-    path: string,
-    request?: RequestInitWithJson,
-    onSuccess?: (json: object, resp: Response) => void,
-    onError?: (json: object, resp?: Response) => boolean,
-  ): Promise<object | undefined> {
-    request = request || {};
-    const headers = new Headers(request.headers);
-    if (request && 'json' in request) {
-      request.body = JSON.stringify(request.json);
-      headers.set('Content-Type', 'application/json');
-    }
-    const access_token = getCookie('access_token');
-    if (access_token) {
-      headers.set('Authorization', 'Bearer ' + access_token);
-    }
-    request.headers = headers;
-    try {
-      const resp = await fetch('https://phira.5wyxi.com' + path, request);
-      const text = await resp.text();
-      let json: any = { text };
-      try {
-        json = JSON.parse(text);
-      } catch (e) {
-        // empty
-      }
-      if (!resp.ok) {
-        if (resp.status == 401) {
-          // unauthorized
-          logout();
-          pleaseLogin(router);
-          throw new Error();
-        } else if (!onError || onError(json, resp)) {
-          if (!onSuccess) throw new Error(json.error);
-          toast(json.error, 'error');
-        }
-      } else if (onSuccess) {
-        onSuccess(json, resp);
-      } else {
-        return json;
-      }
-    } catch (e) {
-      if (!onError || onError({})) {
-        if (!onSuccess) throw e;
-        toastError(e);
-      }
-    }
-  };
 }
 
 export type IConfirmDialog = InstanceType<typeof ConfirmDialog>;
