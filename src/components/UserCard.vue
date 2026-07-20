@@ -9,6 +9,7 @@ import type { UserView } from '../model';
 
 import FollowButton from './FollowButton.vue';
 import UserAvatar from './UserAvatar.vue';
+import UserBadges from './UserBadges.vue';
 
 const props = defineProps<{ id: number }>();
 
@@ -37,6 +38,7 @@ fetchApi(`/user/${props.id}`, {}, (u) => {
           <span v-else>{{ user.name }}</span>
         </span>
       </router-link>
+      <UserBadges :badges="user.badges" :names="user.badgeNames" sm class="justify-center mt-2" />
       <p v-if="user.bio" class="text-sm text-gray-500">{{ user.bio }}</p>
       <p v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></p>
       <FollowButton class="mt-2" :id="id" :initFollowing="user.following" />

@@ -23,6 +23,7 @@ const PAGE_NUM = 30;
 
 import LoadView from './LoadView.vue';
 import UserAvatar from './UserAvatar.vue';
+import UserBadges from './UserBadges.vue';
 
 import moment from 'moment';
 
@@ -104,6 +105,7 @@ onMounted(() => {
                     <span v-else>{{ user.name }}</span>
                   </span>
                   <span v-if="user.bio" class="text-xs truncate">{{ user.bio }}</span>
+                  <UserBadges :badges="user.badges" sm class="mt-1" />
                 </div>
               </router-link>
             </td>

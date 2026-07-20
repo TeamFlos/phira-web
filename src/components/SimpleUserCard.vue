@@ -8,6 +8,7 @@ import { useFetchApi, userNameClass } from '../common';
 import type { UserView } from '../model';
 
 import UserAvatar from './UserAvatar.vue';
+import UserBadges from './UserBadges.vue';
 
 const props = defineProps<{ id: number }>();
 
@@ -35,6 +36,7 @@ fetchApi(`/user/${props.id}`, {}, (u) => {
           {{ user.name }}
         </p>
       </router-link>
+      <UserBadges :badges="user.badges" :names="user.badgeNames" sm class="mt-1" />
     </div>
   </div>
 </template>

@@ -104,6 +104,7 @@ import LoadView from '../components/LoadView.vue';
 import PropItem from '../components/PropItem.vue';
 import RecordList from '../components/RecordList.vue';
 import UserAvatar from '../components/UserAvatar.vue';
+import UserBadges from '../components/UserBadges.vue';
 
 const route = useRoute();
 
@@ -282,6 +283,7 @@ const currentBestPool = ref(true);
               <div class="mt-2 lg:mt-0">
                 <span v-if="user.bio" class="whitespace-nowrap max-w-xs truncate">{{ user.bio }}</span> <span v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></span>
               </div>
+              <UserBadges :badges="user.badges" :names="user.badgeNames" class="mt-2 justify-center lg:justify-start" />
             </div>
             <div class="flex flex-row justify-center flex-wrap overflow-x-hidden lg:-mt-4 lg:ml-4">
               <a class="stat w-fit group cursor-pointer" :href="`/user/?following=${id}`" target="_blank">

@@ -208,7 +208,12 @@ export type User = {
   last_login: string;
 };
 
-export type UserView = User & { following: boolean };
+export type UserView = User & {
+  following: boolean;
+  // Localized badge display names keyed by identifier, from GET /user/{id}.
+  // Missing entries fall back to the raw identifier client-side.
+  badgeNames?: Record<string, string>;
+};
 
 export type Chart = {
   id: number;
