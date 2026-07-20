@@ -5,10 +5,28 @@ en:
   password-updated: Password updated
   old-password: Original password
 
+  hykb:
+    title: HYKB (好游快爆) account
+    bound: 'Bound · UID {uid}'
+    not-bound: Not bound
+    unbind: Unbind
+    confirm-title: Unbind HYKB account?
+    confirm-desc: You will no longer be able to log in with this HYKB account. Make sure you have set an email and password first, otherwise you may lose access to your account.
+    unbound: HYKB account unbound
+
 zh-CN:
   edit-password: 更改密码
   password-updated: 更改密码成功
   old-password: 原密码
+
+  hykb:
+    title: 好游快爆账号
+    bound: '已绑定 · UID {uid}'
+    not-bound: 未绑定
+    unbind: 解绑
+    confirm-title: 解绑好游快爆账号？
+    confirm-desc: 解绑后你将无法再使用该好游快爆账号登录。请确保已设置邮箱和密码，否则可能无法登录账号。
+    unbound: 已解绑好游快爆账号
 
 </i18n>
 
@@ -18,11 +36,16 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError, validatePassword } from '../common';
+import { useFetchApi, toast, toastError, validatePassword, type IConfirmDialog } from '../common';
+import type { User } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
+import ConfirmDialog from '../components/ConfirmDialog.vue';
 
 const fetchApi = useFetchApi();
+
+const user = (await fetchApi('/me')) as User;
+const hykbUid = ref<number | null>(user.hykb_uid);
 
 const password_old = ref<string>();
 const password = ref<string>();
@@ -57,6 +80,14 @@ async function changePassword() {
   }
 }
 
+const unbindDialog = ref<IConfirmDialog>();
+
+async function unbindHykb() {
+  await fetchApi('/me/unbind-hykb', { method: 'POST' });
+  hykbUid.value = null;
+  toast(t('hykb.unbound'));
+}
+
 import tabLoading from '../views/SettingsView.vue';
 tabLoading.value = false;
 </script>
@@ -78,5 +109,20 @@ tabLoading.value = false;
         <LoadOr :loading="changingPassword">{{ t('save') }}</LoadOr>
       </button>
     </div>
+
+    <div class="divider"></div>
+
+    <h1 class="card-title" v-t="'hykb.title'"></h1>
+    <div class="flex flex-row items-center gap-4">
+      <span class="grow">
+        {{ hykbUid !== null ? t('hykb.bound', { uid: hykbUid }) : t('hykb.not-bound') }}
+      </span>
+      <button v-if="hykbUid !== null" class="btn btn-error btn-outline" @click="unbindDialog!.showModal()" v-t="'hykb.unbind'"></button>
+    </div>
+
+    <ConfirmDialog :do="unbindHykb" ref="unbindDialog">
+      <h3 class="font-bold text-lg" v-t="'hykb.confirm-title'"></h3>
+      <p class="mt-4" v-t="'hykb.confirm-desc'"></p>
+    </ConfirmDialog>
   </div>
 </template>

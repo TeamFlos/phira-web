@@ -192,6 +192,7 @@ export type User = {
   avatar: string;
   name: string;
   email: string;
+  hykb_uid: number | null;
   language: string;
   bio: string | null;
   badges: string[];
