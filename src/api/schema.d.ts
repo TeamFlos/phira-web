@@ -941,7 +941,9 @@ export interface components {
             charts: components["schemas"]["ChartView"][];
         };
         DetailedUserView: components["schemas"]["UserView"] & {
-            email: string;
+            email?: string | null;
+            /** Format: int64 */
+            hykb_uid?: number | null;
         };
         EditP: {
             avatar?: string | null;
@@ -2628,16 +2630,14 @@ export interface operations {
     user_list: {
         parameters: {
             query?: {
-                page?: number;
-                pageNum?: number;
+                /** @description Filter users by name (case-insensitive substring) */
                 search?: string;
-                order?: string;
-                tags?: string;
-                filters?: Record<string, never>;
                 /** @description Filter users this user follows */
                 following?: number;
                 /** @description Filter followers of this user */
                 followedBy?: number;
+                /** @description Cursor: only return users with id >= this value */
+                page?: number;
             };
             header?: never;
             path?: never;
