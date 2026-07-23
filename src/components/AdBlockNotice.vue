@@ -28,10 +28,10 @@ zh-CN:
 
 <script setup lang="ts">
 import { AdBlockDetector } from '@/adbd';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-useI18n();
+const { locale } = useI18n();
 
 // Generic storage key / no ad-related class names: filter lists target
 // names like `adblock-notice`, so keep everything inconspicuous.
@@ -40,8 +40,13 @@ const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-// TODO: point this at a proper "how to disable your ad blocker" guide.
-const GUIDE_URL = 'https://www.wikihow.com/Disable-AdBlock';
+// WikiHow's "Disable AdBlock" guide, picked per interface language.
+const GUIDE_URLS: Record<string, string> = {
+  en: 'https://www.wikihow.com/Disable-AdBlock',
+  'zh-CN': 'https://zh.wikihow.com/%E7%A6%81%E7%94%A8-Adblock',
+  'zh-TW': 'https://zh.wikihow.com/%E7%A6%81%E7%94%A8-Adblock',
+};
+const guideUrl = computed(() => GUIDE_URLS[locale.value] ?? GUIDE_URLS['en']);
 
 const dialog = ref<HTMLDialogElement>();
 
@@ -93,7 +98,7 @@ onMounted(() => {
           <a class="link italic" href="/staff" target="_blank" rel="noopener" v-t="'staff'"></a>
         </template>
         <template #link>
-          <a class="link link-primary" :href="GUIDE_URL" target="_blank" rel="noopener" v-t="'guide'"></a>
+          <a class="link link-primary" :href="guideUrl" target="_blank" rel="noopener" v-t="'guide'"></a>
         </template>
       </i18n-t>
       <div class="modal-action">
