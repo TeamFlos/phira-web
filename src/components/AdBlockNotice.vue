@@ -71,22 +71,26 @@ function dismiss(days: number) {
   dialog.value?.close();
 }
 
+function onDetected() {
+  if (dialog.value?.open) return;
+  console.log('Ad blocker detected');
+  // Once shown, don't nag again within an hour even if the user
+  // never interacts with the dialog.
+  snooze(HOUR);
+  dialog.value?.showModal();
+}
+
 onMounted(() => {
   if (Date.now() < snoozedUntil()) return;
   new BlockAdBlock({
     checkOnLoad: true,
     resetOnEnd: true,
   })
-    .onDetected(() => {
-      if (dialog.value?.open) return;
-      console.log('Ad blocker detected');
-      // Once shown, don't nag again within an hour even if the user
-      // never interacts with the dialog.
-      snooze(HOUR);
-      dialog.value?.showModal();
-    })
+    .onDetected(onDetected)
     .onNotDetected(() => {
-      console.log('No ad blocker detected');
+      fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5774998175455449', { mode: 'no-cors' })
+        .then(() => console.log('Ad blocker not detected'))
+        .catch(() => onDetected());
     });
 });
 </script>
