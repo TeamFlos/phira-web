@@ -1,254 +1,224 @@
-/**
- * AdBlockDetector
- * 核心检测逻辑：诱饵元素可见性 + AdSense <ins> 属性异常 + 用户自定义容器 + iframe 尺寸压缩监控
- * 不含任何 UI 展示逻辑，检测结果通过回调 / EventTarget 对外暴露。
+/*
+ * BlockAdBlock (TypeScript port)
+ * Original: Copyright (c) 2015 Valentin Allaire <valentin.allaire@sitexw.fr>
+ * Released under the MIT license
+ * https://github.com/sitexw/BlockAdBlock
  */
 
-export interface AdBlockDetectorConfig {
-  /** 轮询检测间隔（ms） */
-  checkInterval?: number;
-  /** 需要额外监控的“真实”广告容器 ID 列表（缺失或被隐藏则判定为拦截） */
-  watchedAdContainers?: string[];
-  /** 前期高频率检测的轮次上限，超过后转为被动检测以节省 CPU */
-  aggressiveCycles?: number;
-  /** 检测到拦截时的回调 */
-  onDetected?: (reason: DetectionReason) => void;
-  /** 从“已检测到拦截”恢复正常时的回调（可选） */
-  onCleared?: () => void;
+type DetectionHandler = () => void;
+
+interface BlockAdBlockOptions {
+  checkOnLoad: boolean;
+  resetOnEnd: boolean;
+  loopCheckTime: number;
+  loopMaxNumber: number;
+  baitClass: string;
+  baitStyle: string;
+  debug: boolean;
 }
 
-export type DetectionReason = 'bait-generic' | 'bait-adsense' | 'adsense-suspicious-attr' | 'watched-container' | 'iframe-squeeze';
+const DEFAULT_OPTIONS: BlockAdBlockOptions = {
+  checkOnLoad: false,
+  resetOnEnd: false,
+  loopCheckTime: 50,
+  loopMaxNumber: 5,
+  baitClass: 'pub_300x250 pub_300x250m pub_728x90 text-ad textAd text_ad text_ads text-ads text-ad-links',
+  baitStyle: 'width: 1px !important; height: 1px !important; position: absolute !important; left: -10000px !important; top: -1000px !important;',
+  debug: false,
+};
 
-interface DetectorElements {
-  baitGeneric: HTMLDivElement | null;
-  baitAdsense: HTMLModElement | null;
-}
+export class BlockAdBlock {
+  static readonly VERSION = '3.2.1';
 
-const IDS = {
-  baitGeneric: 'ad-detection-bait',
-  baitAdsense: 'ad-detection-bait-ins',
-} as const;
+  private options: BlockAdBlockOptions;
 
-const CLASSES = {
-  baitGeneric: 'ad-banner adsbygoogle ad-unit advertisement adbox sponsored-ad',
-  baitAdsense: 'adsbygoogle',
-  baitAdsensePermittedPrefix: 'adsbygoogle-',
-} as const;
+  private bait: HTMLDivElement | null = null;
+  private checking = false;
+  private loopHandle: ReturnType<typeof setInterval> | null = null;
+  private loopNumber = 0;
+  private readonly events: { detected: DetectionHandler[]; notDetected: DetectionHandler[] } = {
+    detected: [],
+    notDetected: [],
+  };
 
-const BAIT_STYLE =
-  'display: block !important; visibility: visible !important; opacity: 1 !important; ' +
-  'height: 1px !important; width: 1px !important; position: absolute !important; ' +
-  'left: -10000px !important; top: -10000px !important; background-color: transparent !important; ' +
-  'pointer-events: none !important;';
+  constructor(options?: Partial<BlockAdBlockOptions>) {
+    this.options = { ...DEFAULT_OPTIONS, ...options };
 
-const IFRAME_SQUEEZE_RULES: RegExp[] = [
-  /height\s*:\s*1px\s*!important/i,
-  /width\s*:\s*1px\s*!important/i,
-  /max-height\s*:\s*1px\s*!important/i,
-  /max-width\s*:\s*1px\s*!important/i,
-];
-
-export class AdBlockDetector {
-  private readonly config: Required<Omit<AdBlockDetectorConfig, 'onDetected' | 'onCleared'>> & Pick<AdBlockDetectorConfig, 'onDetected' | 'onCleared'>;
-
-  private elements: DetectorElements = { baitGeneric: null, baitAdsense: null };
-  private detected = false;
-  private cycles = 0;
-  private intervalId: number | undefined;
-  private iframeObserver: MutationObserver | undefined;
-  private iframePollId: number | undefined;
-
-  constructor(config: AdBlockDetectorConfig = {}) {
-    this.config = {
-      checkInterval: config.checkInterval ?? 2000,
-      watchedAdContainers: config.watchedAdContainers ?? [],
-      aggressiveCycles: config.aggressiveCycles ?? 30,
-      onDetected: config.onDetected,
-      onCleared: config.onCleared,
-    };
+    window.addEventListener('load', this.handleWindowLoad, false);
   }
 
-  /** 启动检测：创建诱饵、开始轮询、监听可见性变化和 iframe 变化 */
-  init(): void {
-    this.runInitialChecks();
-    this.startLoop();
-    this.bindLifecycleEvents();
-    this.startIframeMonitor();
-  }
+  private handleWindowLoad = (): void => {
+    setTimeout(() => {
+      if (!this.options.checkOnLoad) return;
 
-  /** 停止所有定时器与观察者 */
-  destroy(): void {
-    if (this.intervalId !== undefined) window.clearInterval(this.intervalId);
-    if (this.iframePollId !== undefined) window.clearInterval(this.iframePollId);
-    this.iframeObserver?.disconnect();
-  }
+      this.log('onload->eventCallback', 'A check loading is launched');
 
-  get isDetected(): boolean {
-    return this.detected;
-  }
-
-  // --- 诱饵元素管理 ---
-
-  private createBaits(): void {
-    if (!this.elements.baitGeneric || !document.getElementById(IDS.baitGeneric)) {
-      const el = document.createElement('div');
-      el.id = IDS.baitGeneric;
-      el.className = CLASSES.baitGeneric;
-      el.style.cssText = BAIT_STYLE;
-      document.body.appendChild(el);
-      this.elements.baitGeneric = el;
-    }
-
-    if (!this.elements.baitAdsense || !document.getElementById(IDS.baitAdsense)) {
-      const el = document.createElement('ins');
-      el.id = IDS.baitAdsense;
-      el.className = CLASSES.baitAdsense;
-      el.style.cssText = BAIT_STYLE;
-      document.body.appendChild(el);
-      this.elements.baitAdsense = el;
-    }
-  }
-
-  private refreshBaits(): void {
-    if (this.detected) return;
-    (['baitGeneric', 'baitAdsense'] as const).forEach((key) => {
-      const el = this.elements[key];
-      if (el && el.isConnected) {
-        document.body.appendChild(el); // 重新插入触发样式重算
-      } else {
-        this.createBaits();
+      if (this.bait === null) {
+        this.createBait();
       }
-    });
+      setTimeout(() => this.check(), 1);
+    }, 1);
+  };
+
+  private log(method: string, message: string): void {
+    if (this.options.debug) {
+      console.log(`[BlockAdBlock][${method}] ${message}`);
+    }
   }
 
-  private isHidden(element: Element | null): boolean {
-    if (!element) return true;
-    const htmlEl = element as HTMLElement;
-    if (htmlEl.offsetHeight === 0 || htmlEl.offsetWidth === 0) return true;
-    const style = getComputedStyle(element);
-    return style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0';
+  setOption<K extends keyof BlockAdBlockOptions>(key: K, value: BlockAdBlockOptions[K]): this;
+  setOption(options: Partial<BlockAdBlockOptions>): this;
+  setOption(optionsOrKey: Partial<BlockAdBlockOptions> | keyof BlockAdBlockOptions, value?: BlockAdBlockOptions[keyof BlockAdBlockOptions]): this {
+    const options: Partial<BlockAdBlockOptions> = value !== undefined ? { [optionsOrKey as string]: value } : (optionsOrKey as Partial<BlockAdBlockOptions>);
+
+    for (const key in options) {
+      if (Object.prototype.hasOwnProperty.call(options, key)) {
+        (this.options as any)[key] = (options as any)[key];
+        this.log('setOption', `The option "${key}" was assigned to "${(options as any)[key]}"`);
+      }
+    }
+    return this;
   }
 
-  // --- 核心检测 ---
+  private createBait(): void {
+    const bait = document.createElement('div');
+    bait.setAttribute('class', this.options.baitClass);
+    bait.setAttribute('style', this.options.baitStyle);
+    this.bait = document.body.appendChild(bait);
 
-  private checkState(): void {
-    this.createBaits();
+    // Force layout/style calculation so offset/client properties are populated.
+    void this.bait.offsetParent;
+    void this.bait.offsetHeight;
+    void this.bait.offsetLeft;
+    void this.bait.offsetTop;
+    void this.bait.offsetWidth;
+    void this.bait.clientHeight;
+    void this.bait.clientWidth;
 
-    let reason: DetectionReason | null = null;
+    this.log('createBait', 'Bait has been created');
+  }
 
-    if (this.isHidden(this.elements.baitGeneric)) {
-      reason = 'bait-generic';
+  private destroyBait(): void {
+    if (this.bait) {
+      document.body.removeChild(this.bait);
+      this.bait = null;
+    }
+    this.log('destroyBait', 'Bait has been removed');
+  }
+
+  check(loop = true): boolean {
+    this.log('check', `An audit was requested ${loop ? 'with a' : 'without'} loop`);
+
+    if (this.checking) {
+      this.log('check', 'A check was canceled because there is already one ongoing');
+      return false;
+    }
+    this.checking = true;
+
+    if (this.bait === null) {
+      this.createBait();
     }
 
-    if (!reason && this.isHidden(this.elements.baitAdsense)) {
-      reason = 'bait-adsense';
+    this.loopNumber = 0;
+    if (loop) {
+      this.loopHandle = setInterval(() => this.checkBait(loop), this.options.loopCheckTime);
     }
+    setTimeout(() => this.checkBait(loop), 1);
 
-    if (!reason) {
-      const adElements = document.querySelectorAll(`ins.${CLASSES.baitAdsense}`);
-      for (const ad of Array.from(adElements)) {
-        const classNames = Array.from(ad.classList);
-        const suspicious = classNames.some((cls) => cls !== CLASSES.baitAdsense && !cls.startsWith(CLASSES.baitAdsensePermittedPrefix));
-        if (suspicious || ad.hasAttribute('title')) {
-          reason = 'adsense-suspicious-attr';
-          break;
-        }
+    this.log('check', 'A check is in progress ...');
+    return true;
+  }
+
+  private checkBait(loop: boolean): void {
+    if (this.bait === null) {
+      this.createBait();
+    }
+    const bait = this.bait!;
+
+    let detected =
+      document.body.getAttribute('abp') !== null ||
+      bait.offsetParent === null ||
+      bait.offsetHeight === 0 ||
+      bait.offsetLeft === 0 ||
+      bait.offsetTop === 0 ||
+      bait.offsetWidth === 0 ||
+      bait.clientHeight === 0 ||
+      bait.clientWidth === 0;
+
+    if (window.getComputedStyle !== undefined) {
+      const style = window.getComputedStyle(bait, null);
+      if (style && (style.getPropertyValue('display') === 'none' || style.getPropertyValue('visibility') === 'hidden')) {
+        detected = true;
       }
     }
 
-    if (!reason) {
-      for (const containerId of this.config.watchedAdContainers) {
-        const el = document.getElementById(containerId);
-        if (!el || this.isHidden(el)) {
-          reason = 'watched-container';
-          break;
-        }
+    this.log(
+      'checkBait',
+      `A check (${this.loopNumber + 1}/${this.options.loopMaxNumber} ~${1 + this.loopNumber * this.options.loopCheckTime}ms) was conducted and detection is ${
+        detected ? 'positive' : 'negative'
+      }`,
+    );
+
+    if (loop) {
+      this.loopNumber++;
+      if (this.loopNumber >= this.options.loopMaxNumber) {
+        this.stopLoop();
       }
     }
 
-    if (reason) {
-      this.setDetected(reason);
-    } else if (this.detected) {
-      this.setCleared();
+    if (detected) {
+      this.stopLoop();
+      this.destroyBait();
+      this.emitEvent(true);
+      if (loop) this.checking = false;
+    } else if (this.loopHandle === null || !loop) {
+      this.destroyBait();
+      this.emitEvent(false);
+      if (loop) this.checking = false;
     }
   }
 
-  private setDetected(reason: DetectionReason): void {
-    if (!this.detected) {
-      this.detected = true;
-      this.config.onDetected?.(reason);
+  private stopLoop(): void {
+    if (this.loopHandle !== null) {
+      clearInterval(this.loopHandle);
     }
+    this.loopHandle = null;
+    this.loopNumber = 0;
+    this.log('stopLoop', 'A loop has been stopped');
   }
 
-  private setCleared(): void {
-    this.detected = false;
-    this.config.onCleared?.();
+  emitEvent(detected: boolean): this {
+    this.log('emitEvent', `An event with a ${detected ? 'positive' : 'negative'} detection was called`);
+
+    const handlers = detected ? this.events.detected : this.events.notDetected;
+    handlers.forEach((fn, i) => {
+      this.log('emitEvent', `Call function ${i + 1}/${handlers.length}`);
+      fn();
+    });
+
+    if (this.options.resetOnEnd) {
+      this.clearEvent();
+    }
+    return this;
   }
 
-  // --- 主循环与事件绑定 ---
-
-  private runInitialChecks(): void {
-    this.checkState();
-    [100, 500, 1000, 2000].forEach((delay) => window.setTimeout(() => this.checkState(), delay));
+  clearEvent(): void {
+    this.events.detected = [];
+    this.events.notDetected = [];
+    this.log('clearEvent', 'The event list has been cleared');
   }
 
-  private startLoop(): void {
-    this.intervalId = window.setInterval(() => {
-      this.checkState();
-      if (!this.detected && this.cycles < this.config.aggressiveCycles) {
-        this.refreshBaits();
-        this.cycles++;
-      }
-    }, this.config.checkInterval);
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        this.checkState();
-        this.cycles = 0;
-      }
-    });
+  on(detected: boolean, fn: DetectionHandler): this {
+    (detected ? this.events.detected : this.events.notDetected).push(fn);
+    this.log('on', `A type of event "${detected ? 'detected' : 'notDetected'}" was added`);
+    return this;
   }
 
-  private bindLifecycleEvents(): void {
-    window.addEventListener('pageshow', (event) => {
-      if ((event as PageTransitionEvent).persisted) this.checkState();
-    });
-    window.addEventListener('load', () => {
-      window.setTimeout(() => this.checkState(), 100);
-    });
+  onDetected(fn: DetectionHandler): this {
+    return this.on(true, fn);
   }
 
-  /**
-   * 监控 <ins> 内的 AdSense iframe 是否被压缩为 1px（部分拦截器采用 CSS 隐藏而非移除元素）
-   */
-  private startIframeMonitor(): void {
-    const check = () => {
-      const iframes = document.querySelectorAll<HTMLIFrameElement>('ins iframe[id^="aswift_"]');
-      for (const iframe of Array.from(iframes)) {
-        const style = iframe.getAttribute('style');
-        if (!style) continue;
-        const matchCount = IFRAME_SQUEEZE_RULES.reduce((count, rule) => count + (rule.test(style) ? 1 : 0), 0);
-        if (matchCount >= 2) {
-          this.setDetected('iframe-squeeze');
-          this.iframeObserver?.disconnect();
-          if (this.iframePollId !== undefined) window.clearInterval(this.iframePollId);
-          return;
-        }
-      }
-    };
-
-    this.iframeObserver = new MutationObserver((mutations) => {
-      const shouldCheck = mutations.some((m) => m.type === 'childList' || (m.type === 'attributes' && (m.target as Element).tagName in { IFRAME: 1, INS: 1 }));
-      if (shouldCheck) check();
-    });
-
-    this.iframeObserver.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style'],
-    });
-
-    this.iframePollId = window.setInterval(check, 3500);
+  onNotDetected(fn: DetectionHandler): this {
+    return this.on(false, fn);
   }
 }

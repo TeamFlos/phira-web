@@ -27,7 +27,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { AdBlockDetector } from '@/adbd';
+import { BlockAdBlock } from '@/adbd';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -73,19 +73,21 @@ function dismiss(days: number) {
 
 onMounted(() => {
   if (Date.now() < snoozedUntil()) return;
-  const detector = new AdBlockDetector({
-    watchedAdContainers: ['ad-header', 'ad-sidebar'],
-    onDetected: (reason) => {
+  new BlockAdBlock({
+    checkOnLoad: true,
+    resetOnEnd: true,
+  })
+    .onDetected(() => {
       if (dialog.value?.open) return;
-      console.log('Ad blocker detected:', reason);
+      console.log('Ad blocker detected');
       // Once shown, don't nag again within an hour even if the user
       // never interacts with the dialog.
       snooze(HOUR);
       dialog.value?.showModal();
-    },
-    onCleared: () => console.log('Ad blocker cleared'),
-  });
-  detector.init();
+    })
+    .onNotDetected(() => {
+      console.log('No ad blocker detected');
+    });
 });
 </script>
 
