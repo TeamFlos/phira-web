@@ -17,6 +17,7 @@ export default {};
 
 <script setup lang="ts">
 import { toastError } from './common';
+import AdBlockNotice from './components/AdBlockNotice.vue';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
 import LoadView from './components/LoadView.vue';
@@ -44,4 +45,5 @@ onErrorCaptured((err) => {
     </router-view>
   </div>
   <AppFooter />
+  <AdBlockNotice />
 </template>
