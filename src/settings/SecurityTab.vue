@@ -36,16 +36,17 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, toast, toastError, validatePassword, type IConfirmDialog } from '../common';
-import type { User } from '../model';
+import { toast, toastError, validatePassword, type IConfirmDialog } from '../common';
+import { useApi, errMessage } from '../api/client';
 
 import LoadOr from '../components/LoadOr.vue';
 import ConfirmDialog from '../components/ConfirmDialog.vue';
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
-const user = (await fetchApi('/me')) as User;
-const hykbUid = ref<number | null>(user.hykb_uid);
+const { data: user, error: userError } = await api.GET('/me');
+if (!user) throw new Error(errMessage(userError) || 'error');
+const hykbUid = ref<number | null>(user.hykb_uid ?? null);
 
 const password_old = ref<string>();
 const password = ref<string>();
@@ -62,13 +63,16 @@ async function changePassword() {
       pwd2 = password2.value!;
     validatePassword(t, pwd_old);
     validatePassword(t, pwd, pwd2);
-    await fetchApi('/edit/password', {
-      method: 'POST',
-      json: {
+    const { error } = await api.POST('/edit/password', {
+      body: {
         old: pwd_old,
         new: pwd,
       },
     });
+    if (error) {
+      toastError(new Error(errMessage(error) || 'error'));
+      return;
+    }
     password_old.value = undefined;
     password.value = undefined;
     password2.value = undefined;
@@ -83,7 +87,8 @@ async function changePassword() {
 const unbindDialog = ref<IConfirmDialog>();
 
 async function unbindHykb() {
-  await fetchApi('/me/unbind-hykb', { method: 'POST' });
+  const { error } = await api.POST('/me/unbind-hykb');
+  if (error) throw new Error(errMessage(error) || 'error');
   hykbUid.value = null;
   toast(t('hykb.unbound'));
 }

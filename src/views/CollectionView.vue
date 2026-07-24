@@ -53,7 +53,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, useFetchApi, type IConfirmDialog } from '../common';
+import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, toastError, type IConfirmDialog } from '../common';
+import { useApi, errMessage } from '../api/client';
 import type { Collection } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
@@ -65,7 +66,7 @@ import { useClipboard } from '@vueuse/core';
 
 const route = useRoute();
 const router = useRouter();
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const id = parseInt(String(route.params.id));
 const collection = ref<Collection>();
@@ -73,8 +74,11 @@ const collection = ref<Collection>();
 if (!loggedIn()) {
   pleaseLogin(router);
 } else {
-  collection.value = (await fetchApi(`/collection/${id}`)) as Collection;
-  setTitle(collection.value.name);
+  const { data, error } = await api.GET('/collection/{id}', { params: { path: { id } } });
+  if (!error && data) {
+    collection.value = data as Collection;
+    setTitle(collection.value.name);
+  }
 }
 
 const hasCover = computed(() => Boolean(collection.value?.cover));
@@ -89,12 +93,14 @@ const visibilityLabel = computed(() => (collection.value?.public ? t('visibility
 const reportDialog = ref<IConfirmDialog>();
 const reportReason = ref('');
 async function doReport() {
-  await fetchApi(`/collection/${id}/report`, {
-    method: 'POST',
-    json: {
-      reason: reportReason.value!,
-    },
+  const { error } = await api.POST('/collection/{id}/report', {
+    params: { path: { id } },
+    body: { reason: reportReason.value! },
   });
+  if (error) {
+    toastError(new Error(errMessage(error) || 'error'));
+    return;
+  }
   toast(t('report.done'));
 }
 
@@ -106,19 +112,19 @@ function copyUrl() {
 }
 
 const liked = ref<boolean>();
-fetchApi(`/collection/${id}/like`, { method: 'GET' }).then((res) => {
-  liked.value = (res as { like: boolean }).like;
+api.GET('/collection/{id}/like', { params: { path: { id } } }).then((res) => {
+  if (res.data) liked.value = res.data.like;
 });
 function doLike() {
   if (liked.value === undefined) return;
-  fetchApi(`/collection/${id}/like`, {
-    method: 'POST',
-    json: {
-      like: !liked.value,
-    },
+  api.POST('/collection/{id}/like', {
+    params: { path: { id } },
+    body: { like: !liked.value },
   }).then((res) => {
-    liked.value = !liked.value;
-    collection.value!.likes = (res as { likes: number }).likes;
+    if (res.data) {
+      liked.value = !liked.value;
+      collection.value!.likes = res.data.likes;
+    }
   });
 }
 </script>

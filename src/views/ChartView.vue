@@ -82,7 +82,8 @@ const { t } = useI18n();
 
 import moment from 'moment';
 
-import { useFetchApi, toast, toastError, loggedIn, setTitle, userPermissions } from '../common';
+import { toast, toastError, loggedIn, setTitle, userPermissions } from '../common';
+import { useApi, errMessage } from '../api/client';
 import { Permission, type Chart, type User } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
@@ -95,13 +96,15 @@ import StbStatus from '../components/StbStatus.vue';
 import TagList from '../components/TagList.vue';
 import UserCard from '../components/UserCard.vue';
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const route = useRoute();
 const router = useRouter();
 
 const id = parseInt(String(route.params.id));
-const chart = reactive((await fetchApi(`/chart/${id}`)) as Chart);
+const chartRes = await api.GET('/chart/{id}', { params: { path: { id } } });
+if (chartRes.error || !chartRes.data) throw new Error();
+const chart = reactive<Chart>(chartRes.data as Chart);
 const tags: string[] = [];
 for (let tag of chart.tags) {
   if (!['regular', 'troll', 'plain', 'visual'].includes(tag)) tags.push(tag);
@@ -111,7 +114,9 @@ setTitle(chart.name);
 
 const me = ref<User>();
 if (loggedIn()) {
-  fetchApi('/me', {}, (user) => (me.value = user as User));
+  api.GET('/me').then(({ data }) => {
+    if (data) me.value = data as User;
+  });
 }
 
 const rating = ref(Math.round((chart.rating ?? 0) * 10));
@@ -134,7 +139,11 @@ function switchTab(s: string) {
 
 const myRating = ref<number>();
 if (loggedIn()) {
-  fetchApi(`/chart/${id}/rate`, {}, (r) => (myRating.value = (r as { score: number }).score));
+  api
+    .GET('/chart/{id}/rate', { params: { path: { id } } })
+    .then(({ data }) => {
+      if (data) myRating.value = data.score;
+    });
 }
 
 const settingRanked = ref(false);
@@ -142,10 +151,14 @@ async function setRanked(ranked: boolean) {
   if (settingRanked.value) return;
   settingRanked.value = true;
   try {
-    await fetchApi(`/chart/${id}/set-ranked`, {
-      method: 'POST',
-      json: { ranked },
+    const { error } = await api.POST('/chart/{id}/set-ranked', {
+      params: { path: { id } },
+      body: { ranked },
     });
+    if (error) {
+      toastError(new Error(errMessage(error) || 'error'));
+      return;
+    }
     toast(t('div-updated'));
     chart.ranked = ranked;
   } catch (e) {
@@ -160,10 +173,14 @@ async function submitRating() {
   if (submittingRating.value) return;
   submittingRating.value = true;
   try {
-    await fetchApi(`/chart/${id}/rate`, {
-      method: 'POST',
-      json: { score: rating.value! },
+    const { error } = await api.POST('/chart/{id}/rate', {
+      params: { path: { id } },
+      body: { score: rating.value! },
     });
+    if (error) {
+      toastError(new Error(errMessage(error) || 'error'));
+      return;
+    }
     myRating.value = rating.value!;
     toast(t('rating.done'));
   } catch (e) {
@@ -178,12 +195,14 @@ async function doCensor() {
   if (censoring.value) return;
   censoring.value = true;
   try {
-    await fetchApi(`/chart/${id}/censor`, {
-      method: 'POST',
-      json: {
-        censor: true,
-      },
+    const { error } = await api.POST('/chart/{id}/censor', {
+      params: { path: { id } },
+      body: { censor: true },
     });
+    if (error) {
+      toastError(new Error(errMessage(error) || 'error'));
+      return;
+    }
     toast(t('censored'));
   } catch (e) {
     toastError(e);
@@ -197,12 +216,14 @@ async function doHide() {
   if (hiding.value) return;
   hiding.value = true;
   try {
-    await fetchApi(`/chart/${id}/hide`, {
-      method: 'POST',
-      json: {
-        hide: true,
-      },
+    const { error } = await api.POST('/chart/{id}/hide', {
+      params: { path: { id } },
+      body: { hide: true },
     });
+    if (error) {
+      toastError(new Error(errMessage(error) || 'error'));
+      return;
+    }
     toast(t('hidden'));
   } catch (e) {
     toastError(e);

@@ -16,8 +16,10 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 useI18n();
 
-import { useFetchApi, userNameClass, LANGUAGES } from '../common';
+import { userNameClass, LANGUAGES } from '../common';
+import { useApi } from '../api/client';
 import type { Page, User } from '../model';
+import type { paths } from '../api/schema';
 
 const PAGE_NUM = 30;
 
@@ -27,9 +29,11 @@ import UserBadges from './UserBadges.vue';
 
 import moment from 'moment';
 
+type UserListQuery = NonNullable<paths['/user']['get']['parameters']['query']>;
+
 const props = defineProps<{ params?: object }>();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const users = ref<User[]>();
 
@@ -41,14 +45,18 @@ const hasNext = ref(false);
 
 async function fetchUsers() {
   users.value = undefined;
-  const params = {
-    page: String(cursor.value),
-    ...(props.params ?? {}),
-  };
-  const resp = (await fetchApi('/user/?' + new URLSearchParams(params))) as Page<User>;
-  users.value = resp.results;
+  const resp = await api.GET('/user', {
+    params: {
+      query: {
+        page: cursor.value,
+        ...(props.params as object),
+      } as UserListQuery,
+    },
+  });
+  if (resp.error || !resp.data) throw new Error();
+  users.value = resp.data.results as User[];
   // 满页则认为还有下一页（临界情况下可能多出一个空页，可接受）。
-  hasNext.value = resp.results.length >= PAGE_NUM;
+  hasNext.value = resp.data.results.length >= PAGE_NUM;
 }
 
 function nextPage() {

@@ -17,13 +17,14 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, validateEmail, validatePassword, toast } from '../common';
+import { validateEmail, validatePassword, toast } from '../common';
+import { useApi, errMessage } from '../api/client';
 
 import LoadOr from '../components/LoadOr.vue';
 
 const router = useRouter();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const doingRegister = ref(false);
 
@@ -46,14 +47,17 @@ async function submit() {
     let pwd = password.value!,
       pwd2 = password2.value!;
     validatePassword(pwd, pwd2);
-    await fetchApi('/register', {
-      method: 'POST',
-      json: {
+    const { error } = await api.POST('/register', {
+      body: {
         email: email.value!,
         name: username.value!,
         password: pwd,
       },
     });
+    if (error) {
+      errorMessage.value = errMessage(error) || t('register');
+      return;
+    }
     toast(t('registered'));
     router.back();
   } catch (e) {
