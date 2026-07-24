@@ -87,7 +87,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, reactive, type Ref } from 'vue';
+import { computed, ref, reactive, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
@@ -169,16 +169,15 @@ async function doReport() {
   toast(t('report.done'));
 }
 
-let showModifyRoles = false;
-if (me.value && userPermissions(me.value).has(Permission.SET_REVIEWER)) {
-  showModifyRoles = true;
-}
-if (me.value && userPermissions(me.value).has(Permission.SET_SUPERVISOR)) {
-  showModifyRoles = true;
-}
-if (me.value && userPermissions(me.value).has(Permission.SET_ROLES)) {
-  showModifyRoles = true;
-}
+const showModifyRoles = computed(() => {
+  if (!me.value) return false;
+  const permissions = userPermissions(me.value);
+  return (
+    permissions.has(Permission.SET_REVIEWER) ||
+    permissions.has(Permission.SET_SUPERVISOR) ||
+    permissions.has(Permission.SET_ROLES)
+  );
+});
 
 const modifyRolesDialog = ref<IConfirmDialog>();
 const newRoles = reactive(new Roles(user.roles).to_selection());
