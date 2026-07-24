@@ -13,6 +13,8 @@ import 'moment/dist/locale/zh-hk';
 
 import ConfirmDialog from './components/ConfirmDialog.vue';
 
+export const API_BASE = (import.meta.env.VITE_API_BASE || 'https://phira.5wyxi.com').replace(/\/$/, '');
+
 export const LANGUAGES = {
   'zh-CN': '简体中文',
   'zh-TW': '繁體中文',
@@ -171,7 +173,7 @@ export function useFetchApi(): FetchApi {
     }
     request.headers = headers;
     try {
-      const resp = await fetch('https://phira.5wyxi.com' + path, request);
+      const resp = await fetch(API_BASE + path, request);
       const text = await resp.text();
       let json: any = { text };
       try {
