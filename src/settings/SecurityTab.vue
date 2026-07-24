@@ -44,8 +44,9 @@ import ConfirmDialog from '../components/ConfirmDialog.vue';
 
 const api = useApi();
 
-const user = (await fetchApi('/me')) as User;
-const hykbUid = ref<number | null>(user.hykb_uid);
+const { data: user, error: userError } = await api.GET('/me');
+if (!user) throw new Error(errMessage(userError) || 'error');
+const hykbUid = ref<number | null>(user.hykb_uid ?? null);
 
 const password_old = ref<string>();
 const password = ref<string>();
@@ -86,7 +87,8 @@ async function changePassword() {
 const unbindDialog = ref<IConfirmDialog>();
 
 async function unbindHykb() {
-  await fetchApi('/me/unbind-hykb', { method: 'POST' });
+  const { error } = await api.POST('/me/unbind-hykb');
+  if (error) throw new Error(errMessage(error) || 'error');
   hykbUid.value = null;
   toast(t('hykb.unbound'));
 }

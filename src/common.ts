@@ -115,6 +115,7 @@ export function deleteCookie(key: string) {
 
 export function logout() {
   deleteCookie('access_token');
+  deleteCookie('refresh_token');
 }
 
 // From https://stackoverflow.com/questions/10730362/get-cookie-by-name

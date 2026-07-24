@@ -468,6 +468,26 @@ export interface paths {
         patch: operations["edit_subs"];
         trace?: never;
     };
+    "/me/unbind-hykb": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unbind the HYKB account from the current account. Refused if it would leave
+         *     the account with no way to log in (no email/password set).
+         */
+        post: operations["unbind_hykb"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/oauth/authorize": {
         parameters: {
             query?: never;
@@ -979,6 +999,9 @@ export interface components {
             rks: number;
         };
         GetUserR: components["schemas"]["UserView"] & {
+            badgeNames?: {
+                [key: string]: string;
+            };
             following: boolean;
         };
         HideP: {
@@ -1422,7 +1445,6 @@ export interface operations {
                 search?: string;
                 order?: string;
                 tags?: string;
-                filters?: Record<string, never>;
                 /** @description Filter by uploader user id (captured into the filters map) */
                 uploader?: number;
                 /** @description Filter by review status */
@@ -1437,6 +1459,8 @@ export interface operations {
                 division?: string;
                 /** @description Rating range as "lower,upper" (in tenths, e.g. 0.3,1.0) */
                 rating?: string;
+                /** @description Chart category: 0 ranked, 1 special, 2 unstable, 3 any */
+                type?: number;
             };
             header?: never;
             path?: never;
@@ -1483,7 +1507,6 @@ export interface operations {
                 search?: string;
                 order?: string;
                 tags?: string;
-                filters?: Record<string, never>;
             };
             header?: never;
             path?: never;
@@ -1717,7 +1740,6 @@ export interface operations {
                 search?: string;
                 order?: string;
                 tags?: string;
-                filters?: Record<string, never>;
                 /** @description Filter by owner user id (captured into the filters map) */
                 owner?: number;
             };
@@ -2297,6 +2319,30 @@ export interface operations {
             };
         };
     };
+    unbind_hykb: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description HYKB account cannot be unbound */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     authorize: {
         parameters: {
             query: {
@@ -2377,7 +2423,6 @@ export interface operations {
                 search?: string;
                 order?: string;
                 tags?: string;
-                filters?: Record<string, never>;
                 /** @description Filter by player user id (captured into the filters map) */
                 player?: number;
                 /** @description Filter by chart id (captured into the filters map) */

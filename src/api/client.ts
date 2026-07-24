@@ -1,13 +1,10 @@
 import createClient from 'openapi-fetch';
 import type { paths } from './schema';
 import { useRouter } from 'vue-router';
-import { getCookie, setCookie, logout, pleaseLogin } from '../common';
+import { API_BASE, getCookie, setCookie, logout, pleaseLogin } from '../common';
 
-/**
- * API host. Defaults to the same host the hand-rolled `useFetchApi` in
- * `common.ts` hardcodes; override per-environment with `VITE_API_HOST`.
- */
-const API_HOST = import.meta.env.VITE_API_HOST ?? 'https://phira.5wyxi.com';
+/** API host shared with the existing local-development configuration. */
+const API_HOST = API_BASE;
 
 /** 30d cookie expiry for the refresh token (access token uses `expireAt`). */
 function refreshCookieExpiry(): string {
@@ -56,46 +53,43 @@ function ensureRefreshed(refreshToken: string): Promise<boolean> {
 }
 
 /**
- * Typed API client. Call from a component `setup()` (like `useFetchApi`) so the
- * 401 handler has access to the router for the login redirect.
- *
- *   const api = useApi();
- *   const { data, error } = await api.GET('/user/{id}', { params: { path: { id } } });
+ * Typed API client. Call from a component `setup()` so the 401 handler can
+ * redirect through its router.
  */
 export function useApi() {
   const router = useRouter();
   const client = createClient<paths>({ baseUrl: API_HOST });
+  const replaySources = new Map();
 
   client.use({
-    // Inject the bearer from the access_token cookie on every request.
-    onRequest: ({ request }) => {
+    // Keep an unread clone before fetch disturbs POST/PUT bodies. A later 401
+    // can therefore replay the original request exactly once after refresh.
+    onRequest: ({ request, id }) => {
+      const headers = new Headers(request.headers);
       const token = getCookie('access_token');
-      if (token) {
-        const headers = new Headers(request.headers);
-        headers.set('Authorization', `Bearer ${token}`);
-        return new Request(request, { headers });
-      }
+      if (token) headers.set('Authorization', `Bearer ${token}`);
+      const next = new Request(request, { headers });
+      replaySources.set(id, next.clone());
+      return next;
     },
-    // On 401: try a single de-duplicated refresh + replay; else log out.
-    onResponse: async ({ request, response, schemaPath, options }) => {
-      if (response.status !== 401) return;
-      // Never try to refresh the login/refresh call itself.
-      if (schemaPath === '/login') return;
+    onResponse: async ({ response, schemaPath, id, options }) => {
+      const source = replaySources.get(id);
+      replaySources.delete(id);
+      if (response.status !== 401 || schemaPath === '/login') return;
       const refreshToken = getCookie('refresh_token');
       if (!refreshToken || !(await ensureRefreshed(refreshToken))) {
         logout();
         pleaseLogin(router);
         return;
       }
-      // Re-issue the original request with the freshly-stored access token.
-      const headers = new Headers(request.headers);
+      if (!source) return;
+      const headers = new Headers(source.headers);
       headers.set('Authorization', `Bearer ${getCookie('access_token')}`);
-      return options.fetch(new Request(request, { headers }));
+      return options.fetch(new Request(source, { headers }));
     },
-    // No global onError toast: HTTP errors resolve as `{ error }` and are
-    // handled per call site (mirroring the old `useFetchApi` contract, which
-    // only toasted in callback mode); genuine network failures reject and are
-    // caught by the caller's try/catch or `.catch()`.
+    onError: ({ id }) => {
+      replaySources.delete(id);
+    },
   });
 
   return client;
