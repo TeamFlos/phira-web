@@ -449,7 +449,9 @@ function rotate(value: string, choices: string[]): string {
         </div>
       </div>
       <div v-if="charts" class="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-0 min-w-0">
-        <ChartCard v-for="chart in charts" :key="chart.id" :chart="chart" />
+        <template v-for="(chart, index) in charts" :key="chart.id">
+          <ChartCard :chart="chart" />
+        </template>
       </div>
       <div v-else class="flex flex-col items-center w-full h-16 mb-8 p-8">
         <LoadView class="loading-lg" />
