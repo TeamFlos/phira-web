@@ -91,6 +91,8 @@ async function updateAvatar() {
   try {
     const upRes = await api.POST('/upload/{name}', {
       params: { path: { name: 'avatar' } },
+      headers: { 'Content-Type': 'application/octet-stream' },
+      bodySerializer: (body) => body as unknown as BodyInit,
       body: avatarFile.value as unknown as number[],
     });
     if (!upRes.data) throw new Error('error');
