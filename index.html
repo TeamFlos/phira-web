@@ -8,6 +8,27 @@
       function gtag() {
         dataLayer.push(arguments);
       }
+      // Consent Mode v2: deny by default in EEA / UK / CH, where the CMP prompts
+      // the user. Google's CMP issues `consent` `update` once a choice is made.
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500,
+        // EEA + UK + CH
+        region: 'AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO GB CH'.split(' '),
+      });
+
+      // Everywhere else no consent message is shown, so an all-denied default
+      // would never be updated and we'd lose all analytics.
+      gtag('consent', 'default', {
+        ad_storage: 'granted',
+        ad_user_data: 'granted',
+        ad_personalization: 'granted',
+        analytics_storage: 'granted',
+      });
+
       gtag('js', new Date());
 
       gtag('config', 'G-T40XKEE8MF');
