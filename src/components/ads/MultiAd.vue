@@ -8,7 +8,6 @@ onMounted(() => {
     console.error('adsbygoogle push failed', e);
   }
 });
-
 const isTest = localStorage.getItem('isTest') === 'true';
 </script>
 

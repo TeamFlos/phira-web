@@ -63,6 +63,7 @@ import ConfirmDialog from '../components/ConfirmDialog.vue';
 import PropItem from '../components/PropItem.vue';
 import SimpleUserCard from '../components/SimpleUserCard.vue';
 import { useClipboard } from '@vueuse/core';
+import MultiAd from '@/components/ads/MultiAd.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -117,15 +118,17 @@ api.GET('/collection/{id}/like', { params: { path: { id } } }).then((res) => {
 });
 function doLike() {
   if (liked.value === undefined) return;
-  api.POST('/collection/{id}/like', {
-    params: { path: { id } },
-    body: { like: !liked.value },
-  }).then((res) => {
-    if (res.data) {
-      liked.value = !liked.value;
-      collection.value!.likes = res.data.likes;
-    }
-  });
+  api
+    .POST('/collection/{id}/like', {
+      params: { path: { id } },
+      body: { like: !liked.value },
+    })
+    .then((res) => {
+      if (res.data) {
+        liked.value = !liked.value;
+        collection.value!.likes = res.data.likes;
+      }
+    });
 }
 </script>
 
@@ -187,13 +190,16 @@ function doLike() {
             </div>
           </div>
         </div>
-        <div class="card bg-base-100 p-4 shadow-xl lg:col-span-2">
-          <div v-if="collection.charts.length" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <ChartCard v-for="chart in collection.charts" :key="chart.id" :chart="chart" />
+        <div class="lg:col-span-2">
+          <div class="card bg-base-100 p-4 shadow-xl">
+            <div v-if="collection.charts.length" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <ChartCard v-for="chart in collection.charts" :key="chart.id" :chart="chart" />
+            </div>
+            <div v-else class="p-8 text-center">
+              <p class="w-full italic" v-t="'no-charts'"></p>
+            </div>
           </div>
-          <div v-else class="p-8 text-center">
-            <p class="w-full italic" v-t="'no-charts'"></p>
-          </div>
+          <MultiAd class="mt-8" />
         </div>
       </div>
     </div>

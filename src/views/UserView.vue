@@ -34,7 +34,7 @@ en:
     title: Uploaded charts
     more: See More
     no-charts: This user did not upload any charts.
-  
+
   roles:
     done: Roles updated
     modify: Modify Roles
@@ -106,6 +106,7 @@ import PropItem from '../components/PropItem.vue';
 import RecordList from '../components/RecordList.vue';
 import UserAvatar from '../components/UserAvatar.vue';
 import UserBadges from '../components/UserBadges.vue';
+import MultiAd from '@/components/ads/MultiAd.vue';
 
 const route = useRoute();
 
@@ -118,14 +119,12 @@ const user = reactive<UserView>(userRes.data);
 const charts = ref<Chart[]>();
 const chartHasMore = ref(false);
 
-api
-  .GET('/chart', { params: { query: { uploader: id, pageNum: 3 } as any } })
-  .then(({ data, error }) => {
-    if (error || !data) return;
-    const resp = data as Page<Chart>;
-    charts.value = resp.results;
-    chartHasMore.value = resp.results.length < resp.count;
-  });
+api.GET('/chart', { params: { query: { uploader: id, pageNum: 3 } as any } }).then(({ data, error }) => {
+  if (error || !data) return;
+  const resp = data as Page<Chart>;
+  charts.value = resp.results;
+  chartHasMore.value = resp.results.length < resp.count;
+});
 
 setTitle(user.name);
 
@@ -193,11 +192,7 @@ async function doReport() {
 const showModifyRoles = computed(() => {
   if (!me.value) return false;
   const permissions = userPermissions(me.value);
-  return (
-    permissions.has(Permission.SET_REVIEWER) ||
-    permissions.has(Permission.SET_SUPERVISOR) ||
-    permissions.has(Permission.SET_ROLES)
-  );
+  return permissions.has(Permission.SET_REVIEWER) || permissions.has(Permission.SET_SUPERVISOR) || permissions.has(Permission.SET_ROLES);
 });
 
 const modifyRolesDialog = ref<IConfirmDialog>();
@@ -227,14 +222,12 @@ function cancelModifyRoles() {
 }
 
 const recentRecords = ref<PlayRecordEx[]>();
-api
-  .GET('/record', { params: { query: { player: id } as any } })
-  .then(({ data, error }) => {
-    if (error || !data) return;
-    let records = data as PlayRecordEx[];
-    if (records.length > 12) records.splice(12);
-    recentRecords.value = records;
-  });
+api.GET('/record', { params: { query: { player: id } as any } }).then(({ data, error }) => {
+  if (error || !data) return;
+  let records = data as PlayRecordEx[];
+  if (records.length > 12) records.splice(12);
+  recentRecords.value = records;
+});
 
 const bestPool = ref<PlayRecord[]>(),
   recentPool = ref<PlayRecord[]>();
@@ -397,6 +390,7 @@ const currentBestPool = ref(true);
               <RecordList v-if="currentBestPool" :initial-records="bestPool"></RecordList>
               <RecordList v-if="!currentBestPool" :initial-records="recentPool"></RecordList>
             </div>
+            <MultiAd class="mt-8" />
           </div>
         </div>
       </div>

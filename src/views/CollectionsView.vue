@@ -50,6 +50,7 @@ import type { Page, PartialCollection, User } from '../model';
 import LoadView from '../components/LoadView.vue';
 import PageIndicator from '../components/PageIndicator.vue';
 import CollectionCard from '@/components/CollectionCard.vue';
+import HeaderAd from '@/components/ads/HeaderAd.vue';
 
 const PAGE_NUM = 28;
 
@@ -204,6 +205,9 @@ onMounted(() => {
 <template>
   <div class="flex flex-col items-center mt-8">
     <div class="mx-8 lg:w-3/4">
+      <div class="w-full px-8">
+        <HeaderAd class="h-[120px] w-full" />
+      </div>
       <div class="flex flex-row items-end flex-wrap gap-4">
         <div class="form-control">
           <label class="label">
