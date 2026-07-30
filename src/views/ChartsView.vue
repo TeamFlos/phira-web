@@ -401,7 +401,7 @@ function rotate(value: string, choices: string[]): string {
   <div class="flex flex-col items-center mt-8">
     <div class="mx-8 lg:w-3/4">
       <div class="w-full px-8">
-        <HeaderAd class="h-[120px] w-full" />
+        <HeaderAd class="h-[120px] w-full mb-4" />
       </div>
       <div class="flex flex-row items-end flex-wrap gap-4">
         <div class="form-control">

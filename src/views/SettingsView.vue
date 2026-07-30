@@ -34,7 +34,7 @@ const category = computed(() => {
 <template>
   <div class="flex flex-col items-center mt-8 min-h-[24px] p-6">
     <div class="w-full lg:w-2/3 p-8">
-      <HeaderAd class="h-[120px] w-full" />
+      <HeaderAd class="h-[120px] w-full mb-4" />
     </div>
     <div class="flex flex-col w-full lg:flex-row lg:w-2/3 gap-4">
       <div>
