@@ -20,7 +20,7 @@ import { toastError } from './common';
 import AdBlockNotice from './components/AdBlockNotice.vue';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
-import FooterAd from './components/FooterAd.vue';
+import FooterAd from './components/ads/FooterAd.vue';
 import LoadView from './components/LoadView.vue';
 
 onErrorCaptured((err) => {

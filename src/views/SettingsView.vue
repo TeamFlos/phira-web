@@ -23,6 +23,7 @@ import LoadSuspense from '../components/LoadSuspense.vue';
 import AccountTab from '../settings/AccountTab.vue';
 import SecurityTab from '../settings/SecurityTab.vue';
 import EmailTab from '../settings/EmailTab.vue';
+import HeaderAd from '@/components/ads/HeaderAd.vue';
 
 const route = useRoute();
 const category = computed(() => {
@@ -31,7 +32,10 @@ const category = computed(() => {
 </script>
 
 <template>
-  <div class="flex justify-center mt-8 min-h-[24px] p-6">
+  <div class="flex flex-col items-center mt-8 min-h-[24px] p-6">
+    <div class="w-full lg:w-2/3 p-8">
+      <HeaderAd class="h-[120px] w-full" />
+    </div>
     <div class="flex flex-col w-full lg:flex-row lg:w-2/3 gap-4">
       <div>
         <ul id="category-menu" class="menu bg-base-100 lg:w-56 rounded-box gap-2">
