@@ -139,11 +139,9 @@ function switchTab(s: string) {
 
 const myRating = ref<number>();
 if (loggedIn()) {
-  api
-    .GET('/chart/{id}/rate', { params: { path: { id } } })
-    .then(({ data }) => {
-      if (data) myRating.value = data.score;
-    });
+  api.GET('/chart/{id}/rate', { params: { path: { id } } }).then(({ data }) => {
+    if (data) myRating.value = data.score;
+  });
 }
 
 const settingRanked = ref(false);

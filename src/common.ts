@@ -81,7 +81,6 @@ export function fileToURL(file: string) {
   return file.replace(/https:\/\/api.phira.cn\/files\//g, 'https://phira.5wyxi.com/files/');
 }
 
-
 export function validateEmail(t: any, email: string) {
   if (!/^[a-z0-9!#$%&'*+/=?^_‘{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_‘{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(email)) {
     throw new Error(t('invalid-email'));
@@ -134,6 +133,5 @@ export function pleaseLogin(router: Router) {
   router.push('/login');
   toast(i18n.global.t('please-login'), 'error');
 }
-
 
 export type IConfirmDialog = InstanceType<typeof ConfirmDialog>;

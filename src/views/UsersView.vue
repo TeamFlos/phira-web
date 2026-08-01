@@ -62,11 +62,7 @@ onMounted(() => {
   <div class="flex flex-row justify-center w-full">
     <div class="mx-8 max-w-none w-full lg:w-3/4 flex flex-col items-end">
       <div class="ml-auto join w-full lg:w-auto">
-        <input
-          class="input input-bordered join-item rounded-l-full w-full"
-          :placeholder="t('search')"
-          v-model="tempSearchValue"
-          @keyup.enter="searchValue = tempSearchValue!" />
+        <input class="input input-bordered join-item rounded-l-full w-full" :placeholder="t('search')" v-model="tempSearchValue" @keyup.enter="searchValue = tempSearchValue!" />
         <button class="btn btn-secondary join-item rounded-r-full" @click="searchValue = tempSearchValue!">
           <i class="fa-solid fa-search"></i>
         </button>
