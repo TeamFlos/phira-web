@@ -314,6 +314,7 @@ async function fetchCharts() {
   if (parameters.value.tags) query.tags = parameters.value.tags;
   if (parameters.value.search) query.search = parameters.value.search;
   if (parameters.value.rating) query.rating = parameters.value.rating;
+  if (parameters.value.uploader) query.uploader = parameters.value.uploader;
   if (fromMe === 'yes' && user) {
     query.uploader = user.id;
   }
