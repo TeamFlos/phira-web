@@ -63,7 +63,6 @@ import ConfirmDialog from '../components/ConfirmDialog.vue';
 import PropItem from '../components/PropItem.vue';
 import SimpleUserCard from '../components/SimpleUserCard.vue';
 import { useClipboard } from '@vueuse/core';
-import MultiAd from '@/components/ads/MultiAd.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -199,7 +198,7 @@ function doLike() {
               <p class="w-full italic" v-t="'no-charts'"></p>
             </div>
           </div>
-          <MultiAd class="mt-8" />
+          <!-- <MultiAd class="mt-8" /> -->
         </div>
       </div>
     </div>

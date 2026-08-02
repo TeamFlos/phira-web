@@ -106,7 +106,6 @@ import PropItem from '../components/PropItem.vue';
 import RecordList from '../components/RecordList.vue';
 import UserAvatar from '../components/UserAvatar.vue';
 import UserBadges from '../components/UserBadges.vue';
-import MultiAd from '@/components/ads/MultiAd.vue';
 
 const route = useRoute();
 
@@ -390,7 +389,7 @@ const currentBestPool = ref(true);
               <RecordList v-if="currentBestPool" :initial-records="bestPool"></RecordList>
               <RecordList v-if="!currentBestPool" :initial-records="recentPool"></RecordList>
             </div>
-            <MultiAd class="mt-8" />
+            <!-- <MultiAd class="mt-8" /> -->
           </div>
         </div>
       </div>
