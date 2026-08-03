@@ -60,7 +60,6 @@ async function confirm() {
       throw new Error(body.error || 'failed');
     }
     done.value = true;
-    toast(t('done'), 'success');
     setTimeout(() => router.push({ name: 'home' }), 2500);
   } catch (e) {
     toastError(e);
