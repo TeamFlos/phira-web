@@ -32,7 +32,7 @@ async function onConfirm() {
 }
 
 function tryCloseDialog() {
-  if (!doing.value) dialogE.value!.close();
+  if (!doing.value && dialogE.value) dialogE.value!.close();
 }
 </script>
 
