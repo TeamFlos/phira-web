@@ -55,7 +55,7 @@ async function submit() {
     validateEmail(t, email.value!);
     let pwd = password.value!,
       pwd2 = password2.value!;
-    validatePassword(pwd, pwd2);
+    validatePassword(t, pwd, pwd2);
     const { error } = await api.POST('/register', {
       body: {
         email: email.value!,
