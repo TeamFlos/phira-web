@@ -54,6 +54,8 @@ const i18n = createI18n({
       'title-oauth': 'OAuth',
       'title-staff': 'Staff',
       'title-confirm-collab': 'Collaboration Invitation',
+      'title-activate': 'Activate Account',
+      'title-transfer-confirm': 'Confirm Account Transfer',
     },
     'zh-CN': {
       login: '登录',
@@ -82,6 +84,8 @@ const i18n = createI18n({
       'title-oauth': 'OAuth',
       'title-staff': '团队成员',
       'title-confirm-collab': '协作邀请',
+      'title-activate': '激活账号',
+      'title-transfer-confirm': '确认账号迁移',
     },
   },
   legacy: false,

@@ -6,6 +6,9 @@ import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
 
+import ActivateView from '../views/ActivateView.vue';
+import TransferConfirmView from '../views/TransferConfirmView.vue';
+
 import ChartsView from '../views/ChartsView.vue';
 import ChartView from '../views/ChartView.vue';
 import ConfirmCollabView from '../views/ConfirmCollabView.vue';
@@ -36,6 +39,9 @@ const router = createRouter({
 
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
+
+    { path: '/email/activate', name: 'email-activate', component: ActivateView },
+    { path: '/email/transfer-confirm', name: 'email-transfer-confirm', component: TransferConfirmView },
 
     { path: '/chart', name: 'charts', component: ChartsView },
     { path: '/chart/:id(\\d+)', name: 'chart', component: ChartView },
