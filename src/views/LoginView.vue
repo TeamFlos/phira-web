@@ -10,6 +10,11 @@ en:
     prompt: 'New to Phira?'
     action: Register
 
+  pending-delete:
+    title: Account deletion pending
+    message: Your account has a pending deletion request. Continue logging in to cancel it?
+    cancel-delete: Cancel deletion & log in
+
 zh-CN:
   login-failed: 登录失败
   logging-in: 正在登录中
@@ -20,6 +25,11 @@ zh-CN:
     prompt: 没有账户？
     action: 注册账号
 
+  pending-delete:
+    title: 账号删除请求待处理
+    message: 你的账号有一个待处理的删除请求。是否撤销删除并继续登录？
+    cancel-delete: 撤销删除并登录
+
 </i18n>
 
 <script setup lang="ts">
@@ -29,10 +39,11 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { API_BASE, validateEmail, validatePassword, toast, changeLocale } from '../common';
+import { API_BASE, validateEmail, validatePassword, toast, changeLocale, type IConfirmDialog } from '../common';
 import { useApi, storeTokens, apiError } from '../api/client';
 
 import LoadOr from '../components/LoadOr.vue';
+import ConfirmDialog from '../components/ConfirmDialog.vue';
 
 const router = useRouter();
 
@@ -46,6 +57,33 @@ const password = ref<string>();
 
 const errorMessage = ref<string>();
 
+// Holds the credentials of an in-flight login that was blocked by a pending
+// delete request, so the dialog can resume it with `cancelDeleteRequest: true`.
+let pendingBody: { email: string; password: string } | undefined;
+const deleteRequestDialog = ref<IConfirmDialog>();
+
+async function performLogin(body: { email: string; password: string }, cancelDeleteRequest = false) {
+  const { data, error } = await api.POST('/login', {
+    body: { ...body, cancelDeleteRequest },
+  });
+  if (error || !data) {
+    const err = apiError(error);
+    if (err.code === 'PENDING_DELETE_REQUEST' && !cancelDeleteRequest) {
+      pendingBody = body;
+      deleteRequestDialog.value?.showModal();
+      return;
+    }
+    errorMessage.value = err.message || t('login-failed');
+    return;
+  }
+  storeTokens(data);
+  toast(t('logged-in'));
+  router.back();
+  api.GET('/me').then(({ data: me }) => {
+    if (me) changeLocale(me.language);
+  });
+}
+
 async function submit() {
   if (doingLogin.value) {
     toast(t('logging-in'), 'error');
@@ -57,25 +95,17 @@ async function submit() {
     validateEmail(t, email.value!);
     let pwd = password.value!;
     validatePassword(t, pwd);
-    const { data, error } = await api.POST('/login', {
-      body: { email: email.value!, password: pwd },
-    });
-    if (error || !data) {
-      console.log(error);
-      errorMessage.value = apiError(error).message || t('login-failed');
-      return;
-    }
-    storeTokens(data);
-    toast(t('logged-in'));
-    router.back();
-    api.GET('/me').then(({ data: me }) => {
-      if (me) changeLocale(me.language);
-    });
+    await performLogin({ email: email.value!, password: pwd });
   } catch (e) {
     errorMessage.value = e instanceof Error ? e.message : String(e);
   } finally {
     doingLogin.value = false;
   }
+}
+
+async function cancelDeleteAndLogin() {
+  if (!pendingBody) return;
+  await performLogin(pendingBody, true);
 }
 </script>
 
@@ -116,4 +146,8 @@ async function submit() {
       </div>
     </div>
   </div>
+  <ConfirmDialog :do="cancelDeleteAndLogin" :confirm-text="t('pending-delete.cancel-delete')" ref="deleteRequestDialog">
+    <h3 class="text-lg font-bold" v-t="'pending-delete.title'"></h3>
+    <p class="py-2" v-t="'pending-delete.message'"></p>
+  </ConfirmDialog>
 </template>

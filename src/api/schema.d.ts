@@ -1037,6 +1037,7 @@ export interface components {
       | {
           email: string;
           password: string;
+          cancelDeleteRequest?: boolean;
         }
       | {
           refreshToken: string;
