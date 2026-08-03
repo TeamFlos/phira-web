@@ -151,8 +151,8 @@ export class ApiError extends Error {
  * directly — e.g. `throw apiError(error)` or `apiError(error).code`.
  */
 export function apiError(error: unknown): ApiError {
-  const body = (error ?? {}) as { message?: unknown; code?: unknown };
-  const message = typeof body.message === 'string' && body.message ? body.message : 'unknown error';
+  const body = (error ?? {}) as { error?: unknown; code?: unknown };
+  const message = typeof body.error === 'string' && body.error ? body.error : 'unknown error';
   const code = typeof body.code === 'string' ? body.code : undefined;
   return new ApiError(message, code);
 }
