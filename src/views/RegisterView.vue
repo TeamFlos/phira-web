@@ -3,10 +3,16 @@
 en:
   registering: Registering
   registered: Registered
+  activate-title: Almost there!
+  activate-body: We've sent an activation link to {email}. Please check your inbox (and spam folder) and click the link to activate your account.
+  activate-confirm: Got it
 
 zh-CN:
   registering: 正在注册中
   registered: 注册成功
+  activate-title: 就差一步啦！
+  activate-body: 我们已向 {email} 发送了一封激活邮件，请前往邮箱（记得也看看垃圾邮件）点击链接完成激活。
+  activate-confirm: 知道了
 
 </i18n>
 
@@ -35,6 +41,9 @@ const password2 = ref<string>();
 
 const errorMessage = ref<string>();
 
+// Activation dialog shown after a successful registration.
+const activateDialog = ref<HTMLDialogElement>();
+
 async function submit() {
   if (doingRegister.value) {
     toast(t('registering'), 'error');
@@ -59,12 +68,17 @@ async function submit() {
       return;
     }
     toast(t('registered'));
-    router.back();
+    activateDialog.value?.showModal();
   } catch (e) {
     errorMessage.value = e instanceof Error ? e.message : String(e);
   } finally {
     doingRegister.value = false;
   }
+}
+
+function onActivateConfirm() {
+  activateDialog.value?.close();
+  router.back();
 }
 </script>
 
@@ -110,4 +124,20 @@ async function submit() {
       </div>
     </div>
   </div>
+  <dialog class="modal modal-bottom sm:modal-middle" ref="activateDialog">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg" v-t="'activate-title'"></h3>
+      <i18n-t keypath="activate-body" tag="p" class="py-4">
+        <template #email>
+          <span class="font-semibold break-all">{{ email }}</span>
+        </template>
+      </i18n-t>
+      <div class="modal-action">
+        <button class="btn btn-primary" @click="onActivateConfirm" v-t="'activate-confirm'"></button>
+      </div>
+    </div>
+    <div class="modal-backdrop">
+      <button class="cursor-default" @click="onActivateConfirm"></button>
+    </div>
+  </dialog>
 </template>
