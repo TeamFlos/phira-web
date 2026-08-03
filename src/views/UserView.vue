@@ -93,8 +93,8 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { userNameClass, detailedTime, LANGUAGES, toast, toastError, loggedIn, setTitle, userPermissions, type IConfirmDialog } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { userNameClass, detailedTime, LANGUAGES, toast, loggedIn, setTitle, userPermissions, type IConfirmDialog } from '../common';
+import { useApi } from '../api/client';
 import { Permission, Roles, type Chart, type User, type UserView, type Page, type PlayRecord, type RecordPool, type PoolItem } from '../model';
 import { type PlayRecordEx } from '../components/RecordList.vue';
 
@@ -143,33 +143,24 @@ const stats = statsRes.data;
 
 const confirmBanDialog = ref<IConfirmDialog>();
 async function doBan() {
-  const { error } = await api.POST('/user/{id}/ban', { params: { path: { id } } });
-  if (error) {
-    toastError(new Error(errMessage(error) || 'error'));
-    return;
-  }
+  const { error } = await api.POST('/user/{id}/ban', { params: { path: { id } }, toastError: true });
+  if (error) return;
   toast(t('ban.done'));
   user.banned = true;
 }
 
 const confirmAvatarBanDialog = ref<IConfirmDialog>();
 async function doBanAvatar() {
-  const { error } = await api.POST('/user/{id}/ban-avatar', { params: { path: { id } } });
-  if (error) {
-    toastError(new Error(errMessage(error) || 'error'));
-    return;
-  }
+  const { error } = await api.POST('/user/{id}/ban-avatar', { params: { path: { id } }, toastError: true });
+  if (error) return;
   toast(t('ban-avatar.done'));
   user.banned = true;
 }
 
 const confirmLoginBanDialog = ref<IConfirmDialog>();
 async function doBanLogin() {
-  const { error } = await api.POST('/user/{id}/ban-login', { params: { path: { id } } });
-  if (error) {
-    toastError(new Error(errMessage(error) || 'error'));
-    return;
-  }
+  const { error } = await api.POST('/user/{id}/ban-login', { params: { path: { id } }, toastError: true });
+  if (error) return;
   toast(t('login-ban.done'));
   user.login_banned = true;
 }
@@ -180,11 +171,9 @@ async function doReport() {
   const { error } = await api.POST('/user/{id}/report', {
     params: { path: { id } },
     body: { reason: reportReason.value! },
+    toastError: true,
   });
-  if (error) {
-    toastError(new Error(errMessage(error) || 'error'));
-    return;
-  }
+  if (error) return;
   toast(t('report.done'));
 }
 
@@ -205,11 +194,9 @@ async function doModifyRoles() {
       add: diff.added.roles,
       remove: diff.removed.roles,
     },
+    toastError: true,
   });
-  if (error) {
-    toastError(new Error(errMessage(error) || 'error'));
-    return;
-  }
+  if (error) return;
   user.roles = Roles.from_selection(newRoles).roles;
   toast(t('roles.done'));
 }

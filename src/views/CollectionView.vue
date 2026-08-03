@@ -53,8 +53,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, toastError, type IConfirmDialog } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, type IConfirmDialog } from '../common';
+import { useApi } from '../api/client';
 import type { Collection } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
@@ -96,11 +96,9 @@ async function doReport() {
   const { error } = await api.POST('/collection/{id}/report', {
     params: { path: { id } },
     body: { reason: reportReason.value! },
+    toastError: true,
   });
-  if (error) {
-    toastError(new Error(errMessage(error) || 'error'));
-    return;
-  }
+  if (error) return;
   toast(t('report.done'));
 }
 

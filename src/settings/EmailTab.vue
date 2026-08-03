@@ -24,7 +24,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toast, toastError } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { useApi } from '../api/client';
 import type { EmailSubs } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
@@ -40,11 +40,8 @@ async function saveSubs() {
   if (savingSubs.value) return;
   savingSubs.value = true;
   try {
-    const { error } = await api.PATCH('/me/subs', { body: { ...subs } });
-    if (error) {
-      toastError(new Error(errMessage(error) || 'error'));
-      return;
-    }
+    const { error } = await api.PATCH('/me/subs', { body: { ...subs }, toastError: true });
+    if (error) return;
     toast(t('subs.done'));
   } catch (e) {
     toastError(e);

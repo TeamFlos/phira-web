@@ -28,7 +28,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toast, toastError, userPermissions } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { useApi } from '../api/client';
 import { Permission, Role, type User } from '../model';
 
 import LoadOr from './LoadOr.vue';
@@ -55,11 +55,9 @@ async function switchSetReviewer() {
         add: !hasRole.value ? role : 0,
         remove: hasRole.value ? role : 0,
       },
+      toastError: true,
     });
-    if (error) {
-      toastError(new Error(errMessage(error) || 'error'));
-      return;
-    }
+    if (error) return;
     toast(hasRole.value ? t('done-cancel') : t('done-set'));
     hasRole.value = !hasRole.value;
   } catch (e) {

@@ -1,7 +1,7 @@
-import createClient from 'openapi-fetch';
+import createClient, { type Client } from 'openapi-fetch';
 import type { paths } from './schema';
 import { useRouter } from 'vue-router';
-import { API_BASE, getCookie, setCookie, logout, pleaseLogin } from '../common';
+import { API_BASE, getCookie, setCookie, logout, pleaseLogin, toastError } from '../common';
 
 /** API host shared with the existing local-development configuration. */
 const API_HOST = API_BASE;
@@ -55,8 +55,13 @@ function ensureRefreshed(refreshToken: string): Promise<boolean> {
 /**
  * Typed API client. Call from a component `setup()` so the 401 handler can
  * redirect through its router.
+ *
+ * Each request method (GET/POST/…) also honors a non-standard `toastError:
+ * true` flag in its options: when set and the response carries an error body,
+ * the message is auto-toasted. The flag is stripped before the request is
+ * forwarded, so it never reaches the network.
  */
-export function useApi() {
+export function useApi(): Client<paths> {
   const router = useRouter();
   const client = createClient<paths>({ baseUrl: API_HOST });
   const replaySources = new Map();
@@ -92,20 +97,64 @@ export function useApi() {
     },
   });
 
+  return withToastError(client);
+}
+
+const METHODS = ['GET', 'PUT', 'POST', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'TRACE'] as const;
+
+/**
+ * Wrap an openapi-fetch client's request methods so the per-call `toastError`
+ * init flag is honored. The typed signature is left untouched (openapi-fetch's
+ * `InitParam` already admits arbitrary `[key: string]` options), so full
+ * per-path type safety is preserved.
+ */
+function withToastError(client: Client<paths>): Client<paths> {
+  for (const method of METHODS) {
+    const original = (client as any)[method].bind(client);
+    (client as any)[method] = async (url: any, ...init: any[]) => {
+      const last = init[init.length - 1];
+      let doToast = false;
+      if (last && typeof last === 'object' && 'toastError' in last) {
+        doToast = !!last.toastError;
+        const rest = { ...last };
+        delete rest.toastError;
+        init[init.length - 1] = rest;
+      }
+      const res = await original(url, ...init);
+      if (doToast && res.error) {
+        toastError(apiError(res.error));
+      }
+      return res;
+    };
+  }
   return client;
 }
 
 /**
- * Extract the human-readable message from an openapi-fetch error body. The API
- * returns `{ error: "msg" }` for non-2xx; openapi-fetch parses that into
- * `error` regardless of whether the response was schema-documented.
+ * Error returned by the API for non-2xx. Carries the machine-readable `code`
+ * (when present) so callers can branch on it, in addition to the human-readable
+ * `message`. Thrown or read via {@link apiError}.
  */
-export function errMessage(error: unknown): string {
-  if (error && typeof error === 'object' && 'error' in error) {
-    const v = (error as { error?: unknown }).error;
-    if (typeof v === 'string') return v;
+export class ApiError extends Error {
+  readonly code?: string;
+
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = code;
   }
-  return '';
 }
 
-export type ApiClient = ReturnType<typeof useApi>;
+/**
+ * Collapse an openapi-fetch error body into an {@link ApiError}. Always returns
+ * a value (never null), so it's safe to throw or read `.message`/`.code` off it
+ * directly — e.g. `throw apiError(error)` or `apiError(error).code`.
+ */
+export function apiError(error: unknown): ApiError {
+  const body = (error ?? {}) as { message?: unknown; code?: unknown };
+  const message = typeof body.message === 'string' && body.message ? body.message : 'unknown error';
+  const code = typeof body.code === 'string' ? body.code : undefined;
+  return new ApiError(message, code);
+}
+
+export type ApiClient = Client<paths>;

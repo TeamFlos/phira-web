@@ -18,7 +18,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { validateEmail, validatePassword, toast } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { useApi, apiError } from '../api/client';
 
 import LoadOr from '../components/LoadOr.vue';
 
@@ -55,7 +55,7 @@ async function submit() {
       },
     });
     if (error) {
-      errorMessage.value = errMessage(error) || t('register');
+      errorMessage.value = apiError(error).message || t('register');
       return;
     }
     toast(t('registered'));

@@ -83,7 +83,7 @@ const { t } = useI18n();
 import moment from 'moment';
 
 import { toast, toastError, loggedIn, setTitle, userPermissions } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { useApi } from '../api/client';
 import { Permission, type Chart, type User } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
@@ -152,11 +152,9 @@ async function setRanked(ranked: boolean) {
     const { error } = await api.POST('/chart/{id}/set-ranked', {
       params: { path: { id } },
       body: { ranked },
+      toastError: true,
     });
-    if (error) {
-      toastError(new Error(errMessage(error) || 'error'));
-      return;
-    }
+    if (error) return;
     toast(t('div-updated'));
     chart.ranked = ranked;
   } catch (e) {
@@ -174,11 +172,9 @@ async function submitRating() {
     const { error } = await api.POST('/chart/{id}/rate', {
       params: { path: { id } },
       body: { score: rating.value! },
+      toastError: true,
     });
-    if (error) {
-      toastError(new Error(errMessage(error) || 'error'));
-      return;
-    }
+    if (error) return;
     myRating.value = rating.value!;
     toast(t('rating.done'));
   } catch (e) {
@@ -196,11 +192,9 @@ async function doCensor() {
     const { error } = await api.POST('/chart/{id}/censor', {
       params: { path: { id } },
       body: { censor: true },
+      toastError: true,
     });
-    if (error) {
-      toastError(new Error(errMessage(error) || 'error'));
-      return;
-    }
+    if (error) return;
     toast(t('censored'));
   } catch (e) {
     toastError(e);
@@ -217,11 +211,9 @@ async function doHide() {
     const { error } = await api.POST('/chart/{id}/hide', {
       params: { path: { id } },
       body: { hide: true },
+      toastError: true,
     });
-    if (error) {
-      toastError(new Error(errMessage(error) || 'error'));
-      return;
-    }
+    if (error) return;
     toast(t('hidden'));
   } catch (e) {
     toastError(e);

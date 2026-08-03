@@ -20,7 +20,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toast, toastError } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { useApi } from '../api/client';
 
 import LoadOr from './LoadOr.vue';
 
@@ -37,11 +37,9 @@ async function switchFollow() {
     const { error } = await api.POST('/user/{id}/follow', {
       params: { path: { id: props.id } },
       body: { follow: !following.value },
+      toastError: true,
     });
-    if (error) {
-      toastError(new Error(errMessage(error) || 'error'));
-      return;
-    }
+    if (error) return;
     toast(following.value ? t('done-unfollow') : t('done-follow'));
     following.value = !following.value;
   } catch (e) {

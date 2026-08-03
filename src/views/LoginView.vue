@@ -1,6 +1,7 @@
 <i18n lang="yml" src="@/locales/form.yml"></i18n>
 <i18n>
 en:
+  login-failed: Login failed
   logging-in: Logging in
   logged-in: Logged in
 
@@ -10,6 +11,7 @@ en:
     action: Register
 
 zh-CN:
+  login-failed: 登录失败
   logging-in: 正在登录中
   logged-in: 登录成功
 
@@ -28,7 +30,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { API_BASE, validateEmail, validatePassword, toast, changeLocale } from '../common';
-import { useApi, storeTokens } from '../api/client';
+import { useApi, storeTokens, apiError } from '../api/client';
 
 import LoadOr from '../components/LoadOr.vue';
 
@@ -59,7 +61,8 @@ async function submit() {
       body: { email: email.value!, password: pwd },
     });
     if (error || !data) {
-      errorMessage.value = t('login');
+      console.log(error);
+      errorMessage.value = apiError(error).message || t('login-failed');
       return;
     }
     storeTokens(data);

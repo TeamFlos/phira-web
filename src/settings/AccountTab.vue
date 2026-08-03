@@ -27,7 +27,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toast, toastError, fileToURL, LANGUAGES, changeLocale } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { useApi, apiError } from '../api/client';
 import type { User } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
@@ -98,7 +98,7 @@ async function updateAvatar() {
     if (!upRes.data) throw new Error('error');
     const id = upRes.data.id;
     const { error } = await api.PATCH('/me', { body: { avatar: id } });
-    if (error) throw new Error(errMessage(error) || 'error');
+    if (error) throw apiError(error);
     toast(t('avatar-updated'));
     avatarFile.value = undefined;
   } catch (e) {
@@ -120,7 +120,7 @@ async function saveProfile() {
         char: loadingChars.value ? null : char.value,
       },
     });
-    if (error) throw new Error(errMessage(error) || 'error');
+    if (error) throw apiError(error);
     changeLocale(language.value);
     toast(t('profile-updated'));
   } catch (e) {

@@ -8,7 +8,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toast } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { useApi, apiError } from '../api/client';
 import type { OAuthApp } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
@@ -56,7 +56,7 @@ async function auth() {
       },
     });
     if (error || !data) {
-      errorMessage.value = errMessage(error) || 'error';
+      errorMessage.value = apiError(error).message;
       return;
     }
     let resp = data;

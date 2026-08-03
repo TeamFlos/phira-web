@@ -38,7 +38,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { toastError, toast, userNameClass } from '../common';
-import { useApi, errMessage } from '../api/client';
+import { useApi, apiError } from '../api/client';
 import type { Chart, UserView } from '../model';
 
 import LoadOr from '../components/LoadOr.vue';
@@ -63,7 +63,7 @@ type CollabInfo = {
 };
 
 const collab = await getUntyped<CollabInfo>(`/chart/collab/${hash}`);
-if (collab.error || !collab.data) throw new Error(errMessage(collab.error) || 'error');
+if (collab.error || !collab.data) throw apiError(collab.error);
 const info = collab.data;
 if (info.confirmed) {
   toast(t('already-confirmed'));
@@ -71,9 +71,8 @@ if (info.confirmed) {
 }
 
 const inviter = ref<UserView>();
-api.GET('/user/{id}', { params: { path: { id: info.chart.uploader } } }).then(({ data, error }) => {
+api.GET('/user/{id}', { params: { path: { id: info.chart.uploader } }, toastError: true }).then(({ data }) => {
   if (data) inviter.value = data;
-  else if (error) toastError(new Error(errMessage(error)));
 });
 
 const confirming = ref(false);
@@ -83,7 +82,7 @@ async function confirm() {
   confirming.value = true;
   try {
     const { error } = await postUntyped(`/chart/collab/${hash}/confirm`);
-    if (error) throw new Error(errMessage(error));
+    if (error) throw apiError(error);
     toast(t('confirmed'));
     router.push({ name: 'home' });
   } catch (e) {
