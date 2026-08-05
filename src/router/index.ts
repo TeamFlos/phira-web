@@ -23,6 +23,7 @@ import SettingsView from '../views/SettingsView.vue';
 
 import OAuthView from '../views/OAuthView.vue';
 import StaffView from '../views/StaffView.vue';
+import UpdateView from '../views/UpdateView.vue';
 
 import DMCA from '../DMCA.vue';
 import PrivacyPolicy from '../PrivacyPolicy.vue';
@@ -66,6 +67,7 @@ const router = createRouter({
 
     { path: '/oauth', name: 'oauth', component: OAuthView },
     { path: '/staff', name: 'staff', component: StaffView },
+    { path: '/update', name: 'update', component: UpdateView },
     { path: '/censor', name: 'censor', component: CensorView },
   ],
   scrollBehavior(_to, from, savedPosition) {
