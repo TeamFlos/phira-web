@@ -52,8 +52,7 @@ async function submit() {
   errorMessage.value = undefined;
   doingRegister.value = true;
   try {
-    email.value = email.value!.trim().toLowerCase(); // 后端注册即存小写，这里统一后再提交
-    validateEmail(t, email.value);
+    validateEmail(t, email.value!);
     let pwd = password.value!,
       pwd2 = password2.value!;
     validatePassword(t, pwd, pwd2);

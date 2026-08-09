@@ -92,8 +92,7 @@ async function submit() {
   errorMessage.value = undefined;
   doingLogin.value = true;
   try {
-    email.value = email.value!.trim().toLowerCase(); // 后端注册即存小写、登录查询不转小写，这里统一
-    validateEmail(t, email.value);
+    validateEmail(t, email.value!);
     let pwd = password.value!;
     validatePassword(t, pwd);
     await performLogin({ email: email.value!, password: pwd });
