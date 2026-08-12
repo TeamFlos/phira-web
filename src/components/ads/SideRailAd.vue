@@ -1,19 +1,14 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { useAds } from '@/common';
 
 defineProps<{ side: 'left' | 'right' }>();
 
-onMounted(() => {
-  try {
-    ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-  } catch (e) {
-    console.error('adsbygoogle push failed', e);
-  }
-});
+const { enabled } = useAds();
 </script>
 
 <template>
   <ins
+    v-if="enabled"
     class="adsbygoogle fixed top-24 z-10"
     :class="side === 'left' ? 'left-12' : 'right-12'"
     style="display: inline-block; width: 160px; height: 600px"

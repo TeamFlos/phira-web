@@ -1,4 +1,5 @@
 import type { Router } from 'vue-router';
+import { onMounted } from 'vue';
 
 import { toast as toastSonner } from 'vue-sonner';
 
@@ -137,3 +138,16 @@ export function pleaseLogin(router: Router) {
 }
 
 export type IConfirmDialog = InstanceType<typeof ConfirmDialog>;
+
+export function useAds() {
+  onMounted(() => {
+    try {
+      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+    } catch (e) {
+      console.error('adsbygoogle push failed', e);
+    }
+  });
+  return {
+    enabled: import.meta.env.VITE_NO_ADS !== '1',
+  };
+}
