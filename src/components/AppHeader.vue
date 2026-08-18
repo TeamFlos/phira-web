@@ -6,6 +6,7 @@ en:
   collection: Collections
   user: Users
   censor: Censor tool
+  review: Review
 
   wip: Work in progress
 
@@ -21,6 +22,7 @@ zh-CN:
   collection: 合集
   user: 用户
   censor: 审核工具
+  review: 待审队列
 
   wip: 功能暂未开放
 
@@ -84,6 +86,9 @@ const NAVS = computed(() => {
   ];
   if (user.value && userPermissions(user.value).has(Permission.CENSOR_DETAIL)) {
     routes.push({ path: '/censor', icon: 'fa-gavel', text: 'censor' });
+  }
+  if (user.value && userPermissions(user.value).has(Permission.REVIEW)) {
+    routes.push({ path: '/review', icon: 'fa-clipboard-check', text: 'review' });
   }
   return routes;
 });

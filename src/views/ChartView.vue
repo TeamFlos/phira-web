@@ -10,6 +10,7 @@ en:
 
   leaderboard: Leaderboard
   stb-history: Stb. History
+  version-history: Version history
 
   description-empty: This chart doesn't have description.
 
@@ -46,6 +47,7 @@ zh-CN:
 
   leaderboard: 排行榜
   stb-history: 评议记录
+  version-history: 版本历史
 
   description-empty: 该谱面没有简介。
 
@@ -258,6 +260,10 @@ async function doHide() {
                   <PropItem :title="t('status.title')" :value="t(chart.reviewed ? (chart.stable ? 'status.stable' : 'status.reviewed') : 'status.unreviewed')" />
                   <PropItem :title="t('updated-at')" :value="moment(chart.updated).fromNow()" />
                   <PropItem :title="t('created-at')" :value="moment(chart.created).fromNow()" />
+                  <router-link :to="`/chart/${chart.id}/versions`" class="link link-hover text-sm mt-1">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    {{ t('version-history') }}
+                  </router-link>
                 </div>
                 <div class="divider"></div>
                 <p v-if="chart.description && chart.description.length" class="w-full break-words">

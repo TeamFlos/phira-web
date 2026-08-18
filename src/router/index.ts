@@ -11,7 +11,9 @@ import TransferConfirmView from '../views/TransferConfirmView.vue';
 
 import ChartsView from '../views/ChartsView.vue';
 import ChartView from '../views/ChartView.vue';
+import ChartVersionsView from '../views/ChartVersionsView.vue';
 import ConfirmCollabView from '../views/ConfirmCollabView.vue';
+import ReviewQueueView from '../views/ReviewQueueView.vue';
 
 import CollectionView from '../views/CollectionView.vue';
 import CollectionsView from '../views/CollectionsView.vue';
@@ -46,6 +48,7 @@ const router = createRouter({
 
     { path: '/chart', name: 'charts', component: ChartsView },
     { path: '/chart/:id(\\d+)', name: 'chart', component: ChartView },
+    { path: '/chart/:id(\\d+)/versions/:vid(\\d+)?', name: 'chart-versions', component: ChartVersionsView },
     { path: '/chart/confirm-collab', name: 'confirm-collab', component: ConfirmCollabView },
 
     { path: '/collection', name: 'collections', component: CollectionsView },
@@ -67,6 +70,7 @@ const router = createRouter({
 
     { path: '/oauth', name: 'oauth', component: OAuthView },
     { path: '/staff', name: 'staff', component: StaffView },
+    { path: '/review', name: 'review-queue', component: ReviewQueueView },
     { path: '/update', name: 'update', component: UpdateView },
     { path: '/censor', name: 'censor', component: CensorView },
   ],
