@@ -12,6 +12,7 @@ en:
 
   me:
     profile: Profile
+    charts: My Charts
     settings: Settings
     logout: Logout
 
@@ -28,6 +29,7 @@ zh-CN:
 
   me:
     profile: 主页
+    charts: 稿件中心
     settings: 设置
     logout: 登出
 
@@ -168,6 +170,9 @@ onUnmounted(() => {
                 <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40">
                   <li>
                     <router-link v-if="user" :to="`/user/${user.id}`" @click="blur" v-t="'me.profile'"></router-link>
+                  </li>
+                  <li>
+                    <router-link to="/my/charts" @click="blur" v-t="'me.charts'"></router-link>
                   </li>
                   <li>
                     <router-link to="/settings" @click="blur" v-t="'me.settings'"></router-link>

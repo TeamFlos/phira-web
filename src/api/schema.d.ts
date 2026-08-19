@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/anti-pirate/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["anti_pirate_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/censor-detail": {
         parameters: {
             query?: never;
@@ -243,6 +259,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/chart/{id}/visibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["chart_set_visibility"];
         trace?: never;
     };
     "/collection": {
@@ -501,6 +533,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["issue_list"];
+        put?: never;
+        post: operations["issue_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/issue/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["issue_by_id"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/issue/{id}/record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["issue_append_record"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/login": {
         parameters: {
             query?: never;
@@ -557,6 +637,38 @@ export interface paths {
             cookie?: never;
         };
         get: operations["get_chars"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/charts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["user_my_charts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/issues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["user_my_issues"];
         put?: never;
         post?: never;
         delete?: never;
@@ -982,6 +1094,10 @@ export interface components {
         ActiveSeries: {
             series: components["schemas"]["ActiveDay"][];
         };
+        AppendRecordP: {
+            operation?: null | components["schemas"]["IssueOperation"];
+            text: string;
+        };
         AuthorizeR: {
             code: string;
             location: string;
@@ -1083,6 +1199,19 @@ export interface components {
             /** Format: int32 */
             uploader: number;
         };
+        CheckP: {
+            /** @description Hex-encoded SHA-256 of the chart content file. */
+            checksum: string;
+        };
+        CheckR: {
+            matches: components["schemas"]["Match"][];
+        };
+        Collaborator: {
+            confirmed: boolean;
+            /** Format: int32 */
+            userId: number;
+            userName: string;
+        };
         Collection: {
             cover?: null | components["schemas"]["String"];
             /** Format: date-time */
@@ -1159,6 +1288,11 @@ export interface components {
             /** @description None 表示继承所属 Rights Holder 的 policy */
             status?: string | null;
         };
+        CreateIssueP: {
+            target?: null | components["schemas"]["IssueTarget"];
+            /** @description The reason / body text of the opening record. 10–200 chars. */
+            text: string;
+        };
         DetailedCollection: components["schemas"]["Collection"] & {
             charts: components["schemas"]["ChartView"][];
         };
@@ -1221,6 +1355,56 @@ export interface components {
             /** Format: date-time */
             time: string;
         };
+        IssueBrief: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int32 */
+            createdBy: number;
+            /** Format: int32 */
+            id: number;
+            target?: null | components["schemas"]["IssueTarget"];
+        };
+        IssueDetail: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int32 */
+            createdBy: number;
+            /** Format: int32 */
+            id: number;
+            open: boolean;
+            records: components["schemas"]["IssueRecordView"][];
+            target?: null | components["schemas"]["IssueTarget"];
+        };
+        /** @enum {string} */
+        IssueOperation: "open" | "close";
+        IssueRecordView: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int32 */
+            createdBy: number;
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            issueId: number;
+            operation?: null | components["schemas"]["IssueOperation"];
+            text: string;
+        };
+        IssueTarget: {
+            /** Format: int32 */
+            id: number;
+            /** @enum {string} */
+            type: "Chart";
+        } | {
+            /** Format: int32 */
+            id: number;
+            /** @enum {string} */
+            type: "Collection";
+        } | {
+            /** Format: int32 */
+            id: number;
+            /** @enum {string} */
+            type: "User";
+        };
         Leaderboard: {
             reviewers: components["schemas"]["ReviewerStat"][];
         };
@@ -1250,6 +1434,94 @@ export interface components {
             id: number;
             refreshToken: string;
             token: string;
+        };
+        Match: {
+            /** Format: int32 */
+            chartId: number;
+            collaborators: components["schemas"]["Collaborator"][];
+            name: string;
+            /** Format: int32 */
+            uploaderId: number;
+            uploaderName: string;
+            /**
+             * Format: int32
+             * @description Present when the match is a chart_version row (not the live chart).
+             *     See [`crate::model::VersionStatus`]
+             */
+            versionStatus?: number | null;
+        };
+        MyChartCollaborator: {
+            confirmed: boolean;
+            name: string;
+            /** Format: int32 */
+            userId: number;
+        };
+        MyChartEntry: {
+            /** Format: int32 */
+            activeVersionStatus?: number | null;
+            /** Format: date-time */
+            chartUpdated: string;
+            charter: string;
+            collaborators: components["schemas"]["MyChartCollaborator"][];
+            collaboratorsConfirmed: boolean;
+            composer: string;
+            /** Format: date-time */
+            created: string;
+            denyReason?: string | null;
+            description?: string | null;
+            /** Format: float */
+            difficulty: number;
+            hidden: boolean;
+            /** Format: int32 */
+            id: number;
+            illustrator: string;
+            level: string;
+            name: string;
+            pendingReview: boolean;
+            /** Format: int64 */
+            playCount: number;
+            /** Format: int32 */
+            publishedVersionId?: number | null;
+            ranked: boolean;
+            /** Format: float */
+            rating?: number | null;
+            /** Format: int32 */
+            ratingCount: number;
+            reviewState: components["schemas"]["ReviewState"];
+            stable: boolean;
+            stableRequest: boolean;
+            tags: string[];
+            /** Format: date-time */
+            updated: string;
+        };
+        MyChartsR: {
+            /** Format: int64 */
+            count: number;
+            results: components["schemas"]["MyChartEntry"][];
+        };
+        MyIssueBrief: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int32 */
+            createdBy: number;
+            /** Format: int32 */
+            id: number;
+            /**
+             * @description Whether the issue is currently open (derived from the last record
+             *     with a non-NULL operation; defaults to open if no transition exists).
+             */
+            open: boolean;
+            /**
+             * Format: int64
+             * @description Count of records (comments + state transitions) on this issue.
+             */
+            recordCount: number;
+            target?: null | components["schemas"]["IssueTarget"];
+        };
+        MyIssuesR: {
+            /** Format: int64 */
+            count: number;
+            results: components["schemas"]["MyIssueBrief"][];
         };
         MyRatingR: {
             /** Format: int32 */
@@ -1343,6 +1615,19 @@ export interface components {
                 public: boolean;
                 /** Format: date-time */
                 updated: string;
+            }[];
+        };
+        PaginationR_IssueBrief: {
+            /** Format: int64 */
+            count: number;
+            results: {
+                /** Format: date-time */
+                createdAt: string;
+                /** Format: int32 */
+                createdBy: number;
+                /** Format: int32 */
+                id: number;
+                target?: null | components["schemas"]["IssueTarget"];
             }[];
         };
         PaginationR_QueryR: {
@@ -1525,6 +1810,13 @@ export interface components {
             /** @description The reviewers who have already voted on it, oldest vote first. */
             reviewedBy: components["schemas"]["ReviewerRef"][];
         };
+        /**
+         * @description Submission lifecycle state a chart is currently in, derived server-side
+         *     from `published_version_id`, `pending_review`, and the active version's
+         *     `chart_version.status`.
+         * @enum {string}
+         */
+        ReviewState: "awaiting_first_review" | "awaiting_collaborators" | "published" | "has_pending_edit" | "rejected_edit";
         /** @description Just enough of a user to render a link to their profile. */
         ReviewerRef: {
             avatar?: null | components["schemas"]["String"];
@@ -1694,6 +1986,9 @@ export interface components {
          * @enum {string}
          */
         VersionStatus: "pending" | "published" | "rejected" | "superseded" | "awaitingCollaborators" | "yanked";
+        VisibilityP: {
+            hidden: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -1703,6 +1998,29 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    anti_pirate_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckP"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckR"];
+                };
+            };
+        };
+    };
     censor_detail: {
         parameters: {
             query?: never;
@@ -2141,6 +2459,37 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PaginationR_ChartVersionView"];
                 };
+            };
+        };
+    };
+    chart_set_visibility: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Chart ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VisibilityP"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description not the uploader */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2618,6 +2967,102 @@ export interface operations {
             };
         };
     };
+    issue_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                pageNum?: number;
+                search?: string;
+                order?: string;
+                tags?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginationR_IssueBrief"];
+                };
+            };
+        };
+    };
+    issue_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateIssueP"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssueDetail"];
+                };
+            };
+        };
+    };
+    issue_by_id: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Issue ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssueDetail"];
+                };
+            };
+        };
+    };
+    issue_append_record: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Issue ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppendRecordP"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssueRecordView"];
+                };
+            };
+        };
+    };
     login: {
         parameters: {
             query?: never;
@@ -2733,6 +3178,62 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Character"][];
                 };
+            };
+        };
+    };
+    user_my_charts: {
+        parameters: {
+            query?: {
+                page?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyChartsR"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    user_my_issues: {
+        parameters: {
+            query?: {
+                page?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyIssuesR"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

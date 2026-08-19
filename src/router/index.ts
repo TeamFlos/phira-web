@@ -20,6 +20,7 @@ import CollectionsView from '../views/CollectionsView.vue';
 
 import UsersView from '../views/UsersView.vue';
 import UserView from '../views/UserView.vue';
+import MyChartsView from '../views/MyChartsView.vue';
 
 import SettingsView from '../views/SettingsView.vue';
 
@@ -56,6 +57,7 @@ const router = createRouter({
 
     { path: '/user', name: 'users', component: UsersView },
     { path: '/user/:id(\\d+)', name: 'user', component: UserView },
+    { path: '/my/charts', name: 'my-charts', component: MyChartsView },
 
     { path: '/settings', redirect: () => '/settings/account' },
     { path: '/settings/:category', name: 'settings', component: SettingsView },
