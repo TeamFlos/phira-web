@@ -34,6 +34,7 @@ import { Permission, type Chart, type ChartVersion, type User } from '../model';
 import LoadView from '../components/LoadView.vue';
 import PageIndicator from '../components/PageIndicator.vue';
 import ReviewActions from '../components/ReviewActions.vue';
+import ReviewCheck from '../components/ReviewCheck.vue';
 import VersionDetail from '../components/VersionDetail.vue';
 import VersionDiff from '../components/VersionDiff.vue';
 import VersionTimeline from '../components/VersionTimeline.vue';
@@ -268,6 +269,7 @@ async function refresh() {
                 <p v-else class="italic opacity-60 py-4" v-t="'need-two'"></p>
               </div>
             </div>
+            <ReviewCheck v-if="canReview" :track="selected.content.name" :artist="selected.content.composer" />
             <ReviewActions v-if="canReview && selected.status === 'pending'" :chart="id" @reviewed="refresh" />
           </template>
           <p v-else-if="!loading" class="italic opacity-60 py-8 text-center" v-t="'empty'"></p>
