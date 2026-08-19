@@ -33,6 +33,11 @@ export function diffText(a: string, b: string): DiffOp[] {
     }));
 }
 
+/** Decode the integer status the anti-pirate check returns for version rows. */
+export function versionStatusOf(code: number): VersionStatus | undefined {
+  return (['pending', 'published', 'rejected', 'superseded', 'awaitingCollaborators', 'yanked'] as const)[code];
+}
+
 /** DaisyUI badge modifier for each version status. */
 export function statusBadgeClass(status: VersionStatus): string {
   switch (status) {

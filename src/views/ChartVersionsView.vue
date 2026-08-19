@@ -277,7 +277,7 @@ async function refresh() {
                 <p v-else class="italic opacity-60 py-4" v-t="'need-two'"></p>
               </div>
             </div>
-            <ReviewCard v-if="canReview" :chart="id" :version="selected" :findings="metadataFindings" @reviewed="refresh" />
+            <ReviewCard v-if="canReview" :chart="id" :uploader-id="chart?.uploader" :version="selected" :findings="metadataFindings" @reviewed="refresh" />
           </template>
           <p v-else-if="!loading" class="italic opacity-60 py-8 text-center" v-t="'empty'"></p>
         </div>

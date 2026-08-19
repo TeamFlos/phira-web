@@ -10,7 +10,7 @@
 import { computed, ref, watch } from 'vue';
 
 import { useApi } from '../api/client';
-import type { ChartVersion, ReviewCheckR } from '../model';
+import type { ChartVersion, PirateMatch, ReviewCheckR } from '../model';
 import { effectiveTrackStatus, worstPolicyStatus } from '../policy';
 
 export type CheckLevel = 'ok' | 'info' | 'warning' | 'problem';
@@ -23,13 +23,12 @@ export type CensorHit = { field: 'name' | 'description' | 'tags'; segments: Cens
 
 /**
  * Items the reviewer must tick before approving. i18n labels live in
- * ReviewCard.vue keyed by these ids. The first three attest that the
+ * ReviewCard.vue keyed by these ids. The first four attest that the
  * automated checks' output was reviewed by a human (false positives happen);
  * the rest cover what machines cannot judge. cl-sync retires when the
- * delay-alignment wasm check lands, cl-original when the stolen-upload
- * endpoint exists; delete them here when that happens.
+ * delay-alignment wasm check lands; delete it here when that happens.
  */
-export const REVIEW_MANUAL_ITEMS = ['cl-copyright', 'cl-censor', 'cl-metadata', 'cl-sync', 'cl-original', 'cl-content', 'cl-thorough', 'cl-play'] as const;
+export const REVIEW_MANUAL_ITEMS = ['cl-copyright', 'cl-pirate', 'cl-censor', 'cl-metadata', 'cl-sync', 'cl-content', 'cl-thorough', 'cl-play'] as const;
 
 // --- derivations ------------------------------------------------------------
 
@@ -39,11 +38,11 @@ export function copyrightProblem(result: ReviewCheckR | undefined): 'forbidden' 
   return status === 'forbidden' || status === 'restricted' ? status : undefined;
 }
 
-/** First match carrying the problem status, as `name — artist`, for templates. */
+/** First match carrying the problem status, as `name by artist`, for templates. */
 export function problemDetail(result: ReviewCheckR | undefined, problem: 'forbidden' | 'restricted'): string {
   if (!result) return '';
   const track = result.tracks.find((v) => effectiveTrackStatus(v) === problem) ?? result.tracks[0];
-  if (track) return `${track.name} — ${track.artist}`;
+  if (track) return `${track.name} by ${track.artist}`;
   return result.artists[0]?.name ?? '';
 }
 
@@ -65,10 +64,10 @@ export function censoredFields(hits: CensorHit[]): ('name' | 'description' | 'ta
  * Adding a check: write its runner, add it to the Promise.all below, expose
  * its result ref, and give it a display component under components/review/.
  * If its findings should flip the default action to deny, fold them into
- * `hasProblems`. This is where the delay-alignment wasm package and the
- * stolen-upload endpoint plug in once they exist.
+ * `hasProblems`. This is where the delay-alignment wasm package plugs in
+ * once it exists.
  */
-export function useReviewChecks(version: () => ChartVersion) {
+export function useReviewChecks(version: () => ChartVersion, uploaderId: () => number | undefined) {
   const api = useApi();
 
   const loading = ref(true);
@@ -76,20 +75,26 @@ export function useReviewChecks(version: () => ChartVersion) {
   /** Sides of the copyright lookup skipped for empty input, for the UI hint. */
   const copyrightSuppressed = ref<('track' | 'artist')[]>([]);
   const censorHits = ref<CensorHit[]>([]);
+  /** Cross-chart file duplicates: stolen (other uploader) vs same-uploader re-upload. */
+  const stolenMatches = ref<PirateMatch[]>([]);
+  const duplicateMatches = ref<PirateMatch[]>([]);
 
   async function run(v: ChartVersion) {
     loading.value = true;
     copyright.value = undefined;
     copyrightSuppressed.value = [];
     censorHits.value = [];
+    stolenMatches.value = [];
+    duplicateMatches.value = [];
     const content = v.content;
     // An empty subquery would match the whole Meilisearch index, so a side
     // whose field is blank is dropped entirely; both blank skips the call.
     const track = content.name.trim();
     const artist = content.composer.trim();
     const policyReq = track || artist ? api.POST('/content-policy/review-check', { body: { track, artist }, toastError: true }) : undefined;
-    const [policyRes, ...censorRes] = await Promise.all([
+    const [policyRes, pirateRes, ...censorRes] = await Promise.all([
       policyReq,
+      api.POST('/anti-pirate/check', { body: { checksum: v.checksum }, toastError: true }),
       ...(['name', 'description', 'tags'] as const).map(async (field) => {
         const text = field === 'tags' ? content.tags.join(' ') : (content[field] ?? '');
         if (!text) return undefined;
@@ -99,6 +104,13 @@ export function useReviewChecks(version: () => ChartVersion) {
         return segments.some((s) => s.censored) ? { field, segments } : undefined;
       }),
     ]);
+    // Drop own-chart rows; dedupe by chartId (backend returns both the live
+    // row and every version row sharing the checksum). Then split by uploader.
+    const seenChart = new Set<number>();
+    const foreign = (pirateRes.data?.matches ?? []).filter((m) => m.chartId !== v.chart).filter((m) => !seenChart.has(m.chartId) && seenChart.add(m.chartId));
+    const uploader = uploaderId();
+    stolenMatches.value = foreign.filter((m) => uploader != null && m.uploaderId !== uploader);
+    duplicateMatches.value = foreign.filter((m) => uploader != null && m.uploaderId === uploader);
     if (policyRes?.data) {
       const r = policyRes.data as ReviewCheckR;
       const tracks = track ? r.tracks : [];
@@ -122,7 +134,7 @@ export function useReviewChecks(version: () => ChartVersion) {
   watch(version, run, { immediate: true });
 
   const problem = computed(() => copyrightProblem(copyright.value));
-  const hasProblems = computed(() => !!problem.value || censorHits.value.length > 0);
+  const hasProblems = computed(() => !!problem.value || censorHits.value.length > 0 || stolenMatches.value.length > 0 || duplicateMatches.value.length > 0);
 
-  return { loading, copyright, copyrightSuppressed, censorHits, problem, hasProblems };
+  return { loading, copyright, copyrightSuppressed, censorHits, stolenMatches, duplicateMatches, problem, hasProblems };
 }

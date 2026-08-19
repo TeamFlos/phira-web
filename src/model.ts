@@ -11,6 +11,7 @@ export type UserView = S['GetUserR']; // /user/{id} shape (UserView + following;
 export type Chart = S['ChartView'];
 export type MyChartEntry = S['MyChartEntry'];
 export type ReviewState = S['ReviewState'];
+export type PirateMatch = S['Match'];
 export type ChartVersion = S['ChartVersionView'];
 export type ChartSnapshot = S['ChartSnapshotView'];
 export type VersionStatus = S['VersionStatus'];

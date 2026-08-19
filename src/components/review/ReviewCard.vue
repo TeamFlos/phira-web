@@ -6,20 +6,24 @@ en:
   checks-clean: Automated checks found nothing.
   checklist: Checklist
   cl-copyright: Copyright matches reviewed, false positives ruled out
+  cl-pirate: Duplicate-file matches checked; the uploader is not the original author
   cl-censor: Blocked-word hits reviewed
   cl-metadata: Metadata checked, flagged fields confirmed acceptable
   cl-sync: Audio and chart are in sync
-  cl-original: Not a stolen or re-uploaded chart
   cl-content: Illustration content is appropriate
-  cl-thorough: Reviewed the full chart (audio and notes) — no spelled-out text or other inappropriate content
+  cl-thorough: Reviewed the full chart (audio and notes), no spelled-out text or other inappropriate content
   cl-play: The chart file downloads and plays correctly
   cl-override: I have reviewed the issues above and approve anyway
   templates: Templates
   tpl-auto: Auto
+  tpl-pirate: Duplicate file
   tpl-copyright-forbidden: Copyright (forbidden)
   tpl-copyright-restricted: Copyright (restricted)
   tpl-censored: Blocked words
+  tpl-duplicate: Duplicate upload
+  tpl-body-duplicate: 'This file is byte-identical to a chart you already uploaded (chart #{id}). Do not submit duplicates. Edit the existing chart instead.'
   tpl-metadata: Metadata issues
+  tpl-body-pirate: 'This file is byte-identical to an existing chart ({detail}). Re-uploading another author''s work constitutes piracy and may result in account suspension. Please upload only your own original charts.'
   tpl-body-forbidden: This version uses a track that is forbidden by the content policy ({detail}). Please replace the track and upload again.
   tpl-body-restricted: This version matched a restricted content-policy entry ({detail}). Please make sure the conditions in the note are met, or adjust and upload again.
   tpl-body-censored: 'Inappropriate words were found in: {fields}. Please revise and resubmit.'
@@ -32,7 +36,7 @@ en:
   confirm-approve-text: The vote is final and cannot be changed.
   confirm-deny-title: Deny with this message?
   approved: Vote recorded
-  approved-passed: Approved — the chart is now public
+  approved-passed: Approved, the chart is now public
   denied: The chart has been denied
 
 zh-CN:
@@ -42,20 +46,23 @@ zh-CN:
   checks-clean: 自动检查未发现问题。
   checklist: 检查清单
   cl-copyright: 版权匹配结果已人工核对，误报已排除
+  cl-pirate: 撞车记录已人工核对，上传者非原作者本人
   cl-censor: 屏蔽词命中情况已人工核对
   cl-metadata: 字段信息已核对，提醒项确认无碍
   cl-sync: 音画同步无异常
-  cl-original: 非盗传、转载，来源可信
   cl-content: 插图内容适宜
   cl-thorough: 已完整浏览谱面（音频与谱面内容），无拼字等不当内容
   cl-play: 谱面文件可正常下载游玩
   cl-override: 已知悉上述问题，仍确认通过
   templates: 快速模板
   tpl-auto: 自动
+  tpl-pirate: 撞车
   tpl-copyright-forbidden: 版权（禁止）
   tpl-copyright-restricted: 版权（受限）
-  tpl-censored: 屏蔽词
+  tpl-duplicate: 重复上传
+  tpl-body-duplicate: 该文件与你已上传的谱面（编号 {id}）完全一致，请勿重复提交，修改现有谱面即可。
   tpl-metadata: 信息填写
+  tpl-body-pirate: 该文件与已有谱面完全一致（{detail}）。盗传他人作品属违规行为，情节严重者将封停账号。请仅上传本人原创谱面。
   tpl-body-forbidden: 该版本使用了政策库中标记为禁止的曲目（{detail}），请更换曲目后重新上传。
   tpl-body-restricted: 该版本命中了受限政策条目（{detail}），请确认满足备注中的附加条件，或修改后重新上传。
   tpl-body-censored: 以下字段包含不适宜内容：{fields}。请修改后重新提交。
@@ -87,6 +94,7 @@ import ConfirmDialog from '../ConfirmDialog.vue';
 import LoadOr from '../LoadOr.vue';
 import CensorResults from './CensorResults.vue';
 import CopyrightResults from './CopyrightResults.vue';
+import PirateResults from './PirateResults.vue';
 
 const { t, locale } = useI18n();
 
@@ -97,10 +105,25 @@ function censorTemplateBody(): string {
 }
 const api = useApi();
 
-const props = defineProps<{ chart: number; version: ChartVersion; findings: MetadataFinding[] }>();
+const props = defineProps<{ chart: number; uploaderId: number | undefined; version: ChartVersion; findings: MetadataFinding[] }>();
 const emit = defineEmits<{ (e: 'reviewed'): void }>();
 
-const { loading, copyright, copyrightSuppressed, censorHits, problem, hasProblems } = useReviewChecks(() => props.version);
+const { loading, copyright, copyrightSuppressed, censorHits, stolenMatches, duplicateMatches, problem, hasProblems } = useReviewChecks(
+  () => props.version,
+  () => props.uploaderId,
+);
+
+/** First stolen match as `name by uploader (chart #id)`, for templates. */
+function pirateDetail(): string {
+  const m = stolenMatches.value[0];
+  return m ? `${m.name} by ${m.uploaderName} (chart #${m.chartId})` : '';
+}
+
+/** First same-uploader duplicate's chart id, for the rejection template. */
+function duplicateDetail(): Record<string, unknown> {
+  const m = duplicateMatches.value[0];
+  return m ? { id: m.chartId } : {};
+}
 
 // --- action & message -----------------------------------------------------
 
@@ -116,6 +139,8 @@ const warningReasons = computed(() => warningFindings.value.map((f) => t(`metada
 /** Compose the rejection message from whichever templates apply. */
 const autoReason = computed(() => {
   const parts: string[] = [];
+  if (stolenMatches.value.length) parts.push(t('tpl-body-pirate', { detail: pirateDetail() }));
+  if (duplicateMatches.value.length) parts.push(t('tpl-body-duplicate', duplicateDetail()));
   if (problem.value) parts.push(t(`tpl-body-${problem.value}`, { detail: problemDetail(copyright.value, problem.value) }));
   if (censorHits.value.length) parts.push(censorTemplateBody());
   parts.push(...warningReasons.value);
@@ -132,12 +157,15 @@ watch(loading, (isLoading) => {
   reason.value = autoReason.value;
   manualChecks.value = {};
 });
-
-function applyTemplate(kind: 'forbidden' | 'restricted' | 'censored' | 'metadata') {
+function applyTemplate(kind: 'pirate' | 'duplicate' | 'forbidden' | 'restricted' | 'censored' | 'metadata') {
   if (kind === 'metadata') {
     reason.value = warningReasons.value.join('\n');
   } else if (kind === 'censored') {
     reason.value = censorTemplateBody();
+  } else if (kind === 'pirate') {
+    reason.value = t('tpl-body-pirate', { detail: pirateDetail() });
+  } else if (kind === 'duplicate') {
+    reason.value = t('tpl-body-duplicate', duplicateDetail());
   } else {
     reason.value = t(`tpl-body-${kind}`, { detail: problemDetail(copyright.value, problem.value ?? 'forbidden') });
   }
@@ -192,9 +220,10 @@ async function submitVote() {
 
     <!-- automated checks -->
     <div v-if="!loading" class="flex flex-col gap-2">
+      <PirateResults v-if="stolenMatches.length" kind="stolen" :matches="stolenMatches" />
+      <PirateResults v-if="duplicateMatches.length" kind="duplicate" :matches="duplicateMatches" />
       <CopyrightResults v-if="copyright || copyrightSuppressed.length" :result="copyright" :suppressed="copyrightSuppressed" />
-      <CensorResults :hits="censorHits" />
-      <p v-if="!hasProblems && !copyrightSuppressed.length && !warningFindings.length" class="text-sm opacity-60">
+      <p v-if="!hasProblems && !copyrightSuppressed.length && !duplicateMatches.length && !warningFindings.length" class="text-sm opacity-60">
         <i class="fa-solid fa-circle-check text-success"></i>
         {{ t('checks-clean') }}
       </p>
@@ -220,7 +249,8 @@ async function submitVote() {
       <div v-else-if="action === 'deny'" class="flex flex-col gap-2">
         <div class="flex flex-row items-center gap-2 flex-wrap">
           <h3 class="text-xs font-bold tracking-wider opacity-50">{{ t('templates') }}</h3>
-          <button class="btn btn-ghost btn-xs" :disabled="!autoReason" @click="reason = autoReason">{{ t('tpl-auto') }}</button>
+          <button class="btn btn-ghost btn-xs" :disabled="!stolenMatches.length" @click="applyTemplate('pirate')">{{ t('tpl-pirate') }}</button>
+          <button class="btn btn-ghost btn-xs" :disabled="!duplicateMatches.length" @click="applyTemplate('duplicate')">{{ t('tpl-duplicate') }}</button>
           <button class="btn btn-ghost btn-xs" @click="applyTemplate('forbidden')">{{ t('tpl-copyright-forbidden') }}</button>
           <button class="btn btn-ghost btn-xs" @click="applyTemplate('restricted')">{{ t('tpl-copyright-restricted') }}</button>
           <button class="btn btn-ghost btn-xs" @click="applyTemplate('censored')">{{ t('tpl-censored') }}</button>
