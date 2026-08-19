@@ -309,6 +309,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/content-policy/review-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["content_policy_review_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/content-policy/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["content_policy_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/dash/reviews/leaderboard": {
         parameters: {
             query?: never;
@@ -1073,6 +1105,60 @@ export interface components {
             name: string;
             public: boolean;
         };
+        /**
+         * @description Composite status returned to content-policy callers.
+         *
+         *     Identical to [`Status`] for matched input; `Unknown` when no match.
+         *     Ordering: `Unknown < Free < Restricted < Forbidden`.
+         * @enum {string}
+         */
+        CompositeStatus: "unknown" | "free" | "restricted" | "forbidden";
+        /**
+         * @description 艺人 Meilisearch 索引文档。
+         *
+         *     主键为 `id`，直接使用 data/artists/ 下的文件名（不含 .toml）。
+         */
+        CpArtistDoc: {
+            aliases?: string[];
+            id: string;
+            name: string;
+            note?: string | null;
+            reason?: string | null;
+            status: string;
+        };
+        /**
+         * @description 版权方 Meilisearch 索引文档。
+         *
+         *     主键为 `id`，直接使用 data/rights_holders/ 下的目录名。
+         */
+        CpRightsHolderDoc: {
+            id: string;
+            name: string;
+            note?: string | null;
+            status: string;
+            trackCount: number;
+        };
+        /**
+         * @description 曲目 Meilisearch 索引文档。
+         *
+         *     主键为 `id`，由 `name|artist` 的 hex 编码生成。
+         *     版权方曲目内嵌 RH 信息；独立曲目 rh_* 字段为 None。
+         */
+        CpTrackDoc: {
+            aliases?: string[];
+            artist: string;
+            id: string;
+            name: string;
+            note?: string | null;
+            /** @description 所属版权方名称。独立曲目为 None。 */
+            rhName?: string | null;
+            /** @description 所属版权方备注。独立曲目为 None。 */
+            rhNote?: string | null;
+            /** @description 所属版权方 status。独立曲目为 None。 */
+            rhStatus?: string | null;
+            /** @description None 表示继承所属 Rights Holder 的 policy */
+            status?: string | null;
+        };
         DetailedCollection: components["schemas"]["Collection"] & {
             charts: components["schemas"]["ChartView"][];
         };
@@ -1418,6 +1504,15 @@ export interface components {
         ReportP: {
             reason: string;
         };
+        ReviewCheckP: {
+            artist: string;
+            track: string;
+        };
+        ReviewCheckR: {
+            artists: components["schemas"]["CpArtistDoc"][];
+            compositeStatus: components["schemas"]["CompositeStatus"];
+            tracks: components["schemas"]["CpTrackDoc"][];
+        };
         ReviewQueueItem: {
             chart: components["schemas"]["ChartView"];
             /**
@@ -1451,6 +1546,11 @@ export interface components {
         RksUpdateR: {
             /** Format: double */
             rks: number;
+        };
+        SearchR: {
+            artists: components["schemas"]["CpArtistDoc"][];
+            rightsHolders: components["schemas"]["CpRightsHolderDoc"][];
+            tracks: components["schemas"]["CpTrackDoc"][];
         };
         SetRankedP: {
             ranked: boolean;
@@ -2257,6 +2357,51 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    content_policy_review_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewCheckP"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewCheckR"];
+                };
+            };
+        };
+    };
+    content_policy_search: {
+        parameters: {
+            query: {
+                q: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchR"];
+                };
             };
         };
     };

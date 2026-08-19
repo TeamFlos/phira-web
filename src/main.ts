@@ -68,6 +68,14 @@ const i18n = createI18n({
         awaitingCollaborators: 'Awaiting collaborators',
         yanked: 'Yanked',
       },
+      // Shared by the copyright check card and the policy library search.
+      'policy-status': {
+        free: 'Free',
+        restricted: 'Restricted',
+        forbidden: 'Forbidden',
+        unknown: 'No record',
+        inherited: 'Inherited',
+      },
       'chart-field': {
         name: 'Name',
         composer: 'Composer',
@@ -122,6 +130,13 @@ const i18n = createI18n({
         superseded: '已替换',
         awaitingCollaborators: '等待协作者确认',
         yanked: '已撤下',
+      },
+      'policy-status': {
+        free: '无限制',
+        restricted: '受限',
+        forbidden: '禁止',
+        unknown: '无记录',
+        inherited: '继承版权方',
       },
       'chart-field': {
         name: '曲名',
