@@ -29,12 +29,12 @@ import { useI18n } from 'vue-i18n';
 
 import { fileToURL, loggedIn, pageCount, setTitle, toast, userPermissions } from '../common';
 import { useApi } from '../api/client';
-import { Permission, type Chart, type ChartVersion, type User } from '../model';
+import { Permission, type Chart, type ChartVersion, type User, type UserView } from '../model';
+import { runMetadataRules } from '../review/metadata';
 
 import LoadView from '../components/LoadView.vue';
 import PageIndicator from '../components/PageIndicator.vue';
-import ReviewActions from '../components/ReviewActions.vue';
-import ReviewCheck from '../components/ReviewCheck.vue';
+import ReviewCard from '../components/review/ReviewCard.vue';
 import VersionDetail from '../components/VersionDetail.vue';
 import VersionDiff from '../components/VersionDiff.vue';
 import VersionTimeline from '../components/VersionTimeline.vue';
@@ -60,6 +60,14 @@ if (loggedIn()) {
   });
 }
 const canReview = computed(() => !!me.value && userPermissions(me.value).has(Permission.REVIEW));
+
+// Metadata rule findings, shared by the detail panel (inline hints next to
+// the fields) and the review card (rejection templates). Reviewers only.
+const uploaderName = ref<string>();
+api.GET('/user/{id}', { params: { path: { id: chart.value.uploader } } }).then(({ data }) => {
+  if (data) uploaderName.value = (data as UserView).name;
+});
+const metadataFindings = computed(() => (selected.value && canReview.value ? runMetadataRules(selected.value.content, { uploaderName: uploaderName.value }) : []));
 
 // --- version list ---------------------------------------------------------
 
@@ -258,7 +266,7 @@ async function refresh() {
                 <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': tab === 'diff' }" @click="switchTab('diff')" v-t="'diff'"></a>
               </div>
               <div class="card bg-base-100 border border-base-300 shadow-lg p-4 rounded-ss-none">
-                <VersionDetail v-if="tab === 'detail'" :version="selected" />
+                <VersionDetail v-if="tab === 'detail'" :version="selected" :findings="metadataFindings" />
                 <VersionDiff
                   v-else-if="diffPair"
                   :base="diffPair.base"
@@ -269,8 +277,7 @@ async function refresh() {
                 <p v-else class="italic opacity-60 py-4" v-t="'need-two'"></p>
               </div>
             </div>
-            <ReviewCheck v-if="canReview" :track="selected.content.name" :artist="selected.content.composer" />
-            <ReviewActions v-if="canReview && selected.status === 'pending'" :chart="id" @reviewed="refresh" />
+            <ReviewCard v-if="canReview" :chart="id" :version="selected" :findings="metadataFindings" @reviewed="refresh" />
           </template>
           <p v-else-if="!loading" class="italic opacity-60 py-8 text-center" v-t="'empty'"></p>
         </div>

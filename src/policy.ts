@@ -45,3 +45,14 @@ export function policyStatusIcon(status: string): string {
 export function effectiveTrackStatus(track: { status?: string | null; rhStatus?: string | null }): string {
   return track.status ?? track.rhStatus ?? 'unknown';
 }
+
+const STATUS_RANK: Record<string, number> = { unknown: 0, free: 1, restricted: 2, forbidden: 3 };
+
+/** Worst status across a set, per the ordering `unknown < free < restricted < forbidden`. */
+export function worstPolicyStatus(statuses: Iterable<string>): CompositeStatus {
+  let worst: CompositeStatus = 'unknown';
+  for (const status of statuses) {
+    if ((STATUS_RANK[status] ?? 0) > STATUS_RANK[worst]) worst = status as CompositeStatus;
+  }
+  return worst;
+}

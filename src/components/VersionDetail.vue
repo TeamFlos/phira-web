@@ -31,23 +31,36 @@ import { useI18n } from 'vue-i18n';
 import { detailedTime, fileToURL } from '../common';
 import { statusBadgeClass } from '../version';
 import type { ChartVersion } from '../model';
+import type { MetadataFinding } from '../review/metadata';
 
 import TagList from './TagList.vue';
+import FindingLine from './review/FindingLine.vue';
 
 const { t } = useI18n();
 
-const props = defineProps<{ version: ChartVersion }>();
+const props = defineProps<{ version: ChartVersion; findings?: MetadataFinding[] }>();
 
 const content = computed(() => props.version.content);
 
+/** Findings grouped by the snapshot field they attach to. */
+const findingsByField = computed(() => {
+  const map = new Map<string, MetadataFinding[]>();
+  for (const f of props.findings ?? []) {
+    const list = map.get(f.field) ?? [];
+    list.push(f);
+    map.set(f.field, list);
+  }
+  return map;
+});
+
 /** The at-a-glance fields, laid out next to the illustration. */
 const fields = computed(() => [
-  { label: t('chart-field.name'), value: content.value.name },
-  { label: t('chart-field.difficulty'), value: `${content.value.level} (${content.value.difficulty.toFixed(1)})` },
-  { label: t('chart-field.composer'), value: content.value.composer },
-  { label: t('chart-field.charter'), value: content.value.charter },
-  { label: t('chart-field.illustrator'), value: content.value.illustrator },
-  { label: t('chart-field.noteCount'), value: String(content.value.noteCount) },
+  { key: 'name', label: t('chart-field.name'), value: content.value.name },
+  { key: 'level', label: t('chart-field.difficulty'), value: `${content.value.level} (${content.value.difficulty.toFixed(1)})` },
+  { key: 'composer', label: t('chart-field.composer'), value: content.value.composer },
+  { key: 'charter', label: t('chart-field.charter'), value: content.value.charter },
+  { key: 'illustrator', label: t('chart-field.illustrator'), value: content.value.illustrator },
+  { key: 'noteCount', label: t('chart-field.noteCount'), value: String(content.value.noteCount) },
 ]);
 </script>
 
@@ -76,6 +89,7 @@ const fields = computed(() => [
         <div v-for="field in fields" :key="field.label" class="flex flex-col min-w-0">
           <span class="text-xs opacity-50">{{ field.label }}</span>
           <span class="truncate font-medium" v-tooltip="field.value">{{ field.value }}</span>
+          <FindingLine v-for="finding in findingsByField.get(field.key) ?? []" :key="finding.key" class="mt-0.5" :finding="finding" />
         </div>
       </div>
     </div>
@@ -87,6 +101,7 @@ const fields = computed(() => [
         <p v-if="content.description && content.description.length" class="whitespace-pre-wrap break-words">{{ content.description }}</p>
         <p v-else class="italic opacity-50" v-t="'description-empty'"></p>
       </div>
+      <FindingLine v-for="finding in findingsByField.get('description') ?? []" :key="finding.key" :finding="finding" />
     </section>
 
     <!-- tags -->
@@ -96,6 +111,7 @@ const fields = computed(() => [
            version to keep it in sync when the selection changes. -->
       <TagList v-if="content.tags.length" :key="version.id" :canEdit="false" :init="content.tags" />
       <span v-else class="italic opacity-50" v-t="'tags-empty'"></span>
+      <FindingLine v-for="finding in findingsByField.get('tags') ?? []" :key="finding.key" :finding="finding" />
     </section>
 
     <!-- preview audio -->
