@@ -32,18 +32,58 @@ export const REVIEW_MANUAL_ITEMS = ['cl-copyright', 'cl-pirate', 'cl-censor', 'c
 
 // --- derivations ------------------------------------------------------------
 
-/** The copyright verdict, reduced to the two statuses that block a clean approve. */
-export function copyrightProblem(result: ReviewCheckR | undefined): 'forbidden' | 'restricted' | undefined {
-  const status = result?.compositeStatus;
-  return status === 'forbidden' || status === 'restricted' ? status : undefined;
+/** Levenshtein edit distance between two strings (case-insensitive). */
+export function editDistance(a: string, b: string): number {
+  const s = a.toLowerCase().trim();
+  const t = b.toLowerCase().trim();
+  if (s === t) return 0;
+  const m = s.length;
+  const n = t.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const prev = new Array(n + 1);
+  const curr = new Array(n + 1);
+  for (let j = 0; j <= n; j++) prev[j] = j;
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = s[i - 1] === t[j - 1] ? 0 : 1;
+      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+    }
+    for (let j = 0; j <= n; j++) prev[j] = curr[j];
+  }
+  return prev[n];
 }
 
-/** First match carrying the problem status, as `name by artist`, for templates. */
-export function problemDetail(result: ReviewCheckR | undefined, problem: 'forbidden' | 'restricted'): string {
+/** Minimum edit distance from the query to the match name or any alias. */
+export function minDistance(query: string, name: string, aliases?: string[]): number {
+  if (!query) return 0;
+  return Math.min(editDistance(query, name), ...(aliases ?? []).map((a) => editDistance(query, a)));
+}
+
+/** The copyright verdict, only when a match within edit distance 10 exists. */
+export function copyrightProblem(result: ReviewCheckR | undefined, query: { track: string; artist: string }): 'forbidden' | 'restricted' | undefined {
+  const status = result?.compositeStatus;
+  if (status !== 'forbidden' && status !== 'restricted') return undefined;
+  const hasCloseTrack = result!.tracks.some((t) => minDistance(query.track, t.name, t.aliases) <= 10);
+  const hasCloseArtist = result!.artists.some((a) => minDistance(query.artist, a.name, a.aliases) <= 10);
+  return hasCloseTrack || hasCloseArtist ? status : undefined;
+}
+
+/** Closest match carrying the problem status, as `name by artist`, for templates. */
+export function problemDetail(result: ReviewCheckR | undefined, problem: 'forbidden' | 'restricted', query: { track: string; artist: string }): string {
   if (!result) return '';
-  const track = result.tracks.find((v) => effectiveTrackStatus(v) === problem) ?? result.tracks[0];
+  const tracks = result.tracks
+    .map((t) => ({ t, d: minDistance(query.track, t.name, t.aliases) }))
+    .filter((x) => x.d <= 10)
+    .sort((a, b) => a.d - b.d);
+  const track = (tracks.find((x) => effectiveTrackStatus(x.t) === problem) ?? tracks[0])?.t;
   if (track) return `${track.name} by ${track.artist}`;
-  return result.artists[0]?.name ?? '';
+  const artists = result.artists
+    .map((a) => ({ a, d: minDistance(query.artist, a.name, a.aliases) }))
+    .filter((x) => x.d <= 10)
+    .sort((a, b) => a.d - b.d);
+  return artists[0]?.a.name ?? '';
 }
 
 /**
@@ -72,6 +112,8 @@ export function useReviewChecks(version: () => ChartVersion, uploaderId: () => n
 
   const loading = ref(true);
   const copyright = ref<ReviewCheckR>();
+  /** The track and artist queries used for the copyright search, for edit-distance display. */
+  const copyrightQuery = ref<{ track: string; artist: string }>({ track: '', artist: '' });
   /** Sides of the copyright lookup skipped for empty input, for the UI hint. */
   const copyrightSuppressed = ref<('track' | 'artist')[]>([]);
   const censorHits = ref<CensorHit[]>([]);
@@ -91,6 +133,7 @@ export function useReviewChecks(version: () => ChartVersion, uploaderId: () => n
     // whose field is blank is dropped entirely; both blank skips the call.
     const track = content.name.trim();
     const artist = content.composer.trim();
+    copyrightQuery.value = { track, artist };
     const policyReq = track || artist ? api.POST('/content-policy/review-check', { body: { track, artist }, toastError: true }) : undefined;
     const [policyRes, pirateRes, ...censorRes] = await Promise.all([
       policyReq,
@@ -133,8 +176,8 @@ export function useReviewChecks(version: () => ChartVersion, uploaderId: () => n
 
   watch(version, run, { immediate: true });
 
-  const problem = computed(() => copyrightProblem(copyright.value));
+  const problem = computed(() => copyrightProblem(copyright.value, copyrightQuery.value));
   const hasProblems = computed(() => !!problem.value || censorHits.value.length > 0 || stolenMatches.value.length > 0 || duplicateMatches.value.length > 0);
 
-  return { loading, copyright, copyrightSuppressed, censorHits, stolenMatches, duplicateMatches, problem, hasProblems };
+  return { loading, copyright, copyrightQuery, copyrightSuppressed, censorHits, stolenMatches, duplicateMatches, problem, hasProblems };
 }
