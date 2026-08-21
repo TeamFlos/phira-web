@@ -25,7 +25,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { detailedTime, fileToURL } from '../common';
@@ -41,6 +41,9 @@ const { t } = useI18n();
 const props = defineProps<{ version: ChartVersion; findings?: MetadataFinding[] }>();
 
 const content = computed(() => props.version.content);
+
+/** Full illustration preview modal. */
+const illustrationOpen = ref(false);
 
 /** Findings grouped by the snapshot field they attach to. */
 const findingsByField = computed(() => {
@@ -79,12 +82,12 @@ const fields = computed(() => [
 
     <!-- illustration + key fields -->
     <div class="flex flex-col sm:flex-row gap-4">
-      <a class="group relative w-full sm:w-64 shrink-0 self-start" :href="fileToURL(content.illustration)" target="_blank" rel="noreferrer" v-tooltip="t('view-illustration')">
+      <div class="group relative w-full sm:w-64 shrink-0 self-start cursor-pointer" @click="illustrationOpen = true" v-tooltip="t('view-illustration')">
         <img class="w-full aspect-[8/5] object-cover rounded-lg border border-base-300 shadow-md" :src="fileToURL(content.illustration) + '.thumbnail'" />
         <span class="absolute inset-0 rounded-lg bg-base-100/0 group-hover:bg-base-100/30 transition-colors flex items-center justify-center">
           <i class="fa-solid fa-up-right-and-down-left-from-center opacity-0 group-hover:opacity-80 transition-opacity"></i>
         </span>
-      </a>
+      </div>
       <div class="grow min-w-0 grid grid-cols-2 gap-x-6 gap-y-3 content-start">
         <div v-for="field in fields" :key="field.label" class="flex flex-col min-w-0">
           <span class="text-xs opacity-50">{{ field.label }}</span>
@@ -135,4 +138,16 @@ const fields = computed(() => [
       </div>
     </section>
   </div>
+
+  <!-- full illustration preview -->
+  <Teleport to="body">
+    <div v-if="illustrationOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" @click.self="illustrationOpen = false">
+      <div class="relative">
+        <img class="max-w-full max-h-[90vh] rounded-lg shadow-2xl object-contain" :src="fileToURL(content.illustration)" />
+        <button class="btn btn-sm btn-circle absolute -top-3 -right-3 bg-base-100 border border-base-300 shadow-md hover:bg-base-200" @click="illustrationOpen = false">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+  </Teleport>
 </template>
