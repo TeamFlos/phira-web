@@ -108,7 +108,7 @@ const api = useApi();
 const props = defineProps<{ chart: number; uploaderId: number | undefined; version: ChartVersion; findings: MetadataFinding[] }>();
 const emit = defineEmits<{ (e: 'reviewed'): void }>();
 
-const { loading, copyright, copyrightSuppressed, censorHits, stolenMatches, duplicateMatches, problem, hasProblems } = useReviewChecks(
+const { loading, copyright, copyrightQuery, copyrightSuppressed, censorHits, stolenMatches, duplicateMatches, problem, hasProblems } = useReviewChecks(
   () => props.version,
   () => props.uploaderId,
 );
@@ -141,7 +141,7 @@ const autoReason = computed(() => {
   const parts: string[] = [];
   if (stolenMatches.value.length) parts.push(t('tpl-body-pirate', { detail: pirateDetail() }));
   if (duplicateMatches.value.length) parts.push(t('tpl-body-duplicate', duplicateDetail()));
-  if (problem.value) parts.push(t(`tpl-body-${problem.value}`, { detail: problemDetail(copyright.value, problem.value) }));
+  if (problem.value) parts.push(t(`tpl-body-${problem.value}`, { detail: problemDetail(copyright.value, problem.value, copyrightQuery.value) }));
   if (censorHits.value.length) parts.push(censorTemplateBody());
   parts.push(...warningReasons.value);
   return parts.join('\n');
@@ -167,7 +167,7 @@ function applyTemplate(kind: 'pirate' | 'duplicate' | 'forbidden' | 'restricted'
   } else if (kind === 'duplicate') {
     reason.value = t('tpl-body-duplicate', duplicateDetail());
   } else {
-    reason.value = t(`tpl-body-${kind}`, { detail: problemDetail(copyright.value, problem.value ?? 'forbidden') });
+    reason.value = t(`tpl-body-${kind}`, { detail: problemDetail(copyright.value, problem.value ?? 'forbidden', copyrightQuery.value) });
   }
 }
 
@@ -222,7 +222,7 @@ async function submitVote() {
     <div v-if="!loading" class="flex flex-col gap-2">
       <PirateResults v-if="stolenMatches.length" kind="stolen" :matches="stolenMatches" />
       <PirateResults v-if="duplicateMatches.length" kind="duplicate" :matches="duplicateMatches" />
-      <CopyrightResults v-if="copyright || copyrightSuppressed.length" :result="copyright" :suppressed="copyrightSuppressed" />
+      <CopyrightResults v-if="copyright || copyrightSuppressed.length" :result="copyright" :query="copyrightQuery" :suppressed="copyrightSuppressed" />
       <p v-if="!hasProblems && !copyrightSuppressed.length && !duplicateMatches.length && !warningFindings.length" class="text-sm opacity-60">
         <i class="fa-solid fa-circle-check text-success"></i>
         {{ t('checks-clean') }}

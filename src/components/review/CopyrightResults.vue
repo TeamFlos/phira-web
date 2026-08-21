@@ -30,13 +30,29 @@ import { useI18n } from 'vue-i18n';
 
 import type { ReviewCheckR } from '../../model';
 import { effectiveTrackStatus, policyBadgeClass } from '../../policy';
-import { copyrightProblem } from '../../review';
+import { copyrightProblem, minDistance } from '../../review';
 
 const { t } = useI18n();
 
-const props = defineProps<{ result?: ReviewCheckR; suppressed?: ('track' | 'artist')[] }>();
+const props = defineProps<{ result?: ReviewCheckR; query: { track: string; artist: string }; suppressed?: ('track' | 'artist')[] }>();
 
-const problem = computed(() => copyrightProblem(props.result));
+const problem = computed(() => copyrightProblem(props.result, props.query));
+
+/** Track matches annotated with edit distance for display filtering. */
+const trackRows = computed(() =>
+  (props.result?.tracks ?? []).map((track) => ({
+    track,
+    distance: minDistance(props.query.track, track.name, track.aliases),
+  })),
+);
+
+/** Artist matches annotated with edit distance for display filtering. */
+const artistRows = computed(() =>
+  (props.result?.artists ?? []).map((artist) => ({
+    artist,
+    distance: minDistance(props.query.artist, artist.name, artist.aliases),
+  })),
+);
 </script>
 
 <template>
@@ -55,34 +71,40 @@ const problem = computed(() => copyrightProblem(props.result));
       <span>{{ t('restricted-hint') }}</span>
     </div>
 
-    <div v-if="result.tracks.length" class="flex flex-col gap-1">
+    <div v-if="trackRows.length" class="flex flex-col gap-1">
       <h3 class="text-xs font-bold tracking-wider opacity-50">{{ t('matched-tracks') }}</h3>
-      <div v-for="track in result.tracks" :key="track.id" class="border border-base-300 rounded-lg p-2 flex flex-col gap-1 text-sm">
-        <div class="flex flex-row items-center gap-2 flex-wrap">
-          <span class="font-bold">{{ track.name }}</span>
-          <span class="opacity-70">— {{ track.artist }}</span>
-          <span class="badge badge-sm" :class="policyBadgeClass(effectiveTrackStatus(track))">
-            {{ t(`policy-status.${effectiveTrackStatus(track)}`) }}
-          </span>
+      <template v-for="{ track, distance } in trackRows" :key="track.id">
+        <div v-if="distance <= 10" class="border rounded-lg p-2 flex flex-col gap-1 text-sm" :class="distance >= 1 ? 'border-base-200 opacity-50' : 'border-base-300'">
+          <div class="flex flex-row items-center gap-2 flex-wrap">
+            <span :class="distance >= 1 ? 'opacity-70' : 'font-bold'">{{ track.name }}</span>
+            <span class="opacity-50">— {{ track.artist }}</span>
+            <span v-if="distance === 0" class="badge badge-sm" :class="policyBadgeClass(effectiveTrackStatus(track))">
+              {{ t(`policy-status.${effectiveTrackStatus(track)}`) }}
+            </span>
+            <span v-if="distance >= 1" class="badge badge-sm badge-ghost font-mono">~{{ distance }}</span>
+          </div>
+          <p v-if="track.note" class="opacity-60">{{ t('note') }}{{ track.note }}</p>
+          <p v-if="track.rhName" class="opacity-50">{{ t('inherits-from', { name: track.rhName }) }}</p>
         </div>
-        <p v-if="track.note" class="opacity-80">{{ t('note') }}{{ track.note }}</p>
-        <p v-if="track.rhName" class="opacity-60">{{ t('inherits-from', { name: track.rhName }) }}</p>
-      </div>
+      </template>
     </div>
 
-    <div v-if="result.artists.length" class="flex flex-col gap-1">
+    <div v-if="artistRows.length" class="flex flex-col gap-1">
       <h3 class="text-xs font-bold tracking-wider opacity-50">{{ t('matched-artists') }}</h3>
-      <div v-for="artist in result.artists" :key="artist.id" class="border border-base-300 rounded-lg p-2 flex flex-col gap-1 text-sm">
-        <div class="flex flex-row items-center gap-2 flex-wrap">
-          <span class="font-bold">{{ artist.name }}</span>
-          <span class="badge badge-sm" :class="policyBadgeClass(artist.status)">
-            {{ t(`policy-status.${artist.status}`) }}
-          </span>
+      <template v-for="{ artist, distance } in artistRows" :key="artist.id">
+        <div v-if="distance <= 10" class="border rounded-lg p-2 flex flex-col gap-1 text-sm" :class="distance >= 1 ? 'border-base-200 opacity-50' : 'border-base-300'">
+          <div class="flex flex-row items-center gap-2 flex-wrap">
+            <span :class="distance >= 1 ? 'opacity-70' : 'font-bold'">{{ artist.name }}</span>
+            <span v-if="distance === 0" class="badge badge-sm" :class="policyBadgeClass(artist.status)">
+              {{ t(`policy-status.${artist.status}`) }}
+            </span>
+            <span v-if="distance >= 1" class="badge badge-sm badge-ghost font-mono">~{{ distance }}</span>
+          </div>
+          <p v-if="artist.aliases?.length" class="opacity-60">{{ t('aliases') }}{{ artist.aliases.join(' / ') }}</p>
+          <p v-if="artist.reason" class="opacity-60">{{ t('reason') }}{{ artist.reason }}</p>
+          <p v-if="artist.note" class="opacity-60">{{ t('note') }}{{ artist.note }}</p>
         </div>
-        <p v-if="artist.aliases?.length" class="opacity-80">{{ t('aliases') }}{{ artist.aliases.join(' / ') }}</p>
-        <p v-if="artist.reason" class="opacity-80">{{ t('reason') }}{{ artist.reason }}</p>
-        <p v-if="artist.note" class="opacity-80">{{ t('note') }}{{ artist.note }}</p>
-      </div>
+      </template>
     </div>
   </template>
 </template>
