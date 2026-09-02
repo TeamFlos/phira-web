@@ -59,6 +59,7 @@ const i18n = createI18n({
       'title-chart-versions': 'Version History',
       'title-review-queue': 'Review Queue',
       'title-my-charts': 'My Charts',
+      'title-dlink': 'Open in Phira',
 
       // Shared by the version timeline, the detail/diff panels and the queue.
       'version-status': {
@@ -149,6 +150,7 @@ const i18n = createI18n({
       'title-chart-versions': '版本历史',
       'title-review-queue': '待审队列',
       'title-my-charts': '稿件中心',
+      'title-dlink': '在 Phira 中打开',
 
       'version-status': {
         pending: '待审核',
