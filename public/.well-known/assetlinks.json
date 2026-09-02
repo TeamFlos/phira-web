@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "org.flos.phira",
+    "sha256_cert_fingerprints": [
+      "F6:BB:49:60:ED:F3:D3:46:23:EE:15:4B:62:52:D3:91:FB:BE:24:61:48:B6:D3:C9:64:DA:FC:8E:B9:62:5D:61"
+    ]
+  }
+}]
