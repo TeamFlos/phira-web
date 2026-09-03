@@ -78,6 +78,10 @@ const fields = computed(() => [
         <i class="fa-solid fa-download"></i>
         {{ t('download') }}
       </a>
+      <a class="btn btn-sm btn-outline" :href="`/dlink/import?src=${fileToURL(content.file)}`" target="_blank" rel="noreferrer">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        {{ t('open-in-phira') }}
+      </a>
     </div>
 
     <!-- illustration + key fields -->
