@@ -23,8 +23,6 @@ import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-const DOWNLOAD_URL = 'https://github.com/TeamFlos/phira/releases';
-
 const { t } = useI18n();
 const route = useRoute();
 
@@ -53,7 +51,7 @@ onMounted(openApp);
         </div>
         <i18n-t keypath="not-installed" tag="p" class="text-base-content/70 text-center">
           <template #here>
-            <a class="link" :href="DOWNLOAD_URL" target="_blank" rel="noopener">{{ t('here') }}</a>
+            <router-link class="link" to="/download">{{ t('here') }}</router-link>
           </template>
         </i18n-t>
       </div>

@@ -60,6 +60,7 @@ const i18n = createI18n({
       'title-review-queue': 'Review Queue',
       'title-my-charts': 'My Charts',
       'title-dlink': 'Open in Phira',
+      'title-download': 'Download',
 
       // Shared by the version timeline, the detail/diff panels and the queue.
       'version-status': {
@@ -151,6 +152,7 @@ const i18n = createI18n({
       'title-review-queue': '待审队列',
       'title-my-charts': '稿件中心',
       'title-dlink': '在 Phira 中打开',
+      'title-download': '下载',
 
       'version-status': {
         pending: '待审核',

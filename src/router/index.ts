@@ -2,6 +2,7 @@ import { nextTick } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 import HomeView from '../views/HomeView.vue';
+import DownloadView from '../views/DownloadView.vue';
 
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
@@ -26,7 +27,6 @@ import SettingsView from '../views/SettingsView.vue';
 
 import OAuthView from '../views/OAuthView.vue';
 import StaffView from '../views/StaffView.vue';
-import UpdateView from '../views/UpdateView.vue';
 import DLinkView from '../views/DLinkView.vue';
 
 import DMCA from '../DMCA.vue';
@@ -41,6 +41,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'home', component: HomeView },
+    { path: '/download', name: 'download', component: DownloadView },
 
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
@@ -74,7 +75,6 @@ const router = createRouter({
     { path: '/oauth', name: 'oauth', component: OAuthView },
     { path: '/staff', name: 'staff', component: StaffView },
     { path: '/review', name: 'review-queue', component: ReviewQueueView },
-    { path: '/update', name: 'update', component: UpdateView },
     { path: '/censor', name: 'censor', component: CensorView },
     { path: '/dlink/:action(chart|import)', name: 'dlink', component: DLinkView },
   ],

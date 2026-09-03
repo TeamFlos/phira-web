@@ -5,6 +5,7 @@ en:
   chart: Charts
   collection: Collections
   user: Users
+  download: Download
   censor: Censor tool
   review: Review
 
@@ -22,6 +23,7 @@ zh-CN:
   chart: 谱面
   collection: 合集
   user: 用户
+  download: 下载
   censor: 审核工具
   review: 待审队列
 
@@ -85,6 +87,7 @@ const NAVS = computed(() => {
     { path: '/chart', icon: 'fa-book', text: 'chart' },
     { path: '/collection', icon: 'fa-folder', text: 'collection' },
     { path: '/user', icon: 'fa-user', text: 'user' },
+    { path: '/download', icon: 'fa-download', text: 'download' },
   ];
   if (user.value && userPermissions(user.value).has(Permission.CENSOR_DETAIL)) {
     routes.push({ path: '/censor', icon: 'fa-gavel', text: 'censor' });
