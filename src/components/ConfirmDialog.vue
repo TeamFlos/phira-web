@@ -2,11 +2,14 @@
 import { toastError } from '@/common';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import LoadOr from './LoadOr.vue';
 const { t } = useI18n();
 
 let props = defineProps<{
   do: () => Promise<void>;
   onError?: () => void;
+  /** Override the confirm button label; defaults to the generic `confirm` translation. */
+  confirmText?: string;
 }>();
 
 defineExpose({ showModal: () => dialogE.value!.showModal() });
@@ -29,7 +32,7 @@ async function onConfirm() {
 }
 
 function tryCloseDialog() {
-  if (!doing.value) dialogE.value!.close();
+  if (!doing.value && dialogE.value) dialogE.value!.close();
 }
 </script>
 
@@ -40,7 +43,7 @@ function tryCloseDialog() {
       <div class="modal-action">
         <button class="btn btn-neutral" :disabled="doing" @click="tryCloseDialog" v-t="'cancel'"></button>
         <button class="btn btn-error" @click="onConfirm">
-          <LoadOr :loading="doing">{{ t('confirm') }}</LoadOr>
+          <LoadOr :loading="doing">{{ props.confirmText ?? t('confirm') }}</LoadOr>
         </button>
       </div>
     </div>

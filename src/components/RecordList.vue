@@ -13,7 +13,8 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 useI18n();
 
-import { useFetchApi, fileToURL } from '../common';
+import { fileToURL } from '../common';
+import { useApi } from '../api/client';
 import type { Chart, PlayRecord } from '../model';
 
 import LoadView from './LoadView.vue';
@@ -22,7 +23,7 @@ const props = defineProps<{
   initialRecords?: PlayRecordEx[];
 }>();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 export type PlayRecordEx = PlayRecord & { label?: string; chartDetail?: Chart };
 
@@ -31,14 +32,13 @@ const records = ref<PlayRecordEx[]>();
 function fetchRecords() {
   records.value = props.initialRecords;
   if (props.initialRecords) {
-    fetchApi(
-      `/chart/multi-get?` +
-        new URLSearchParams({
-          ids: props.initialRecords.map((r) => r.chart).join(','),
-        }),
-      {},
-      (resp) => {
-        let charts = resp as Chart[];
+    api
+      .GET('/chart/multi-get', {
+        params: { query: { ids: props.initialRecords.map((r) => r.chart).join(',') } },
+      })
+      .then(({ data, error }) => {
+        if (error || !data) return;
+        let charts = data as unknown as Chart[];
         if (records.value) {
           for (let i = 0; i < charts.length; i++) {
             if (records.value[i].chart == charts[i].id) {
@@ -46,8 +46,7 @@ function fetchRecords() {
             }
           }
         }
-      },
-    );
+      });
   }
 }
 

@@ -94,7 +94,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, pageCount, isString, loggedIn, userPermissions } from '../common';
+import { pageCount, isString, loggedIn, userPermissions } from '../common';
+import { useApi } from '../api/client';
 
 import { Permission } from '../model';
 import type { Chart, Page, User } from '../model';
@@ -104,17 +105,19 @@ import LoadView from '../components/LoadView.vue';
 import PageIndicator from '../components/PageIndicator.vue';
 import RatingBar from '../components/RatingBar.vue';
 import TagList from '../components/TagList.vue';
+import HeaderAd from '@/components/ads/HeaderAd.vue';
 
 const PAGE_NUM = 28;
 
 const route = useRoute();
 const router = useRouter();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 let user: User | null = null;
 if (loggedIn()) {
-  user = (await fetchApi('/me')) as User;
+  const { data, error } = await api.GET('/me');
+  if (!error && data) user = data as User;
 }
 
 const pagination = ref<typeof PageIndicator>();
@@ -297,41 +300,49 @@ const parameters = computed(() => {
 
 async function fetchCharts() {
   charts.value = undefined;
-  let params: Record<string, string> = {
-    pageNum: String(PAGE_NUM),
-    ...parameters.value,
-  };
-  delete params.fromMe;
-  delete params.unreviewed;
-  delete params.stable;
 
   let fromMe = parameters.value.fromMe,
     unreviewed = parameters.value.unreviewed,
     stable = parameters.value.stable;
+
+  const query: Record<string, unknown> = {
+    pageNum: PAGE_NUM,
+    page: Number(parameters.value.page),
+    order: parameters.value.order,
+  };
+  if (parameters.value.division) query.division = parameters.value.division;
+  if (parameters.value.tags) query.tags = parameters.value.tags;
+  if (parameters.value.search) query.search = parameters.value.search;
+  if (parameters.value.rating) query.rating = parameters.value.rating;
+  if (parameters.value.uploader) query.uploader = parameters.value.uploader;
   if (fromMe === 'yes' && user) {
-    params.uploader = String(user?.id);
+    query.uploader = user.id;
   }
   if (unreviewed && unreviewed !== 'any') {
-    params.reviewed = unreviewed === 'yes' ? 'false' : 'true';
+    query.reviewed = unreviewed === 'no';
   }
   if (stable && !['any', 'req'].includes(stable)) {
-    params.stable = 'true';
+    query.stable = true;
   }
   switch (stable) {
     case 'ranked':
-      params.ranked = 'true';
+      query.ranked = true;
       break;
     case 'unranked':
-      params.ranked = 'false';
+      query.ranked = false;
       break;
     case 'req':
-      params.stableRequest = 'true';
+      query.stableRequest = true;
       break;
   }
 
-  const resp = (await fetchApi('/chart?' + new URLSearchParams(params))) as Page<Chart>;
-  totalCount.value = resp.count;
-  charts.value = resp.results;
+  const resp = await api.GET('/chart', {
+    params: { query: query as any },
+  });
+  if (resp.error || !resp.data) throw new Error();
+  const data = resp.data as Page<Chart>;
+  totalCount.value = data.count;
+  charts.value = data.results;
 }
 
 await fetchCharts();
@@ -390,6 +401,9 @@ function rotate(value: string, choices: string[]): string {
 <template>
   <div class="flex flex-col items-center mt-8">
     <div class="mx-8 lg:w-3/4">
+      <div class="w-full px-8">
+        <HeaderAd class="h-[120px] w-full mb-4" />
+      </div>
       <div class="flex flex-row items-end flex-wrap gap-4">
         <div class="form-control">
           <label class="label">
@@ -440,7 +454,9 @@ function rotate(value: string, choices: string[]): string {
         </div>
       </div>
       <div v-if="charts" class="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-0 min-w-0">
-        <ChartCard v-for="chart in charts" :key="chart.id" :chart="chart" />
+        <template v-for="(chart, index) in charts" :key="chart.id">
+          <ChartCard :chart="chart" />
+        </template>
       </div>
       <div v-else class="flex flex-col items-center w-full h-16 mb-8 p-8">
         <LoadView class="loading-lg" />

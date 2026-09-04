@@ -5,7 +5,7 @@ import { darkTheme } from './AppHeader.vue';
 
 import defaultAvatar from '@/assets/user.png';
 
-defineProps<{ url?: string }>();
+defineProps<{ url?: string | null }>();
 </script>
 
 <template>

@@ -3,11 +3,13 @@ en:
   description: Phigros Fanmade Community
   link:
     github: GitHub
+    download: Download
 
 zh-CN:
   description: Phigros 二创社区
   link:
     github: GitHub
+    download: 下载
 
 </i18n>
 
@@ -27,6 +29,12 @@ const { t } = useI18n();
         </h1>
         <p class="text-xl" v-t="'description'"></p>
         <div class="flex mt-6 space-x-2 justify-center">
+          <router-link to="/download">
+            <button class="btn btn-primary">
+              <i class="fa-solid fa-download"></i>
+              {{ t('link.download') }}
+            </button>
+          </router-link>
           <a href="https://github.com/TeamFlos/phira" target="_blank">
             <button class="btn btn-neutral">
               <i class="fa-brands fa-github"></i>

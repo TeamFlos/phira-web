@@ -5,12 +5,15 @@ en:
   chart: Charts
   collection: Collections
   user: Users
+  download: Download
   censor: Censor tool
+  review: Review
 
   wip: Work in progress
 
   me:
     profile: Profile
+    charts: My Charts
     settings: Settings
     logout: Logout
 
@@ -20,12 +23,15 @@ zh-CN:
   chart: 谱面
   collection: 合集
   user: 用户
+  download: 下载
   censor: 审核工具
+  review: 待审队列
 
   wip: 功能暂未开放
 
   me:
     profile: 主页
+    charts: 稿件中心
     settings: 设置
     logout: 登出
 
@@ -37,7 +43,8 @@ import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 
-import { useFetchApi, getCookie, addCookieListener, logout, toast, userPermissions } from '../common';
+import { getCookie, addCookieListener, logout, toast, userPermissions } from '../common';
+import { useApi } from '../api/client';
 import { Permission, type User } from '../model';
 
 import { Toaster } from 'vue-sonner';
@@ -70,7 +77,7 @@ watch(
 
 const route = useRoute();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const accessToken = ref<string>();
 const user = ref<User>();
@@ -80,9 +87,13 @@ const NAVS = computed(() => {
     { path: '/chart', icon: 'fa-book', text: 'chart' },
     { path: '/collection', icon: 'fa-folder', text: 'collection' },
     { path: '/user', icon: 'fa-user', text: 'user' },
+    { path: '/download', icon: 'fa-download', text: 'download' },
   ];
   if (user.value && userPermissions(user.value).has(Permission.CENSOR_DETAIL)) {
     routes.push({ path: '/censor', icon: 'fa-gavel', text: 'censor' });
+  }
+  if (user.value && userPermissions(user.value).has(Permission.REVIEW)) {
+    routes.push({ path: '/review', icon: 'fa-clipboard-check', text: 'review' });
   }
   return routes;
 });
@@ -91,8 +102,8 @@ addCookieListener(() => {
   accessToken.value = getCookie('access_token');
   user.value = undefined;
   if (accessToken.value) {
-    fetchApi('/me', {}, (me) => {
-      user.value = me as User;
+    api.GET('/me').then(({ data }) => {
+      if (data) user.value = data as User;
     });
   }
 });
@@ -162,6 +173,9 @@ onUnmounted(() => {
                 <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-40">
                   <li>
                     <router-link v-if="user" :to="`/user/${user.id}`" @click="blur" v-t="'me.profile'"></router-link>
+                  </li>
+                  <li>
+                    <router-link to="/my/charts" @click="blur" v-t="'me.charts'"></router-link>
                   </li>
                   <li>
                     <router-link to="/settings" @click="blur" v-t="'me.settings'"></router-link>

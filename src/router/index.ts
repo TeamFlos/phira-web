@@ -2,23 +2,32 @@ import { nextTick } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 import HomeView from '../views/HomeView.vue';
+import DownloadView from '../views/DownloadView.vue';
 
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
 
+import ActivateView from '../views/ActivateView.vue';
+import TransferConfirmView from '../views/TransferConfirmView.vue';
+
 import ChartsView from '../views/ChartsView.vue';
 import ChartView from '../views/ChartView.vue';
+import ChartVersionsView from '../views/ChartVersionsView.vue';
+import ConfirmCollabView from '../views/ConfirmCollabView.vue';
+import ReviewQueueView from '../views/ReviewQueueView.vue';
 
 import CollectionView from '../views/CollectionView.vue';
 import CollectionsView from '../views/CollectionsView.vue';
 
 import UsersView from '../views/UsersView.vue';
 import UserView from '../views/UserView.vue';
+import MyChartsView from '../views/MyChartsView.vue';
 
 import SettingsView from '../views/SettingsView.vue';
 
 import OAuthView from '../views/OAuthView.vue';
 import StaffView from '../views/StaffView.vue';
+import DLinkView from '../views/DLinkView.vue';
 
 import DMCA from '../DMCA.vue';
 import PrivacyPolicy from '../PrivacyPolicy.vue';
@@ -32,18 +41,25 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'home', component: HomeView },
+    { path: '/download', name: 'download', component: DownloadView },
 
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
 
+    { path: '/email/activate', name: 'email-activate', component: ActivateView },
+    { path: '/email/transfer-confirm', name: 'email-transfer-confirm', component: TransferConfirmView },
+
     { path: '/chart', name: 'charts', component: ChartsView },
     { path: '/chart/:id(\\d+)', name: 'chart', component: ChartView },
+    { path: '/chart/:id(\\d+)/versions/:vid(\\d+)?', name: 'chart-versions', component: ChartVersionsView },
+    { path: '/chart/confirm-collab', name: 'confirm-collab', component: ConfirmCollabView },
 
     { path: '/collection', name: 'collections', component: CollectionsView },
     { path: '/collection/:id(\\d+)', name: 'collection', component: CollectionView },
 
     { path: '/user', name: 'users', component: UsersView },
     { path: '/user/:id(\\d+)', name: 'user', component: UserView },
+    { path: '/my/charts', name: 'my-charts', component: MyChartsView },
 
     { path: '/settings', redirect: () => '/settings/account' },
     { path: '/settings/:category', name: 'settings', component: SettingsView },
@@ -58,7 +74,9 @@ const router = createRouter({
 
     { path: '/oauth', name: 'oauth', component: OAuthView },
     { path: '/staff', name: 'staff', component: StaffView },
+    { path: '/review', name: 'review-queue', component: ReviewQueueView },
     { path: '/censor', name: 'censor', component: CensorView },
+    { path: '/dlink/:action(chart|import)', name: 'dlink', component: DLinkView },
   ],
   scrollBehavior(_to, from, savedPosition) {
     return new Promise((resolve) => {

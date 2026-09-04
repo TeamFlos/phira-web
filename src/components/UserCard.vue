@@ -4,19 +4,21 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 useI18n();
 
-import { useFetchApi, userNameClass } from '../common';
+import { userNameClass } from '../common';
+import { useApi } from '../api/client';
 import type { UserView } from '../model';
 
 import FollowButton from './FollowButton.vue';
 import UserAvatar from './UserAvatar.vue';
+import UserBadges from './UserBadges.vue';
 
 const props = defineProps<{ id: number }>();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const user = ref<UserView>();
-fetchApi(`/user/${props.id}`, {}, (u) => {
-  user.value = u as UserView;
+api.GET('/user/{id}', { params: { path: { id: props.id } } }).then(({ data }) => {
+  if (data) user.value = data;
 });
 </script>
 
@@ -37,6 +39,7 @@ fetchApi(`/user/${props.id}`, {}, (u) => {
           <span v-else>{{ user.name }}</span>
         </span>
       </router-link>
+      <UserBadges :badges="user.badges" :names="user.badgeNames" sm class="justify-center mt-2" />
       <p v-if="user.bio" class="text-sm text-gray-500">{{ user.bio }}</p>
       <p v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></p>
       <FollowButton class="mt-2" :id="id" :initFollowing="user.following" />

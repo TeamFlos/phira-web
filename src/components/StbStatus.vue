@@ -41,17 +41,22 @@ zh-CN:
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, detailedTime } from '../common';
-import type { StbStatus, User } from '../model';
+import { detailedTime } from '../common';
+import { useApi } from '../api/client';
+import type { StbStatus, UserView } from '../model';
 
 import UserAvatar from './UserAvatar.vue';
 
 const props = defineProps<{ chart: number; uploader: number }>();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
-const status = (await fetchApi(`/chart/${props.chart}/stabilize-status`)) as StbStatus;
-const uploader = (await fetchApi(`/user/${props.uploader}`)) as User;
+const statusRes = await api.GET('/chart/{id}/stabilize-status', { params: { path: { id: props.chart } } });
+if (statusRes.error || !statusRes.data) throw new Error();
+const status: StbStatus = statusRes.data;
+const uploaderRes = await api.GET('/user/{id}', { params: { path: { id: props.uploader } } });
+if (uploaderRes.error || !uploaderRes.data) throw new Error();
+const uploader: UserView = uploaderRes.data;
 </script>
 
 <template>
@@ -79,7 +84,7 @@ const uploader = (await fetchApi(`/user/${props.uploader}`)) as User;
       <li class="step" :class="{ 'step-primary': status.stable }" v-t="'steps.done'"></li>
     </ul>
     <ol v-if="status.history.length" class="relative border-l border-gray-200 dark:border-gray-700 p-2">
-      <li v-for="item in status.history" :key="item.id" class="mb-10 ml-4">
+      <li v-for="(item, idx) in status.history" :key="idx" class="mb-10 ml-4">
         <router-link
           v-if="item.approve === null || item.reviewer !== null"
           class="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 bg-base-100 ring-8 ring-base-100"

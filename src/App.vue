@@ -17,8 +17,10 @@ export default {};
 
 <script setup lang="ts">
 import { toastError } from './common';
+import AdBlockNotice from './components/AdBlockNotice.vue';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
+import FooterAd from './components/ads/FooterAd.vue';
 import LoadView from './components/LoadView.vue';
 
 onErrorCaptured((err) => {
@@ -43,5 +45,11 @@ onErrorCaptured((err) => {
       </Suspense>
     </router-view>
   </div>
+  <div class="w-full flex justify-center px-4 mt-8">
+    <div class="w-full max-w-4xl">
+      <FooterAd />
+    </div>
+  </div>
   <AppFooter />
+  <AdBlockNotice />
 </template>

@@ -6,6 +6,7 @@ en:
     time-rev: Time asc.
     name: Name asc.
     name-rev: Name desc.
+    likes: Most liked
 
   from-me: From me only
 
@@ -22,6 +23,7 @@ zh-CN:
     time-rev: 时间倒序
     name: 名字正序
     name-rev: 名字倒序
+    likes: 最多点赞
 
   from-me: 仅我创建
 
@@ -40,24 +42,27 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { useFetchApi, pageCount, isString, loggedIn } from '../common';
+import { pageCount, isString, loggedIn } from '../common';
+import { useApi } from '../api/client';
 
 import type { Page, PartialCollection, User } from '../model';
 
 import LoadView from '../components/LoadView.vue';
 import PageIndicator from '../components/PageIndicator.vue';
 import CollectionCard from '@/components/CollectionCard.vue';
+import HeaderAd from '@/components/ads/HeaderAd.vue';
 
 const PAGE_NUM = 28;
 
 const route = useRoute();
 const router = useRouter();
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 let user: User | null = null;
 if (loggedIn()) {
-  user = (await fetchApi('/me')) as User;
+  const { data, error } = await api.GET('/me');
+  if (!error && data) user = data as User;
 }
 
 const pagination = ref<typeof PageIndicator>();
@@ -112,7 +117,7 @@ watch(
     }
 
     order.value = '-updated';
-    if (['updated', '-updated', 'name', '-name'].includes(q.order as string)) {
+    if (['updated', '-updated', 'name', '-name', '-likes'].includes(q.order as string)) {
       order.value = q.order as string;
     }
   },
@@ -138,24 +143,26 @@ const parameters = computed(() => {
 
 async function fetchCollections() {
   collections.value = undefined;
-  let params: Record<string, string> = {
-    pageNum: String(PAGE_NUM),
-    ...parameters.value,
+
+  const query: Record<string, unknown> = {
+    pageNum: PAGE_NUM,
+    page: Number(parameters.value.page),
+    order: parameters.value.order,
   };
-  delete params.fromMe;
-  if (params.uploader) {
-    params.owner = params.uploader;
-    delete params.uploader;
-  }
+  if (parameters.value.search) query.search = parameters.value.search;
 
-  let fromMe = parameters.value.fromMe;
-  if (fromMe === 'yes' && user) {
-    params.owner = String(user?.id);
-  }
+  let ownerId: number | undefined;
+  if (parameters.value.uploader) ownerId = Number(parameters.value.uploader);
+  if (parameters.value.fromMe === 'yes' && user) ownerId = user.id;
+  if (ownerId !== undefined) query.owner = ownerId;
 
-  const resp = (await fetchApi('/collection?' + new URLSearchParams(params))) as Page<PartialCollection>;
-  totalCount.value = resp.count;
-  collections.value = resp.results;
+  const resp = await api.GET('/collection', {
+    params: { query: query as any },
+  });
+  if (resp.error || !resp.data) throw new Error();
+  const data = resp.data as Page<PartialCollection>;
+  totalCount.value = data.count;
+  collections.value = data.results;
 }
 
 await fetchCollections();
@@ -198,6 +205,9 @@ onMounted(() => {
 <template>
   <div class="flex flex-col items-center mt-8">
     <div class="mx-8 lg:w-3/4">
+      <div class="w-full px-8">
+        <HeaderAd class="h-[120px] w-full mb-4" />
+      </div>
       <div class="flex flex-row items-end flex-wrap gap-4">
         <div class="form-control">
           <label class="label">
@@ -208,6 +218,7 @@ onMounted(() => {
             <option value="updated" v-t="'order.time-rev'"></option>
             <option value="name" v-t="'order.name'"></option>
             <option value="-name" v-t="'order.name-rev'"></option>
+            <option value="-likes" v-t="'order.likes'"></option>
           </select>
         </div>
         <div v-if="user" class="form-control">

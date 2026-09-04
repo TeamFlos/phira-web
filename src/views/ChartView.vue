@@ -10,6 +10,7 @@ en:
 
   leaderboard: Leaderboard
   stb-history: Stb. History
+  version-history: Version history
 
   description-empty: This chart doesn't have description.
 
@@ -46,6 +47,7 @@ zh-CN:
 
   leaderboard: 排行榜
   stb-history: 评议记录
+  version-history: 版本历史
 
   description-empty: 该谱面没有简介。
 
@@ -82,7 +84,8 @@ const { t } = useI18n();
 
 import moment from 'moment';
 
-import { useFetchApi, toast, toastError, loggedIn, setTitle, userPermissions } from '../common';
+import { toast, toastError, loggedIn, setTitle, userPermissions } from '../common';
+import { useApi } from '../api/client';
 import { Permission, type Chart, type User } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
@@ -95,13 +98,15 @@ import StbStatus from '../components/StbStatus.vue';
 import TagList from '../components/TagList.vue';
 import UserCard from '../components/UserCard.vue';
 
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const route = useRoute();
 const router = useRouter();
 
 const id = parseInt(String(route.params.id));
-const chart = reactive((await fetchApi(`/chart/${id}`)) as Chart);
+const chartRes = await api.GET('/chart/{id}', { params: { path: { id } } });
+if (chartRes.error || !chartRes.data) throw new Error();
+const chart = reactive<Chart>(chartRes.data as Chart);
 const tags: string[] = [];
 for (let tag of chart.tags) {
   if (!['regular', 'troll', 'plain', 'visual'].includes(tag)) tags.push(tag);
@@ -111,7 +116,9 @@ setTitle(chart.name);
 
 const me = ref<User>();
 if (loggedIn()) {
-  fetchApi('/me', {}, (user) => (me.value = user as User));
+  api.GET('/me').then(({ data }) => {
+    if (data) me.value = data as User;
+  });
 }
 
 const rating = ref(Math.round((chart.rating ?? 0) * 10));
@@ -134,7 +141,9 @@ function switchTab(s: string) {
 
 const myRating = ref<number>();
 if (loggedIn()) {
-  fetchApi(`/chart/${id}/rate`, {}, (r) => (myRating.value = (r as { score: number }).score));
+  api.GET('/chart/{id}/rate', { params: { path: { id } } }).then(({ data }) => {
+    if (data) myRating.value = data.score;
+  });
 }
 
 const settingRanked = ref(false);
@@ -142,10 +151,12 @@ async function setRanked(ranked: boolean) {
   if (settingRanked.value) return;
   settingRanked.value = true;
   try {
-    await fetchApi(`/chart/${id}/set-ranked`, {
-      method: 'POST',
-      json: { ranked },
+    const { error } = await api.POST('/chart/{id}/set-ranked', {
+      params: { path: { id } },
+      body: { ranked },
+      toastError: true,
     });
+    if (error) return;
     toast(t('div-updated'));
     chart.ranked = ranked;
   } catch (e) {
@@ -160,10 +171,12 @@ async function submitRating() {
   if (submittingRating.value) return;
   submittingRating.value = true;
   try {
-    await fetchApi(`/chart/${id}/rate`, {
-      method: 'POST',
-      json: { score: rating.value! },
+    const { error } = await api.POST('/chart/{id}/rate', {
+      params: { path: { id } },
+      body: { score: rating.value! },
+      toastError: true,
     });
+    if (error) return;
     myRating.value = rating.value!;
     toast(t('rating.done'));
   } catch (e) {
@@ -178,12 +191,12 @@ async function doCensor() {
   if (censoring.value) return;
   censoring.value = true;
   try {
-    await fetchApi(`/chart/${id}/censor`, {
-      method: 'POST',
-      json: {
-        censor: true,
-      },
+    const { error } = await api.POST('/chart/{id}/censor', {
+      params: { path: { id } },
+      body: { censor: true },
+      toastError: true,
     });
+    if (error) return;
     toast(t('censored'));
   } catch (e) {
     toastError(e);
@@ -197,12 +210,12 @@ async function doHide() {
   if (hiding.value) return;
   hiding.value = true;
   try {
-    await fetchApi(`/chart/${id}/hide`, {
-      method: 'POST',
-      json: {
-        hide: true,
-      },
+    const { error } = await api.POST('/chart/{id}/hide', {
+      params: { path: { id } },
+      body: { hide: true },
+      toastError: true,
     });
+    if (error) return;
     toast(t('hidden'));
   } catch (e) {
     toastError(e);
@@ -247,6 +260,10 @@ async function doHide() {
                   <PropItem :title="t('status.title')" :value="t(chart.reviewed ? (chart.stable ? 'status.stable' : 'status.reviewed') : 'status.unreviewed')" />
                   <PropItem :title="t('updated-at')" :value="moment(chart.updated).fromNow()" />
                   <PropItem :title="t('created-at')" :value="moment(chart.created).fromNow()" />
+                  <router-link :to="`/chart/${chart.id}/versions`" class="link link-hover text-sm mt-1">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    {{ t('version-history') }}
+                  </router-link>
                 </div>
                 <div class="divider"></div>
                 <p v-if="chart.description && chart.description.length" class="w-full break-words">

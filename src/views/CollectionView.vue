@@ -13,6 +13,8 @@ en:
   import:
     label: Import
     toast: Copied to clipboard. Please paste it in "Favorites" -> "Import" in-game.
+  like:
+    label: Like
   visibility:
     title: Visibility
     public: Public
@@ -34,6 +36,8 @@ zh-CN:
   import:
     label: 导入
     toast: 已复制到剪贴板，请粘贴到游戏内“收藏夹”->“导入”中
+  like:
+    label: 点赞
   visibility:
     title: 可见性
     public: 公开
@@ -49,7 +53,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, useFetchApi, type IConfirmDialog } from '../common';
+import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, type IConfirmDialog } from '../common';
+import { useApi } from '../api/client';
 import type { Collection } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
@@ -61,7 +66,7 @@ import { useClipboard } from '@vueuse/core';
 
 const route = useRoute();
 const router = useRouter();
-const fetchApi = useFetchApi();
+const api = useApi();
 
 const id = parseInt(String(route.params.id));
 const collection = ref<Collection>();
@@ -69,8 +74,11 @@ const collection = ref<Collection>();
 if (!loggedIn()) {
   pleaseLogin(router);
 } else {
-  collection.value = (await fetchApi(`/collection/${id}`)) as Collection;
-  setTitle(collection.value.name);
+  const { data, error } = await api.GET('/collection/{id}', { params: { path: { id } } });
+  if (!error && data) {
+    collection.value = data as Collection;
+    setTitle(collection.value.name);
+  }
 }
 
 const hasCover = computed(() => Boolean(collection.value?.cover));
@@ -85,12 +93,12 @@ const visibilityLabel = computed(() => (collection.value?.public ? t('visibility
 const reportDialog = ref<IConfirmDialog>();
 const reportReason = ref('');
 async function doReport() {
-  await fetchApi(`/collection/${id}/report`, {
-    method: 'POST',
-    json: {
-      reason: reportReason.value!,
-    },
+  const { error } = await api.POST('/collection/{id}/report', {
+    params: { path: { id } },
+    body: { reason: reportReason.value! },
+    toastError: true,
   });
+  if (error) return;
   toast(t('report.done'));
 }
 
@@ -99,6 +107,25 @@ function copyUrl() {
   const url = `${window.location.origin}/collection/${id}`;
   copy(url);
   toast(t('import.toast'));
+}
+
+const liked = ref<boolean>();
+api.GET('/collection/{id}/like', { params: { path: { id } } }).then((res) => {
+  if (res.data) liked.value = res.data.like;
+});
+function doLike() {
+  if (liked.value === undefined) return;
+  api
+    .POST('/collection/{id}/like', {
+      params: { path: { id } },
+      body: { like: !liked.value },
+    })
+    .then((res) => {
+      if (res.data) {
+        liked.value = !liked.value;
+        collection.value!.likes = res.data.likes;
+      }
+    });
 }
 </script>
 
@@ -109,26 +136,37 @@ function copyUrl() {
       backdropClass="-mt-24 h-screen bg-fixed bg-blend-overlay bg-[#bbbbbb] dark:bg-[#000000bb]"
       fadeHeightClass="h-48 -mt-48"
       :backdropStyle="{ transition: 'background-color 0.5s' }" />
-    <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-8" :class="hasCover ? '-mt-[35vh]' : 'pt-6'">
+    <div class="mx-auto flex lg:w-3/4 flex-col gap-6 px-4 pb-8" :class="hasCover ? '-mt-[35vh]' : 'pt-6'">
       <div class="flex flex-wrap items-center gap-3">
         <h1 class="text-4xl font-black text-base-content">{{ collection.name }}</h1>
         <div class="badge badge-outline">
           {{ visibilityLabel }}
         </div>
         <div class="ml-auto flex items-center gap-2">
+          <button
+            class="btn btn-sm"
+            :class="{
+              'btn-disabled': liked === undefined,
+              'btn-success': liked,
+            }"
+            @click="doLike">
+            <i class="fa-solid fa-thumbs-up mr-1"></i>
+            <span class="">{{ collection.likes }}</span>
+            {{ t('like.label') }}
+          </button>
           <button class="btn btn-sm" @click="copyUrl">
-            <i class="fa-solid fa-file-arrow-down mr-2"></i>
+            <i class="fa-solid fa-file-arrow-down mr-1"></i>
             {{ t('import.label') }}
           </button>
           <button
-            class="btn btn-secondary btn-sm"
+            class="btn btn-error btn-sm"
             @click="
               () => {
                 reportReason = '';
                 reportDialog!.showModal();
               }
             ">
-            <i class="fa-regular fa-flag mr-2"></i>
+            <i class="fa-regular fa-flag mr-1"></i>
             {{ t('report.button') }}
           </button>
         </div>
@@ -149,19 +187,23 @@ function copyUrl() {
             </div>
           </div>
         </div>
-        <div class="card bg-base-100 p-4 shadow-xl lg:col-span-2">
-          <div v-if="collection.charts.length" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <ChartCard v-for="chart in collection.charts" :key="chart.id" :chart="chart" />
+        <div class="lg:col-span-2">
+          <div class="card bg-base-100 p-4 shadow-xl">
+            <div v-if="collection.charts.length" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <ChartCard v-for="chart in collection.charts" :key="chart.id" :chart="chart" />
+            </div>
+            <div v-else class="p-8 text-center">
+              <p class="w-full italic" v-t="'no-charts'"></p>
+            </div>
           </div>
-          <div v-else class="p-8 text-center">
-            <p class="w-full italic" v-t="'no-charts'"></p>
-          </div>
+          <!-- <MultiAd class="mt-8" /> -->
         </div>
       </div>
     </div>
+
+    <ConfirmDialog :do="doReport" ref="reportDialog">
+      <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
+      <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
+    </ConfirmDialog>
   </div>
-  <ConfirmDialog :do="doReport" ref="reportDialog">
-    <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
-    <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
-  </ConfirmDialog>
 </template>
