@@ -9,6 +9,7 @@ en:
   checksum: Checksum
   created-at: Submitted at
   download: Download chart
+  open-in-phira: 在 Phira 中打开
   view-illustration: Open full illustration
 
 zh-CN:
@@ -21,6 +22,7 @@ zh-CN:
   checksum: 校验和
   created-at: 提交于
   download: 下载谱面
+  open-in-phira: 在 Phira 中打开
   view-illustration: 查看原图
 </i18n>
 
@@ -77,6 +79,10 @@ const fields = computed(() => [
       <a class="btn btn-sm btn-outline" :href="fileToURL(content.file)" target="_blank" rel="noreferrer">
         <i class="fa-solid fa-download"></i>
         {{ t('download') }}
+      </a>
+      <a class="btn btn-sm btn-outline" :href="`/dlink/import?src=${fileToURL(content.file)}`" target="_blank" rel="noreferrer">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        {{ t('open-in-phira') }}
       </a>
     </div>
 
