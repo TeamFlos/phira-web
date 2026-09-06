@@ -3,6 +3,7 @@ en:
   compare-with: Compare with
   only-changed: Only changed fields
   no-change: No differences between these two versions.
+  empty: empty
   unchanged: unchanged
   updated: updated
   old: Old
@@ -14,6 +15,7 @@ zh-CN:
   compare-with: 对比对象
   only-changed: 仅显示变更项
   no-change: 这两个版本之间没有差异。
+  empty: 空
   unchanged: 未更改
   updated: 已更新
   old: 旧
@@ -135,19 +137,19 @@ function onBaseChange(e: Event) {
         </div>
         <!-- unchanged rows are shown flat, whatever their kind -->
         <template v-else-if="!row.changed">
-          <span v-if="row.kind === 'text'" class="opacity-70 break-words" :class="{ 'whitespace-pre-wrap': row.multiline }">
+          <span v-if="row.kind === 'text'" class="break-words" :class="[row.to.length ? 'opacity-70' : 'italic opacity-50', { 'whitespace-pre-wrap': row.multiline }]">
             {{ row.to.length ? row.to : t('empty') }}
           </span>
           <span v-else-if="row.kind === 'number'" class="opacity-70">{{ row.to.toFixed(row.digits) }}</span>
           <div v-else-if="row.kind === 'tags'" class="flex flex-wrap gap-1">
             <span v-for="tag in row.kept" :key="tag" class="badge badge-ghost">{{ tag }}</span>
-            <span v-if="!row.kept.length" class="opacity-70">{{ t('empty') }}</span>
+            <span v-if="!row.kept.length" class="italic opacity-50" v-t="'empty'"></span>
           </div>
           <span v-else class="badge badge-ghost" v-t="'unchanged'"></span>
         </template>
         <!-- text: inline word/character diff -->
         <p v-else-if="row.kind === 'text'" class="break-words" :class="{ 'whitespace-pre-wrap': row.multiline }">
-          <span v-if="!row.ops.length" class="opacity-60">{{ t('empty') }}</span>
+          <span v-if="!row.ops.length" class="italic opacity-50" v-t="'empty'"></span>
           <span
             v-for="(op, i) in row.ops"
             :key="i"
