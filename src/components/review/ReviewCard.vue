@@ -1,7 +1,6 @@
 <i18n>
 en:
   title: Review
-  hint: This version is awaiting review. Your vote is final and cannot be changed.
   checks-loading: Running checks…
   checks-clean: Automated checks found nothing.
   checklist: Checklist
@@ -41,7 +40,6 @@ en:
 
 zh-CN:
   title: 审核
-  hint: 该版本正在等待审核。投票后无法更改。
   checks-loading: 正在检查…
   checks-clean: 自动检查未发现问题。
   checklist: 检查清单
@@ -231,8 +229,6 @@ async function submitVote() {
 
     <!-- action area (pending versions only) -->
     <template v-if="version.status === 'pending'">
-      <p class="text-sm opacity-70" v-t="'hint'"></p>
-
       <!-- clean: checklist; deny: message -->
       <div v-if="action === 'approve'" class="flex flex-col gap-1">
         <h3 class="text-xs font-bold tracking-wider opacity-50">{{ t('checklist') }}</h3>
