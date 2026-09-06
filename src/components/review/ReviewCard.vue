@@ -8,7 +8,6 @@ en:
   g-duplicate: Duplicate upload
   g-copyright: Copyright lookup
   g-censored: Blocked words
-  g-metadata: Metadata reminders
   ignore: Ignore
   unignore: Unignore
   decision: Decision
@@ -21,6 +20,7 @@ en:
   cl-play: The chart file downloads and plays correctly
   auto-reply: Auto-reply from remaining findings
   quick-templates: Quick templates
+  reason-label: Rejection message
   tpl-pirate: Duplicate file
   tpl-copyright-forbidden: Copyright (forbidden)
   tpl-copyright-restricted: Copyright (restricted)
@@ -49,7 +49,6 @@ zh-CN:
   g-duplicate: 重复上传
   g-copyright: 版权检索
   g-censored: 屏蔽词
-  g-metadata: 元数据提醒
   ignore: 忽略
   unignore: 取消忽略
   decision: 决定
@@ -62,6 +61,7 @@ zh-CN:
   cl-play: 谱面文件可正常下载游玩
   auto-reply: 自动回复（未忽略的问题）
   quick-templates: 快速模板
+  reason-label: 拒绝理由
   tpl-pirate: 撞车
   tpl-copyright-forbidden: 版权（禁止）
   tpl-copyright-restricted: 版权（受限）
@@ -97,7 +97,6 @@ import ConfirmDialog from '../ConfirmDialog.vue';
 import LoadOr from '../LoadOr.vue';
 import CensorResults from './CensorResults.vue';
 import CopyrightResults from './CopyrightResults.vue';
-import FindingLine from './FindingLine.vue';
 import PirateResults from './PirateResults.vue';
 
 const { t, locale } = useI18n();
@@ -136,31 +135,38 @@ function duplicateDetail(): Record<string, unknown> {
 const warningFindings = computed(() => props.findings.filter((f) => f.level === 'warning'));
 const warningReasons = computed(() => warningFindings.value.map((f) => t(`metadata-finding-reason.${f.key}`)));
 
-/** The collapsible findings list. `problem` rows must be dismissed before the
- * version can be approved; info-only rows (a copyright lookup that matched
- * nothing problematic) are listed for the record without a toggle. */
-const shownGroups = computed(() => {
-  const groups = [
-    { key: 'stolen', label: t('g-stolen'), present: stolenMatches.value.length > 0, problem: true, count: stolenMatches.value.length },
-    { key: 'duplicate', label: t('g-duplicate'), present: duplicateMatches.value.length > 0, problem: true, count: duplicateMatches.value.length },
-    { key: 'copyright', label: t('g-copyright'), present: !!copyright.value || copyrightSuppressed.value.length > 0, problem: !!problem.value, count: 0 },
-    { key: 'censored', label: t('g-censored'), present: censorHits.value.length > 0, problem: true, count: censorHits.value.length },
-    { key: 'metadata', label: t('g-metadata'), present: warningFindings.value.length > 0, problem: true, count: warningFindings.value.length },
-  ];
-  return groups.filter((g) => g.present);
+/** One collapsible row per finding. Every listed row is a problem the reviewer
+ * must triage: a copyright lookup that matched nothing problematic gets no row
+ * at all. Metadata warnings get one row each — they are independent issues,
+ * and several can share the same wording (e.g. the three "UK" fields). */
+type FindingGroup = {
+  key: string;
+  label: string;
+  count: number;
+  /** Metadata rows carry their reason sentence instead of a results component. */
+  finding?: MetadataFinding;
+};
+
+const shownGroups = computed<FindingGroup[]>(() => {
+  const groups: FindingGroup[] = [];
+  if (stolenMatches.value.length) groups.push({ key: 'stolen', label: t('g-stolen'), count: stolenMatches.value.length });
+  if (duplicateMatches.value.length) groups.push({ key: 'duplicate', label: t('g-duplicate'), count: duplicateMatches.value.length });
+  if (problem.value) groups.push({ key: 'copyright', label: t('g-copyright'), count: 0 });
+  if (censorHits.value.length) groups.push({ key: 'censored', label: t('g-censored'), count: censorHits.value.length });
+  for (const f of warningFindings.value) {
+    groups.push({ key: `metadata:${f.key}`, label: `${t(`chart-field.${f.field}`)} — ${t(`metadata-finding.${f.key}`)}`, count: 0, finding: f });
+  }
+  return groups;
 });
 
-/** Undismissed problem rows — the ones that block approval and feed the auto-reply. */
-const remaining = computed(() => shownGroups.value.filter((g) => g.problem && !ignored.value[g.key]));
+/** Undismissed rows — the ones that block approval and feed the auto-reply. */
+const remaining = computed(() => shownGroups.value.filter((g) => !ignored.value[g.key]));
 
 const openGroups = ref<Record<string, boolean>>({});
 const ignored = ref<Record<string, boolean>>({});
 
 function toggleIgnore(key: string) {
   ignored.value[key] = !ignored.value[key];
-  // Dismissing collapses the row; un-dismissing re-expands the details so they
-  // are in front of the reviewer as they reconsider.
-  openGroups.value[key] = !ignored.value[key];
 }
 
 // --- decision & reply --------------------------------------------------------
@@ -179,7 +185,7 @@ const composedReply = computed(() => {
   if (on('duplicate') && duplicateMatches.value.length) parts.push(t('tpl-body-duplicate', duplicateDetail()));
   if (on('copyright') && problem.value) parts.push(t(`tpl-body-${problem.value}`, { detail: problemDetail(copyright.value, problem.value, copyrightQuery.value) }));
   if (on('censored') && censorHits.value.length) parts.push(censorTemplateBody());
-  if (on('metadata') && warningReasons.value.length) parts.push(warningReasons.value.join('\n'));
+  parts.push(...warningFindings.value.filter((f) => !ignored.value[`metadata:${f.key}`]).map((f) => t(`metadata-finding-reason.${f.key}`)));
   return parts.join('\n');
 });
 
@@ -258,7 +264,7 @@ async function submitVote() {
 </script>
 
 <template>
-  <div class="card bg-base-100 border border-base-300 shadow-lg p-4 flex flex-col gap-3">
+  <div class="card bg-base-100 border border-base-300 shadow-lg p-4 flex flex-col gap-4">
     <h2 class="font-bold text-lg flex flex-row items-center gap-2 flex-wrap">
       <span>
         <i class="fa-solid fa-gavel opacity-60"></i>
@@ -271,29 +277,27 @@ async function submitVote() {
     </h2>
 
     <template v-if="!loading">
-      <!-- findings: one collapsible per group, ignore toggle on the right -->
-      <div v-if="shownGroups.length" class="flex flex-col gap-1">
+      <!-- findings: one collapsible per finding, ignore toggle on the right -->
+      <div v-if="shownGroups.length" class="flex flex-col gap-2">
         <h3 class="text-xs font-bold tracking-wider opacity-50" v-t="'findings'"></h3>
         <div v-for="g in shownGroups" :key="g.key" class="rounded-lg border" :class="ignored[g.key] ? 'border-base-200 opacity-50' : 'border-base-300'">
-          <div class="flex items-center gap-2 px-2 py-1">
-            <button class="btn btn-ghost btn-xs btn-square" @click="openGroups[g.key] = !openGroups[g.key]">
-              <i class="fa-solid text-xs" :class="openGroups[g.key] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+          <!-- the whole row toggles the collapse; only the ignore button is its own target -->
+          <div class="flex items-center gap-3 px-3 py-2.5">
+            <button class="flex items-center gap-3 grow min-w-0 text-left cursor-pointer" @click="openGroups[g.key] = !openGroups[g.key]">
+              <i class="fa-solid text-xs opacity-60 w-3 text-center shrink-0" :class="openGroups[g.key] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+              <span class="font-medium min-w-0" :class="{ 'line-through': ignored[g.key] }">{{ g.label }}</span>
+              <span v-if="g.count" class="badge badge-ghost font-mono shrink-0">{{ g.count }}</span>
             </button>
-            <span class="text-sm font-medium" :class="{ 'line-through': ignored[g.key] }">{{ g.label }}</span>
-            <span v-if="g.count" class="badge badge-sm badge-ghost font-mono">{{ g.count }}</span>
-            <span class="grow"></span>
-            <button v-if="g.problem" class="btn btn-xs" :class="ignored[g.key] ? 'btn-ghost' : 'btn-outline'" @click="toggleIgnore(g.key)">
+            <button class="btn btn-sm shrink-0" :class="ignored[g.key] ? 'btn-ghost' : 'btn-outline'" @click="toggleIgnore(g.key)">
               {{ t(ignored[g.key] ? 'unignore' : 'ignore') }}
             </button>
           </div>
-          <div v-if="openGroups[g.key]" class="px-3 pb-2 flex flex-col gap-2">
+          <div v-if="openGroups[g.key]" class="px-4 pb-3 flex flex-col gap-2">
             <PirateResults v-if="g.key === 'stolen'" kind="stolen" :matches="stolenMatches" />
             <PirateResults v-else-if="g.key === 'duplicate'" kind="duplicate" :matches="duplicateMatches" />
             <CopyrightResults v-else-if="g.key === 'copyright'" :result="copyright" :query="copyrightQuery" :suppressed="copyrightSuppressed" />
             <CensorResults v-else-if="g.key === 'censored'" :hits="censorHits" />
-            <div v-else-if="g.key === 'metadata'" class="flex flex-col gap-0.5">
-              <FindingLine v-for="f in warningFindings" :key="f.key" :finding="f" />
-            </div>
+            <p v-else-if="g.finding" class="text-sm opacity-70">{{ t(`metadata-finding-reason.${g.finding.key}`) }}</p>
           </div>
         </div>
       </div>
@@ -323,12 +327,14 @@ async function submitVote() {
       <!-- deny: the message, auto-composed from remaining findings unless overridden -->
       <div v-else-if="action === 'deny'" class="flex flex-col gap-2">
         <div class="flex items-center gap-3 flex-wrap">
+          <h3 class="text-xs font-bold tracking-wider opacity-50" v-t="'reason-label'"></h3>
+          <span class="grow"></span>
           <label class="label cursor-pointer gap-2 py-0">
             <input type="checkbox" class="checkbox checkbox-sm" v-model="autoReply" />
             <span class="label-text" v-t="'auto-reply'"></span>
           </label>
           <div class="dropdown dropdown-end">
-            <label tabindex="0" class="btn btn-ghost btn-xs" v-t="'quick-templates'"></label>
+            <label tabindex="0" class="btn btn-sm btn-outline" v-t="'quick-templates'"></label>
             <ul tabindex="0" class="dropdown-content menu bg-base-100 border border-base-300 rounded-box shadow-lg w-44 p-2">
               <li :class="{ disabled: !stolenMatches.length }">
                 <a @click="stolenMatches.length && applyTemplate('pirate')">{{ t('tpl-pirate') }}</a>
