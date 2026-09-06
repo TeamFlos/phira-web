@@ -8,7 +8,6 @@ en:
   updated: updated
   old: Old
   new: New
-  checking: Checking…
   direction: '#{from} → #{to}'
 
 zh-CN:
@@ -20,12 +19,11 @@ zh-CN:
   updated: 已更新
   old: 旧
   new: 新
-  checking: 检查中…
   direction: '#{from} → #{to}'
 </i18n>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { fileToURL } from '../common';
@@ -50,47 +48,13 @@ const emit = defineEmits<{ (e: 'update:compareId', id: number): void }>();
 
 const onlyChanged = ref(true);
 
-const rows = ref(diffVersions(props.base, props.target));
-
-/** Fetch a file by URL and return its SHA-256 hex digest. */
-async function sha256(url: string): Promise<string> {
-  const buf = await fetch(fileToURL(url)).then((r) => r.arrayBuffer());
-  const digest = await crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-/** Compare illustration and preview content hashes; URLs differ on every upload
- * even for identical content, so only a byte-level comparison is meaningful. */
-watch(
-  () => [props.base, props.target],
-  async ([base, target]) => {
-    const fresh = diffVersions(base as ChartVersion, target as ChartVersion);
-    rows.value = fresh;
-    await Promise.all(
-      fresh.map(async (row, i) => {
-        if (!('pending' in row) || !row.pending) return;
-        let changed: boolean;
-        try {
-          const [fromHash, toHash] = await Promise.all([sha256(row.from), sha256(row.to)]);
-          changed = fromHash !== toHash;
-        } catch {
-          changed = true;
-        }
-        rows.value[i] = { ...row, changed, pending: false };
-      }),
-    );
-  },
-  { immediate: true },
-);
+const rows = computed(() => diffVersions(props.base, props.target));
 
 const shownRows = computed(() => {
   if (!onlyChanged.value) return rows.value;
-  // Pending rows are always shown: their `changed` flag is not yet known.
-  return rows.value.filter((r) => r.changed || ('pending' in r && r.pending));
+  return rows.value.filter((r) => r.changed);
 });
-const anyChange = computed(() => rows.value.some((r) => r.changed || ('pending' in r && r.pending)));
+const anyChange = computed(() => rows.value.some((r) => r.changed));
 
 function delta(from: number, to: number, digits: number): string {
   const d = to - from;
@@ -130,13 +94,8 @@ function onBaseChange(e: Event) {
         {{ t(`chart-field.${row.field}`) }}
       </div>
       <div class="grow min-w-0">
-        <!-- pending: hash comparison in flight -->
-        <div v-if="'pending' in row && row.pending" class="flex items-center gap-2 text-sm opacity-70">
-          <span class="loading loading-spinner loading-xs"></span>
-          <span v-t="'checking'"></span>
-        </div>
         <!-- unchanged rows are shown flat, whatever their kind -->
-        <template v-else-if="!row.changed">
+        <template v-if="!row.changed">
           <span v-if="row.kind === 'text'" class="break-words" :class="[row.to.length ? 'opacity-70' : 'italic opacity-50', { 'whitespace-pre-wrap': row.multiline }]">
             {{ row.to.length ? row.to : t('empty') }}
           </span>
@@ -176,30 +135,6 @@ function onBaseChange(e: Event) {
           <span v-for="tag in row.removed" :key="`-${tag}`" class="badge badge-error badge-outline line-through">{{ tag }}</span>
           <span v-for="tag in row.added" :key="`+${tag}`" class="badge badge-success badge-outline">{{ tag }}</span>
           <span v-for="tag in row.kept" :key="tag" class="badge badge-ghost">{{ tag }}</span>
-        </div>
-
-        <!-- illustration: side by side -->
-        <div v-else-if="row.kind === 'image'" class="grid grid-cols-2 gap-2">
-          <figure class="flex flex-col gap-1">
-            <img class="w-full aspect-[8/5] object-cover rounded-lg" :src="fileToURL(row.from) + '.thumbnail'" />
-            <figcaption class="text-xs opacity-60 text-center" v-t="'old'"></figcaption>
-          </figure>
-          <figure class="flex flex-col gap-1">
-            <img class="w-full aspect-[8/5] object-cover rounded-lg ring-2 ring-success" :src="fileToURL(row.to) + '.thumbnail'" />
-            <figcaption class="text-xs opacity-60 text-center" v-t="'new'"></figcaption>
-          </figure>
-        </div>
-
-        <!-- preview audio: two playback bars side by side -->
-        <div v-else-if="row.kind === 'audio'" class="grid grid-cols-2 gap-2">
-          <div class="flex flex-col gap-1">
-            <audio class="w-full" controls preload="none" :src="fileToURL(row.from)"></audio>
-            <span class="text-xs opacity-60 text-center" v-t="'old'"></span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <audio class="w-full" controls preload="none" :src="fileToURL(row.to)"></audio>
-            <span class="text-xs opacity-60 text-center" v-t="'new'"></span>
-          </div>
         </div>
 
         <!-- opaque binaries: just say whether they moved -->

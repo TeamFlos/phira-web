@@ -102,12 +102,8 @@ export type DiffRow =
   | { field: string; kind: 'number'; changed: boolean; from: number; to: number; digits: number }
   /** Tag set, rendered as added/removed chips. */
   | { field: string; kind: 'tags'; changed: boolean; added: string[]; removed: string[]; kept: string[] }
-  /** Image, rendered as two thumbnails side by side; `pending` while a content hash is fetched. */
-  | { field: string; kind: 'image'; changed: boolean; pending: boolean; from: string; to: string }
-  /** Preview audio, rendered as two playback bars side by side; `pending` while a content hash is fetched. */
-  | { field: string; kind: 'audio'; changed: boolean; pending: boolean; from: string; to: string }
-  /** Opaque binary (chart archive): only "changed or not"; `pending` while a content hash is fetched. */
-  | { field: string; kind: 'asset'; changed: boolean; pending: boolean; from: string; to: string };
+  /** Opaque binary (chart archive): only "changed or not". */
+  | { field: string; kind: 'asset'; changed: boolean; from: string; to: string };
 
 function textRow(field: string, from: string, to: string, multiline = false): DiffRow {
   const changed = from !== to;
@@ -139,12 +135,14 @@ export function diffVersions(from: ChartVersion, to: ChartVersion): DiffRow[] {
     numberRow('noteCount', a.noteCount, b.noteCount, 0),
     tagsRow(a.tags, b.tags),
     textRow('description', a.description ?? '', b.description ?? '', true),
-    // Illustration and preview are opaque server-side blobs (UUID paths). Their URLs differ
-    // on every upload even when the content is identical, so URL comparison always reports a
-    // change. Mark them as pending until VersionDiff fetches and compares their content hashes.
-    { field: 'illustration', kind: 'image', changed: false, pending: a.illustration !== b.illustration, from: a.illustration, to: b.illustration },
-    { field: 'preview', kind: 'audio', changed: false, pending: a.preview !== b.preview, from: a.preview, to: b.preview },
-    { field: 'file', kind: 'asset', changed: from.checksum !== to.checksum, pending: false, from: a.file, to: b.file },
+    { field: 'file', kind: 'asset', changed: from.checksum !== to.checksum, from: a.file, to: b.file },
+    // Illustration and preview are deliberately absent. Their URLs are opaque
+    // UUID paths that differ on every upload even for identical content, so
+    // without a content check they would always report "changed"; and content
+    // verification (ETag or hash via fetch) needs CORS on the file CDN bucket
+    // (Access-Control-Allow-Origin plus Access-Control-Expose-Headers: ETag),
+    // which it does not send today. Restore the image/audio rows from git
+    // history once the bucket is configured.
   ];
 }
 
