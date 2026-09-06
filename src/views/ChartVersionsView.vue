@@ -159,11 +159,22 @@ async function resolveSelection() {
   }
   const fallback = preferredVersion();
   selectedId.value = fallback?.id;
-  if (fallback) syncUrl(fallback.id, true);
+  if (fallback) await syncUrl(fallback.id, true);
 }
 
 await loadVersions(1);
 await resolveSelection();
+
+// Landing without a tab preference: open straight on the diff against the live
+// published version when there is one — the comparison this page is opened for
+// (a reviewer judging a resubmission, or the uploader checking what changed).
+if (!route.hash) {
+  const published = allVersions.value.find((v) => v.isPublished);
+  if (published && published.id !== selectedId.value) {
+    compareId.value = published.id;
+    switchTab('diff');
+  }
+}
 
 watch(
   () => pagination.value?.current,
@@ -194,8 +205,8 @@ watch(
 
 function syncUrl(versionId: number, replace = false) {
   const to = { path: `/chart/${id}/versions/${versionId}`, hash: route.hash };
-  if (replace) router.replace(to);
-  else router.push(to);
+  // Return the navigation promise so callers can wait for `route` to settle.
+  return replace ? router.replace(to) : router.push(to);
 }
 
 function select(versionId: number) {
