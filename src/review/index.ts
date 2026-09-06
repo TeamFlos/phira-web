@@ -23,12 +23,12 @@ export type CensorHit = { field: 'name' | 'description' | 'tags'; segments: Cens
 
 /**
  * Items the reviewer must tick before approving. i18n labels live in
- * ReviewCard.vue keyed by these ids. The first four attest that the
- * automated checks' output was reviewed by a human (false positives happen);
- * the rest cover what machines cannot judge. cl-sync retires when the
- * delay-alignment wasm check lands; delete it here when that happens.
+ * ReviewCard.vue keyed by these ids. These are the checks automation cannot
+ * make; the automated findings themselves are triaged with the review card's
+ * per-finding ignore toggles instead. cl-sync retires when the delay-alignment
+ * wasm check lands; delete it here when that happens.
  */
-export const REVIEW_MANUAL_ITEMS = ['cl-copyright', 'cl-pirate', 'cl-censor', 'cl-metadata', 'cl-sync', 'cl-content', 'cl-thorough', 'cl-play'] as const;
+export const REVIEW_MANUAL_ITEMS = ['cl-sync', 'cl-content', 'cl-thorough', 'cl-play'] as const;
 
 // --- derivations ------------------------------------------------------------
 
@@ -139,7 +139,7 @@ export function useReviewChecks(version: () => ChartVersion, uploaderId: () => n
       policyReq,
       api.POST('/anti-pirate/check', { body: { checksum: v.checksum }, toastError: true }),
       ...(['name', 'description', 'tags'] as const).map(async (field) => {
-        const text = field === 'tags' ? content.tags.join(' ') : (content[field] ?? '');
+        const text = field === 'tags' ? content.tags.join(' ') : content[field] ?? '';
         if (!text) return undefined;
         const { data, error } = await api.POST('/censor-detail', { body: { text }, toastError: true });
         if (error || !data) return undefined;

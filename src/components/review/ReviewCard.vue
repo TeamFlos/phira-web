@@ -3,34 +3,36 @@ en:
   title: Review
   checks-loading: Running checks…
   checks-clean: Automated checks found nothing.
-  checklist: Checklist
-  cl-copyright: Copyright matches reviewed, false positives ruled out
-  cl-pirate: Duplicate-file matches checked; the uploader is not the original author
-  cl-censor: Blocked-word hits reviewed
-  cl-metadata: Metadata checked, flagged fields confirmed acceptable
+  findings: Findings
+  g-stolen: Stolen file
+  g-duplicate: Duplicate upload
+  g-copyright: Copyright lookup
+  g-censored: Blocked words
+  g-metadata: Metadata reminders
+  ignore: Ignore
+  unignore: Unignore
+  decision: Decision
+  approve: Approve
+  deny: Deny
+  manual: Manual verification
   cl-sync: Audio and chart are in sync
   cl-content: Illustration content is appropriate
   cl-thorough: Reviewed the full chart (audio and notes), no spelled-out text or other inappropriate content
   cl-play: The chart file downloads and plays correctly
-  cl-override: I have reviewed the issues above and approve anyway
-  templates: Templates
-  tpl-auto: Auto
+  auto-reply: Auto-reply from remaining findings
+  quick-templates: Quick templates
   tpl-pirate: Duplicate file
   tpl-copyright-forbidden: Copyright (forbidden)
   tpl-copyright-restricted: Copyright (restricted)
   tpl-censored: Blocked words
   tpl-duplicate: Duplicate upload
-  tpl-body-duplicate: 'This file is byte-identical to a chart you already uploaded (chart #{id}). Do not submit duplicates. Edit the existing chart instead.'
   tpl-metadata: Metadata issues
+  tpl-body-duplicate: 'This file is byte-identical to a chart you already uploaded (chart #{id}). Do not submit duplicates. Edit the existing chart instead.'
   tpl-body-pirate: 'This file is byte-identical to an existing chart ({detail}). Re-uploading another author''s work constitutes piracy and may result in account suspension. Please upload only your own original charts.'
   tpl-body-forbidden: This version uses a track that is forbidden by the content policy ({detail}). Please replace the track and upload again.
   tpl-body-restricted: This version matched a restricted content-policy entry ({detail}). Please make sure the conditions in the note are met, or adjust and upload again.
   tpl-body-censored: 'Inappropriate words were found in: {fields}. Please revise and resubmit.'
-  reason-label: Rejection message
   reason-placeholder: Tell the uploader what needs fixing…
-  reason-empty: Please give a reason
-  approve: Approve
-  deny: Deny
   confirm-approve-title: Approve this version?
   confirm-approve-text: The vote is final and cannot be changed.
   confirm-deny-title: Deny with this message?
@@ -42,33 +44,36 @@ zh-CN:
   title: 审核
   checks-loading: 正在检查…
   checks-clean: 自动检查未发现问题。
-  checklist: 检查清单
-  cl-copyright: 版权匹配结果已人工核对，误报已排除
-  cl-pirate: 撞车记录已人工核对，上传者非原作者本人
-  cl-censor: 屏蔽词命中情况已人工核对
-  cl-metadata: 字段信息已核对，提醒项确认无碍
+  findings: 检查发现
+  g-stolen: 盗传
+  g-duplicate: 重复上传
+  g-copyright: 版权检索
+  g-censored: 屏蔽词
+  g-metadata: 元数据提醒
+  ignore: 忽略
+  unignore: 取消忽略
+  decision: 决定
+  approve: 通过
+  deny: 拒绝
+  manual: 人工核查
   cl-sync: 音画同步无异常
   cl-content: 插图内容适宜
   cl-thorough: 已完整浏览谱面（音频与谱面内容），无拼字等不当内容
   cl-play: 谱面文件可正常下载游玩
-  cl-override: 已知悉上述问题，仍确认通过
-  templates: 快速模板
-  tpl-auto: 自动
+  auto-reply: 自动回复（未忽略的问题）
+  quick-templates: 快速模板
   tpl-pirate: 撞车
   tpl-copyright-forbidden: 版权（禁止）
   tpl-copyright-restricted: 版权（受限）
+  tpl-censored: 屏蔽词
   tpl-duplicate: 重复上传
-  tpl-body-duplicate: 该文件与你已上传的谱面（编号 {id}）完全一致，请勿重复提交，修改现有谱面即可。
   tpl-metadata: 信息填写
+  tpl-body-duplicate: 该文件与你已上传的谱面（编号 {id}）完全一致，请勿重复提交，修改现有谱面即可。
   tpl-body-pirate: 该文件与已有谱面完全一致（{detail}）。盗传他人作品属违规行为，情节严重者将封停账号。请仅上传本人原创谱面。
   tpl-body-forbidden: 该版本使用了政策库中标记为禁止的曲目（{detail}），请更换曲目后重新上传。
   tpl-body-restricted: 该版本命中了受限政策条目（{detail}），请确认满足备注中的附加条件，或修改后重新上传。
   tpl-body-censored: 以下字段包含不适宜内容：{fields}。请修改后重新提交。
-  reason-label: 拒绝理由
   reason-placeholder: 告诉上传者需要修改什么…
-  reason-empty: 请填写拒绝理由
-  approve: 通过
-  deny: 拒绝
   confirm-approve-title: 确认通过该版本？
   confirm-approve-text: 投票后无法更改。
   confirm-deny-title: 确认以此理由拒绝？
@@ -92,6 +97,7 @@ import ConfirmDialog from '../ConfirmDialog.vue';
 import LoadOr from '../LoadOr.vue';
 import CensorResults from './CensorResults.vue';
 import CopyrightResults from './CopyrightResults.vue';
+import FindingLine from './FindingLine.vue';
 import PirateResults from './PirateResults.vue';
 
 const { t, locale } = useI18n();
@@ -123,39 +129,76 @@ function duplicateDetail(): Record<string, unknown> {
   return m ? { id: m.chartId } : {};
 }
 
-// --- action & message -----------------------------------------------------
+// --- findings triage ---------------------------------------------------------
 
-type Action = 'approve' | 'deny';
-const action = ref<Action>();
-const reason = ref('');
-const submitting = ref(false);
-
-/** Warnings get their own rejection sentences; info findings stay display-only. */
+/** Warnings get a collapsible and an ignore toggle; info findings stay inline
+ * hints on the detail panel only. */
 const warningFindings = computed(() => props.findings.filter((f) => f.level === 'warning'));
 const warningReasons = computed(() => warningFindings.value.map((f) => t(`metadata-finding-reason.${f.key}`)));
 
-/** Compose the rejection message from whichever templates apply. */
-const autoReason = computed(() => {
+/** The collapsible findings list. `problem` rows must be dismissed before the
+ * version can be approved; info-only rows (a copyright lookup that matched
+ * nothing problematic) are listed for the record without a toggle. */
+const shownGroups = computed(() => {
+  const groups = [
+    { key: 'stolen', label: t('g-stolen'), present: stolenMatches.value.length > 0, problem: true, count: stolenMatches.value.length },
+    { key: 'duplicate', label: t('g-duplicate'), present: duplicateMatches.value.length > 0, problem: true, count: duplicateMatches.value.length },
+    { key: 'copyright', label: t('g-copyright'), present: !!copyright.value || copyrightSuppressed.value.length > 0, problem: !!problem.value, count: 0 },
+    { key: 'censored', label: t('g-censored'), present: censorHits.value.length > 0, problem: true, count: censorHits.value.length },
+    { key: 'metadata', label: t('g-metadata'), present: warningFindings.value.length > 0, problem: true, count: warningFindings.value.length },
+  ];
+  return groups.filter((g) => g.present);
+});
+
+/** Undismissed problem rows — the ones that block approval and feed the auto-reply. */
+const remaining = computed(() => shownGroups.value.filter((g) => g.problem && !ignored.value[g.key]));
+
+const openGroups = ref<Record<string, boolean>>({});
+const ignored = ref<Record<string, boolean>>({});
+
+function toggleIgnore(key: string) {
+  ignored.value[key] = !ignored.value[key];
+  // Dismissing collapses the row; un-dismissing re-expands the details so they
+  // are in front of the reviewer as they reconsider.
+  openGroups.value[key] = !ignored.value[key];
+}
+
+// --- decision & reply --------------------------------------------------------
+
+type Action = 'approve' | 'deny';
+const action = ref<Action>();
+const autoReply = ref(true);
+const reason = ref('');
+const submitting = ref(false);
+
+/** The message composed from whatever problem rows are still un-ignored. */
+const composedReply = computed(() => {
   const parts: string[] = [];
-  if (stolenMatches.value.length) parts.push(t('tpl-body-pirate', { detail: pirateDetail() }));
-  if (duplicateMatches.value.length) parts.push(t('tpl-body-duplicate', duplicateDetail()));
-  if (problem.value) parts.push(t(`tpl-body-${problem.value}`, { detail: problemDetail(copyright.value, problem.value, copyrightQuery.value) }));
-  if (censorHits.value.length) parts.push(censorTemplateBody());
-  parts.push(...warningReasons.value);
+  const on = (key: string) => !ignored.value[key];
+  if (on('stolen') && stolenMatches.value.length) parts.push(t('tpl-body-pirate', { detail: pirateDetail() }));
+  if (on('duplicate') && duplicateMatches.value.length) parts.push(t('tpl-body-duplicate', duplicateDetail()));
+  if (on('copyright') && problem.value) parts.push(t(`tpl-body-${problem.value}`, { detail: problemDetail(copyright.value, problem.value, copyrightQuery.value) }));
+  if (on('censored') && censorHits.value.length) parts.push(censorTemplateBody());
+  if (on('metadata') && warningReasons.value.length) parts.push(warningReasons.value.join('\n'));
   return parts.join('\n');
 });
 
-// Once the checks for a version land, pick the default action — deny with a
-// prefilled message when anything was flagged (problems or metadata
-// warnings), approve with a checklist when clean — without clobbering a
-// choice the reviewer already made.
-watch(loading, (isLoading) => {
-  if (isLoading) return;
-  action.value = hasProblems.value || warningFindings.value.length ? 'deny' : 'approve';
-  reason.value = autoReason.value;
-  manualChecks.value = {};
+// While auto-reply is on, the message mirrors the remaining findings — toggling
+// an ignore rewrites it immediately. The first manual edit (or a template)
+// turns auto-reply off and freezes the text as written.
+watch(composedReply, (text) => {
+  if (autoReply.value) reason.value = text;
 });
+watch(autoReply, (on) => {
+  if (on) reason.value = composedReply.value;
+});
+function onReasonInput(e: Event) {
+  autoReply.value = false;
+  reason.value = (e.target as HTMLTextAreaElement).value;
+}
+
 function applyTemplate(kind: 'pirate' | 'duplicate' | 'forbidden' | 'restricted' | 'censored' | 'metadata') {
+  autoReply.value = false;
   if (kind === 'metadata') {
     reason.value = warningReasons.value.join('\n');
   } else if (kind === 'censored') {
@@ -174,8 +217,20 @@ const manualChecks = ref<Record<string, boolean>>({});
 const canSubmit = computed(() => {
   if (loading.value || !action.value) return false;
   if (action.value === 'deny') return reason.value.trim().length > 0;
-  const manualOk = REVIEW_MANUAL_ITEMS.every((item) => manualChecks.value[item]);
-  return hasProblems.value ? manualOk && !!manualChecks.value['cl-override'] : manualOk;
+  return REVIEW_MANUAL_ITEMS.every((item) => manualChecks.value[item]) && remaining.value.length === 0;
+});
+
+// Once the checks for a version land, reset the triage and pick the default
+// decision — deny when anything was flagged — without clobbering an in-flight
+// vote on a previous version.
+watch(loading, (isLoading) => {
+  if (isLoading) return;
+  ignored.value = {};
+  openGroups.value = {};
+  autoReply.value = true;
+  manualChecks.value = {};
+  action.value = hasProblems.value ? 'deny' : 'approve';
+  reason.value = composedReply.value;
 });
 
 // --- submission -----------------------------------------------------------
@@ -189,7 +244,6 @@ function openConfirm() {
 
 async function submitVote() {
   if (submitting.value) return;
-  if (action.value === 'deny' && !reason.value.trim().length) throw new Error(t('reason-empty'));
   submitting.value = true;
   try {
     const { passed } = await reviewChart(api, props.chart, action.value === 'approve' ? { approve: true } : { approve: false, reason: reason.value.trim() });
@@ -216,65 +270,95 @@ async function submitVote() {
       </span>
     </h2>
 
-    <!-- automated checks -->
-    <div v-if="!loading" class="flex flex-col gap-2">
-      <PirateResults v-if="stolenMatches.length" kind="stolen" :matches="stolenMatches" />
-      <PirateResults v-if="duplicateMatches.length" kind="duplicate" :matches="duplicateMatches" />
-      <CopyrightResults v-if="copyright || copyrightSuppressed.length" :result="copyright" :query="copyrightQuery" :suppressed="copyrightSuppressed" />
-      <p v-if="!hasProblems && !copyrightSuppressed.length && !duplicateMatches.length && !warningFindings.length" class="text-sm opacity-60">
+    <template v-if="!loading">
+      <!-- findings: one collapsible per group, ignore toggle on the right -->
+      <div v-if="shownGroups.length" class="flex flex-col gap-1">
+        <h3 class="text-xs font-bold tracking-wider opacity-50" v-t="'findings'"></h3>
+        <div v-for="g in shownGroups" :key="g.key" class="rounded-lg border" :class="ignored[g.key] ? 'border-base-200 opacity-50' : 'border-base-300'">
+          <div class="flex items-center gap-2 px-2 py-1">
+            <button class="btn btn-ghost btn-xs btn-square" @click="openGroups[g.key] = !openGroups[g.key]">
+              <i class="fa-solid text-xs" :class="openGroups[g.key] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+            </button>
+            <span class="text-sm font-medium" :class="{ 'line-through': ignored[g.key] }">{{ g.label }}</span>
+            <span v-if="g.count" class="badge badge-sm badge-ghost font-mono">{{ g.count }}</span>
+            <span class="grow"></span>
+            <button v-if="g.problem" class="btn btn-xs" :class="ignored[g.key] ? 'btn-ghost' : 'btn-outline'" @click="toggleIgnore(g.key)">
+              {{ t(ignored[g.key] ? 'unignore' : 'ignore') }}
+            </button>
+          </div>
+          <div v-if="openGroups[g.key]" class="px-3 pb-2 flex flex-col gap-2">
+            <PirateResults v-if="g.key === 'stolen'" kind="stolen" :matches="stolenMatches" />
+            <PirateResults v-else-if="g.key === 'duplicate'" kind="duplicate" :matches="duplicateMatches" />
+            <CopyrightResults v-else-if="g.key === 'copyright'" :result="copyright" :query="copyrightQuery" :suppressed="copyrightSuppressed" />
+            <CensorResults v-else-if="g.key === 'censored'" :hits="censorHits" />
+            <div v-else-if="g.key === 'metadata'" class="flex flex-col gap-0.5">
+              <FindingLine v-for="f in warningFindings" :key="f.key" :finding="f" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <p v-else class="text-sm opacity-60">
         <i class="fa-solid fa-circle-check text-success"></i>
         {{ t('checks-clean') }}
       </p>
-    </div>
 
-    <!-- action area (pending versions only) -->
-    <template v-if="version.status === 'pending'">
-      <!-- clean: checklist; deny: message -->
+      <!-- decision -->
+      <div class="flex flex-col gap-2">
+        <h3 class="text-xs font-bold tracking-wider opacity-50" v-t="'decision'"></h3>
+        <div class="join self-start">
+          <button class="btn btn-sm join-item" :class="action === 'approve' ? 'btn-success' : 'btn-ghost'" @click="action = 'approve'">{{ t('approve') }}</button>
+          <button class="btn btn-sm join-item" :class="action === 'deny' ? 'btn-error' : 'btn-ghost'" @click="action = 'deny'">{{ t('deny') }}</button>
+        </div>
+      </div>
+
+      <!-- approve: what automation cannot check -->
       <div v-if="action === 'approve'" class="flex flex-col gap-1">
-        <h3 class="text-xs font-bold tracking-wider opacity-50">{{ t('checklist') }}</h3>
+        <h3 class="text-xs font-bold tracking-wider opacity-50" v-t="'manual'"></h3>
         <label class="label cursor-pointer justify-start gap-2 py-1" v-for="item in REVIEW_MANUAL_ITEMS" :key="item">
           <input type="checkbox" class="checkbox checkbox-sm" v-model="manualChecks[item]" />
           <span class="label-text">{{ t(item) }}</span>
         </label>
-        <label v-if="hasProblems" class="label cursor-pointer justify-start gap-2 py-1">
-          <input type="checkbox" class="checkbox checkbox-sm checkbox-warning" v-model="manualChecks['cl-override']" />
-          <span class="label-text font-semibold">{{ t('cl-override') }}</span>
-        </label>
       </div>
 
+      <!-- deny: the message, auto-composed from remaining findings unless overridden -->
       <div v-else-if="action === 'deny'" class="flex flex-col gap-2">
-        <div class="flex flex-row items-center gap-2 flex-wrap">
-          <h3 class="text-xs font-bold tracking-wider opacity-50">{{ t('templates') }}</h3>
-          <button class="btn btn-ghost btn-xs" :disabled="!stolenMatches.length" @click="applyTemplate('pirate')">{{ t('tpl-pirate') }}</button>
-          <button class="btn btn-ghost btn-xs" :disabled="!duplicateMatches.length" @click="applyTemplate('duplicate')">{{ t('tpl-duplicate') }}</button>
-          <button class="btn btn-ghost btn-xs" @click="applyTemplate('forbidden')">{{ t('tpl-copyright-forbidden') }}</button>
-          <button class="btn btn-ghost btn-xs" @click="applyTemplate('restricted')">{{ t('tpl-copyright-restricted') }}</button>
-          <button class="btn btn-ghost btn-xs" @click="applyTemplate('censored')">{{ t('tpl-censored') }}</button>
-          <button class="btn btn-ghost btn-xs" :disabled="!warningReasons.length" @click="applyTemplate('metadata')">{{ t('tpl-metadata') }}</button>
-        </div>
-        <textarea v-model="reason" class="textarea textarea-bordered w-full h-28 resize-y" :placeholder="t('reason-placeholder')"></textarea>
-      </div>
-
-      <!-- split button, GitHub-style -->
-      <div class="flex justify-end">
-        <div class="join" v-if="action">
-          <button class="btn join-item" :class="action === 'approve' ? 'btn-success' : 'btn-error'" :disabled="!canSubmit" @click="openConfirm">
-            <LoadOr :loading="submitting">{{ t(action) }}</LoadOr>
-          </button>
-          <div class="dropdown dropdown-top dropdown-end join-item">
-            <label tabindex="0" class="btn rounded-l-none" :class="action === 'approve' ? 'btn-success' : 'btn-error'">
-              <i class="fa-solid fa-caret-up"></i>
-            </label>
-            <ul tabindex="0" class="dropdown-content menu bg-base-100 border border-base-300 rounded-box shadow-lg w-40 p-2 mb-1">
-              <li>
-                <a :class="{ 'menu-active': action === 'approve' }" @click="action = 'approve'">{{ t('approve') }}</a>
+        <div class="flex items-center gap-3 flex-wrap">
+          <label class="label cursor-pointer gap-2 py-0">
+            <input type="checkbox" class="checkbox checkbox-sm" v-model="autoReply" />
+            <span class="label-text" v-t="'auto-reply'"></span>
+          </label>
+          <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-ghost btn-xs" v-t="'quick-templates'"></label>
+            <ul tabindex="0" class="dropdown-content menu bg-base-100 border border-base-300 rounded-box shadow-lg w-44 p-2">
+              <li :class="{ disabled: !stolenMatches.length }">
+                <a @click="stolenMatches.length && applyTemplate('pirate')">{{ t('tpl-pirate') }}</a>
+              </li>
+              <li :class="{ disabled: !duplicateMatches.length }">
+                <a @click="duplicateMatches.length && applyTemplate('duplicate')">{{ t('tpl-duplicate') }}</a>
               </li>
               <li>
-                <a :class="{ 'menu-active': action === 'deny' }" @click="action = 'deny'">{{ t('deny') }}</a>
+                <a @click="applyTemplate('forbidden')">{{ t('tpl-copyright-forbidden') }}</a>
+              </li>
+              <li>
+                <a @click="applyTemplate('restricted')">{{ t('tpl-copyright-restricted') }}</a>
+              </li>
+              <li :class="{ disabled: !censorHits.length }">
+                <a @click="censorHits.length && applyTemplate('censored')">{{ t('tpl-censored') }}</a>
+              </li>
+              <li :class="{ disabled: !warningReasons.length }">
+                <a @click="warningReasons.length && applyTemplate('metadata')">{{ t('tpl-metadata') }}</a>
               </li>
             </ul>
           </div>
         </div>
+        <textarea class="textarea textarea-bordered w-full h-28 resize-y" :value="reason" @input="onReasonInput" :placeholder="t('reason-placeholder')"></textarea>
+      </div>
+
+      <!-- submit -->
+      <div class="flex justify-end">
+        <button class="btn" :class="action === 'deny' ? 'btn-error' : 'btn-success'" :disabled="!canSubmit || submitting" @click="openConfirm">
+          <LoadOr :loading="submitting">{{ action ? t(action) : '' }}</LoadOr>
+        </button>
       </div>
     </template>
   </div>
