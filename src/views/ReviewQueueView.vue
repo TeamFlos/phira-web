@@ -6,7 +6,6 @@ en:
   voted: 'Already voted:'
   no-vote: No votes yet
   uploader: Uploader
-  review: Review
 
 zh-CN:
   title: 待审队列
@@ -15,7 +14,6 @@ zh-CN:
   voted: 已投票：
   no-vote: 暂无投票
   uploader: 上传者
-  review: 审核
 </i18n>
 
 <script setup lang="ts">
@@ -81,34 +79,34 @@ function target(item: ReviewQueueItem): string {
 
       <LoadView v-if="!items" class="mx-auto loading-lg my-16" />
       <p v-else-if="!items.length" class="italic opacity-60 py-16 text-center" v-t="'empty'"></p>
-
-      <router-link
-        v-for="item in items"
-        :key="item.chart.id"
-        :to="target(item)"
-        class="card bg-base-100 border border-base-300 shadow-lg p-3 flex flex-row items-center gap-4 hover:bg-base-200 hover:border-primary transition-colors">
-        <img class="w-32 shrink-0 aspect-[8/5] object-cover rounded-lg border border-base-300" :src="fileToURL(item.chart.illustration) + '.thumbnail'" />
-        <div class="flex flex-col min-w-0 grow gap-1">
-          <span class="text-sm opacity-70 truncate">{{ item.chart.composer }}</span>
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="font-bold truncate">{{ item.chart.name }}</span>
-            <span class="badge badge-primary shrink-0">{{ item.chart.level }}</span>
-          </div>
-          <span class="text-xs opacity-60">{{ moment(item.chart.chartUpdated).fromNow() }}</span>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="text-xs opacity-70" v-t="item.reviewedBy.length ? 'voted' : 'no-vote'"></span>
-            <div class="flex -space-x-2">
-              <UserAvatar
-                v-for="reviewer in item.reviewedBy"
-                :key="reviewer.id"
-                class="w-6 h-6 rounded-full ring-2 ring-base-100"
-                :url="reviewer.avatar"
-                v-tooltip="reviewer.name" />
+      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <router-link
+          v-for="item in items"
+          :key="item.chart.id"
+          :to="target(item)"
+          class="card bg-base-100 border border-base-300 shadow-lg p-3 flex flex-row items-center gap-4 hover:bg-base-200 hover:border-primary transition-colors">
+          <img class="w-32 shrink-0 aspect-[8/5] object-cover rounded-lg border border-base-300" :src="fileToURL(item.chart.illustration) + '.thumbnail'" />
+          <div class="flex flex-col min-w-0 grow gap-1">
+            <span class="text-sm opacity-70 truncate">{{ item.chart.composer }}</span>
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="font-bold truncate">{{ item.chart.name }}</span>
+              <span class="badge badge-primary shrink-0">{{ item.chart.level }}</span>
+            </div>
+            <span class="text-xs opacity-60">{{ moment(item.chart.chartUpdated).fromNow() }}</span>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-xs opacity-70" v-t="item.reviewedBy.length ? 'voted' : 'no-vote'"></span>
+              <div class="flex -space-x-2">
+                <UserAvatar
+                  v-for="reviewer in item.reviewedBy"
+                  :key="reviewer.id"
+                  class="w-6 h-6 rounded-full ring-2 ring-base-100"
+                  :url="reviewer.avatar"
+                  v-tooltip="reviewer.name" />
+              </div>
             </div>
           </div>
-        </div>
-        <span class="btn btn-sm btn-primary shrink-0 hidden sm:inline-flex" v-t="'review'"></span>
-      </router-link>
+        </router-link>
+      </div>
 
       <PageIndicator v-if="totalCount > PAGE_NUM" :total="pageCount(totalCount, PAGE_NUM)" class="mt-4" ref="pagination" />
     </div>
