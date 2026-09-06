@@ -18,6 +18,7 @@ zh-CN:
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 import moment from 'moment';
@@ -32,8 +33,17 @@ import UserAvatar from '../components/UserAvatar.vue';
 
 const { t } = useI18n();
 const api = useApi();
+const route = useRoute();
+const router = useRouter();
 
 const PAGE_NUM = 20;
+
+/** The current page lives in ?page= so a refresh or shared link keeps it. */
+function pageFromQuery(): number {
+  const n = parseInt(String(route.query.page ?? ''));
+  return Number.isInteger(n) && n >= 1 ? n : 1;
+}
+const initialPage = pageFromQuery();
 
 const items = ref<ReviewQueueItem[]>();
 const totalCount = ref(0);
@@ -53,12 +63,15 @@ async function load(page: number) {
   totalCount.value = data.count;
 }
 
-await load(1);
+await load(initialPage);
 
 watch(
   () => pagination.value?.current,
   (page) => {
-    if (page !== undefined) load(page);
+    if (page === undefined) return;
+    load(page);
+    // replace(): paging shouldn't spam history; undefined drops the param on page 1.
+    if (page !== pageFromQuery()) router.replace({ query: { ...route.query, page: page > 1 ? String(page) : undefined } });
   },
 );
 
@@ -108,7 +121,7 @@ function target(item: ReviewQueueItem): string {
         </router-link>
       </div>
 
-      <PageIndicator v-if="totalCount > PAGE_NUM" :total="pageCount(totalCount, PAGE_NUM)" class="mt-4" ref="pagination" />
+      <PageIndicator v-if="totalCount > PAGE_NUM" :init="initialPage" :total="pageCount(totalCount, PAGE_NUM)" class="mt-4" ref="pagination" />
     </div>
   </div>
 </template>
