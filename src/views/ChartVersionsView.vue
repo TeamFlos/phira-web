@@ -2,6 +2,7 @@
 en:
   back: Back to chart
   timeline: Versions
+  uploader: Uploader
   detail: Details
   diff: Compare
   need-two: There is only one visible version — nothing to compare yet.
@@ -12,7 +13,8 @@ en:
 
 zh-CN:
   back: 返回谱面
-  timeline: 版本线
+  timeline: 版本历史
+  uploader: 上传者
   detail: 详情
   diff: 对比
   need-two: 只有一个可见版本，暂时无法对比。
@@ -35,6 +37,7 @@ import { runMetadataRules } from '../review/metadata';
 import LoadView from '../components/LoadView.vue';
 import PageIndicator from '../components/PageIndicator.vue';
 import ReviewCard from '../components/review/ReviewCard.vue';
+import SimpleUserCard from '../components/SimpleUserCard.vue';
 import VersionDetail from '../components/VersionDetail.vue';
 import VersionDiff from '../components/VersionDiff.vue';
 import VersionTimeline from '../components/VersionTimeline.vue';
@@ -249,7 +252,11 @@ async function refresh() {
       <div class="flex flex-col lg:flex-row gap-6">
         <!-- version line -->
         <aside class="lg:w-72 shrink-0 lg:sticky lg:top-20 lg:self-start flex flex-col gap-4">
-          <div class="card bg-base-100 border border-base-300 shadow-lg p-3 lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto">
+          <div>
+            <h2 class="text-xs font-bold tracking-wider opacity-50 px-1 pb-2" v-t="'uploader'"></h2>
+            <SimpleUserCard :id="chart.uploader" class="rounded-xl border border-base-300 shadow-lg" />
+          </div>
+          <div class="card bg-base-100 border border-base-300 shadow-lg p-3 lg:max-h-[calc(100vh-19rem)] lg:overflow-y-auto">
             <h2 class="text-xs font-bold tracking-wider opacity-50 px-1 pb-2" v-t="'timeline'"></h2>
             <LoadView v-if="loading" class="mx-auto" />
             <VersionTimeline v-else :versions="allVersions" :selectedId="selectedId" :compareId="counterpart?.id" @select="select" @setCompare="setCompare" />
