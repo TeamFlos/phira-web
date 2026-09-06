@@ -82,6 +82,7 @@ const api = useApi();
 const accessToken = ref<string>();
 const user = ref<User>();
 const drawerOpened = ref(false);
+const canReview = computed(() => !!user.value && userPermissions(user.value).has(Permission.REVIEW));
 const NAVS = computed(() => {
   let routes = [
     { path: '/chart', icon: 'fa-book', text: 'chart' },
@@ -92,11 +93,20 @@ const NAVS = computed(() => {
   if (user.value && userPermissions(user.value).has(Permission.CENSOR_DETAIL)) {
     routes.push({ path: '/censor', icon: 'fa-gavel', text: 'censor' });
   }
-  if (user.value && userPermissions(user.value).has(Permission.REVIEW)) {
+  if (canReview.value) {
     routes.push({ path: '/review', icon: 'fa-clipboard-check', text: 'review' });
   }
   return routes;
 });
+
+/** A chart's version-history page is deep-linked from the review queue and
+ * belongs to the review workflow: exactly one nav is active there — Review
+ * for reviewers, Charts for everyone else. */
+const onVersions = computed(() => /^\/chart\/\d+\/versions/.test(route.path));
+function navActive(path: string): boolean {
+  if (!onVersions.value) return route.path.startsWith(path);
+  return canReview.value ? path === '/review' : path === '/chart';
+}
 
 addCookieListener(() => {
   accessToken.value = getCookie('access_token');
@@ -148,7 +158,7 @@ onUnmounted(() => {
                 :value="nav.text"
                 class="btn btn-ghost normal-case text-lg"
                 :class="{
-                  'btn-active': route.path.startsWith(nav.path),
+                  'btn-active': navActive(nav.path),
                 }">
                 <i :class="nav.icon" class="fa-solid"></i>
                 {{ t(nav.text) }}
@@ -197,7 +207,7 @@ onUnmounted(() => {
             :value="nav.text"
             class="btn btn-ghost normal-case text-lg justify-start"
             :class="{
-              'btn-active': route.path.startsWith(nav.path),
+              'btn-active': navActive(nav.path),
             }"
             @click="
               () => {
