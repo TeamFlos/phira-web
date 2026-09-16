@@ -56,7 +56,7 @@ export enum Permission {
   SEE_ALL_EVENTS = 0x00000200,
   BAN_USER = 0x00000400,
   SET_RANKED = 0x00000800,
-  SET_ROLES = 0x00001000,
+  SET_ALL_ROLE = 0x00001000,
   SET_REVIEWER = 0x00002000,
   SET_SUPERVISOR = 0x00004000,
   BAN_AVATAR = 0x00008000,
@@ -65,6 +65,8 @@ export enum Permission {
   BAN_USER_LOGIN = 0x00040000,
   HIDE_CHART = 0x00080000,
   CENSOR_DETAIL = 0x00100000,
+  VIEW_STATS = 0x00200000,
+  ISSUE_OPS = 0x00400000,
 }
 
 export class Permissions {
@@ -120,6 +122,7 @@ export enum Role {
   HEAD_REVIEWER = 0x0010,
   PECJAM_REVIEWER = 0x0020,
   MODERATOR = 0x0040,
+  CUSTOM_SERVICE = 0x0080,
 }
 
 export class Roles {
@@ -194,6 +197,7 @@ export class Roles {
     return (this.roles & role) === role;
   }
 
+  // Mirrors phira-server/src/model/roles.rs `Roles::perms` — keep in sync.
   permissions(banned: boolean): Permissions {
     const perms = new Permissions(Permission.NONE);
     if (!banned) {
@@ -204,22 +208,33 @@ export class Roles {
       return perms;
     }
     if (this.has(Role.REVIEWER)) {
-      perms.grant(Permission.SEE_UNREVIEWED, Permission.DELETE_STABLE, Permission.REVIEW, Permission.EDIT_TAGS, Permission.CENSOR_DETAIL);
+      perms.grant(Permission.SEE_UNREVIEWED, Permission.REVIEW, Permission.EDIT_TAGS, Permission.CENSOR_DETAIL, Permission.HIDE_CHART);
     }
     if (this.has(Role.SUPERVISOR)) {
-      perms.grant(Permission.SEE_UNREVIEWED, Permission.SEE_STABLE_REQ, Permission.STABILIZE_CHART, Permission.EDIT_TAGS, Permission.CENSOR_DETAIL);
+      perms.grant(
+        Permission.SEE_UNREVIEWED,
+        Permission.SEE_STABLE_REQ,
+        Permission.STABILIZE_CHART,
+        Permission.EDIT_TAGS,
+        Permission.CENSOR_DETAIL,
+        Permission.VIEW_STATS,
+        Permission.HIDE_CHART,
+      );
     }
     if (this.has(Role.HEAD_SUPERVISOR)) {
-      perms.grant(Permission.STABILIZE_JUDGE, Permission.DELETE_STABLE, Permission.SET_RANKED, Permission.SET_SUPERVISOR);
+      perms.grant(Permission.STABILIZE_JUDGE, Permission.DELETE_STABLE, Permission.SET_RANKED, Permission.SET_SUPERVISOR, Permission.VIEW_STATS, Permission.HIDE_CHART);
     }
     if (this.has(Role.HEAD_REVIEWER)) {
-      perms.grant(Permission.SET_REVIEWER, Permission.BAN_USER, Permission.BAN_AVATAR);
+      perms.grant(Permission.SET_REVIEWER, Permission.BAN_USER, Permission.BAN_AVATAR, Permission.DELETE_UNSTABLE, Permission.VIEW_STATS, Permission.HIDE_CHART);
     }
     if (this.has(Role.PECJAM_REVIEWER)) {
       perms.grant(Permission.SEE_UNREVIEWED, Permission.REVIEW_PECJAM);
     }
     if (this.has(Role.MODERATOR)) {
       perms.grant(Permission.HIDE_CHART);
+    }
+    if (this.has(Role.CUSTOM_SERVICE)) {
+      perms.grant(Permission.ISSUE_OPS);
     }
     return perms;
   }

@@ -180,7 +180,7 @@ async function doReport() {
 const showModifyRoles = computed(() => {
   if (!me.value) return false;
   const permissions = userPermissions(me.value);
-  return permissions.has(Permission.SET_REVIEWER) || permissions.has(Permission.SET_SUPERVISOR) || permissions.has(Permission.SET_ROLES);
+  return permissions.has(Permission.SET_REVIEWER) || permissions.has(Permission.SET_SUPERVISOR) || permissions.has(Permission.SET_ALL_ROLE);
 });
 
 const modifyRolesDialog = ref<IConfirmDialog>();
