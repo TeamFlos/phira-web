@@ -1,15 +1,13 @@
 <i18n>
 en:
   title: Ticket Queue
-  subtitle: All reports and feedback, newest first.
-  empty: No tickets.
+  empty: No tickets
   filter-all: All
   records: '{n} messages'
 
 zh-CN:
   title: 工单队列
-  subtitle: 全部举报与反馈，按时间倒序。
-  empty: 暂无工单。
+  empty: 暂无工单
   filter-all: 全部
   records: '{n} 条消息'
 </i18n>
@@ -38,10 +36,12 @@ const router = useRouter();
 
 const PAGE_NUM = 20;
 
-/** `all` or a concrete status; both the filter and the page live in the URL. */
+/** `all` or a concrete status; both the filter and the page live in the URL.
+ * No param means the default: open (处理中), i.e. the pending work. */
 function statusFromQuery(): IssueOperation | undefined {
   const s = String(route.query.status ?? '');
-  return (ISSUE_OPERATIONS as string[]).includes(s) ? (s as IssueOperation) : undefined;
+  if (s === 'all') return undefined;
+  return (ISSUE_OPERATIONS as string[]).includes(s) ? (s as IssueOperation) : 'open';
 }
 function pageFromQuery(): number {
   const n = parseInt(String(route.query.page ?? ''));
@@ -76,7 +76,7 @@ function setStatus(next: IssueOperation | undefined) {
   status.value = next;
   if (pagination.value) pagination.value.current = 1;
   else load(1);
-  router.replace({ query: { ...route.query, status: next, page: undefined } });
+  router.replace({ query: { ...route.query, status: next ?? 'all', page: undefined } });
 }
 
 watch(
@@ -93,10 +93,7 @@ watch(
 <template>
   <div class="flex flex-col items-center px-4 lg:px-0 mb-24">
     <div class="w-full lg:w-3/4 flex flex-col gap-4">
-      <div>
-        <h1 class="text-3xl font-black">{{ t('title') }}</h1>
-        <p class="opacity-70 mt-1" v-t="'subtitle'"></p>
-      </div>
+      <h1 class="text-3xl font-black">{{ t('title') }}</h1>
 
       <div role="tablist" class="tabs tabs-boxed w-fit">
         <a role="tab" class="tab" :class="{ 'tab-active': !status }" @click="setStatus(undefined)">{{ t('filter-all') }}</a>
