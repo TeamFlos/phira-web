@@ -107,6 +107,9 @@ const METHODS = ['GET', 'PUT', 'POST', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'TR
  * init flag is honored. The typed signature is left untouched (openapi-fetch's
  * `InitParam` already admits arbitrary `[key: string]` options), so full
  * per-path type safety is preserved.
+ *
+ * Non-2xx responses with an empty or undecodable body make openapi-fetch
+ * return a falsy `error` — fall back to the status line so those still toast.
  */
 function withToastError(client: Client<paths>): Client<paths> {
   for (const method of METHODS) {
@@ -123,6 +126,8 @@ function withToastError(client: Client<paths>): Client<paths> {
       const res = await original(url, ...init);
       if (doToast && res.error) {
         toastError(apiError(res.error));
+      } else if (doToast && !res.response.ok) {
+        toastError(new ApiError(`${res.response.status} ${res.response.statusText}`.trim()));
       }
       return res;
     };
@@ -151,6 +156,9 @@ export class ApiError extends Error {
  * directly — e.g. `throw apiError(error)` or `apiError(error).code`.
  */
 export function apiError(error: unknown): ApiError {
+  // A bare string means the body wasn't the API's `{ code, error }` JSON —
+  // e.g. a plain-text proxy error — so the text itself is the message.
+  if (typeof error === 'string' && error) return new ApiError(error);
   const body = (error ?? {}) as { error?: unknown; code?: unknown };
   const message = typeof body.error === 'string' && body.error ? body.error : 'unknown error';
   const code = typeof body.code === 'string' ? body.code : undefined;
