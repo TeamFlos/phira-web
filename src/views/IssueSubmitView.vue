@@ -1,3 +1,4 @@
+<i18n lang="yml" src="@/locales/form.yml"></i18n>
 <i18n>
 en:
   intent:
