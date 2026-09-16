@@ -24,7 +24,7 @@ en:
   hide: Hide
   hidden: Hidden
 
-  report: Report this chart
+  report: Report
 
   status:
     title: Status
@@ -63,7 +63,7 @@ zh-CN:
   hide: 隐藏
   hidden: 已隐藏
 
-  report: 举报该谱面
+  report: 举报
 
   status:
     title: 状态
@@ -248,8 +248,9 @@ async function doHide() {
             <button class="btn btn-error ml-4" v-if="me && userPermissions(me).has(Permission.HIDE_CHART)" @click="doHide">
               <LoadOr :loading="hiding">{{ t('hide') }}</LoadOr>
             </button>
-            <router-link class="btn btn-ghost btn-circle ml-auto self-end" :to="`/issue/submit?type=chart&id=${id}`" v-tooltip="t('report')">
-              <i class="fa-regular fa-flag"></i>
+            <router-link class="btn btn-error btn-sm ml-auto self-end" :to="`/issue/submit?type=chart&id=${id}`">
+              <i class="fa-regular fa-flag mr-1"></i>
+              {{ t('report') }}
             </router-link>
           </div>
           <div class="mt-16 flex flex-col lg:flex-row-reverse gap-8">

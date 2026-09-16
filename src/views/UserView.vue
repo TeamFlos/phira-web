@@ -137,11 +137,6 @@ const stats = statsRes.data;
 
 // type IConfirmDialog = InstanceType<typeof ConfirmDialog>;
 
-/** Collapse the "…" dropdown after picking an item (same as AppHeader). */
-function blur() {
-  (document.activeElement as HTMLElement).blur();
-}
-
 const confirmBanDialog = ref<IConfirmDialog>();
 async function doBan() {
   const { error } = await api.POST('/user/{id}/ban', { params: { path: { id } }, toastError: true });
@@ -165,6 +160,12 @@ async function doBanLogin() {
   toast(t('login-ban.done'));
   user.login_banned = true;
 }
+
+const showModeration = computed(() => {
+  if (!me.value) return false;
+  const permissions = userPermissions(me.value);
+  return permissions.has(Permission.BAN_USER) || permissions.has(Permission.BAN_AVATAR) || permissions.has(Permission.BAN_USER_LOGIN);
+});
 
 const showModifyRoles = computed(() => {
   if (!me.value) return false;
@@ -254,14 +255,15 @@ const currentBestPool = ref(true);
                 </span>
                 <div class="flex flex-row join min-w-[12rem] lg:min-w-0 gap-[0.15rem]">
                   <FollowButton class="join-item grow btn-md lg:btn-sm" :id="id" :initFollowing="user.following" />
-                  <div class="dropdown dropdown-end">
+                  <router-link class="btn btn-error btn-md lg:btn-sm rounded-s-none" :to="`/issue/submit?type=user&id=${id}`">
+                    <i class="fa-regular fa-flag mr-1"></i>
+                    {{ t('report.button') }}
+                  </router-link>
+                  <div class="dropdown dropdown-end" v-if="showModeration">
                     <label tabindex="0" class="btn btn-secondary btn-md lg:btn-sm rounded-s-none">
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </label>
                     <ul tabindex="0" class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-48 lg:!right-auto">
-                      <li>
-                        <router-link :to="`/issue/submit?type=user&id=${id}`" @click="blur" v-t="'report.button'"></router-link>
-                      </li>
                       <template v-if="me && userPermissions(me).has(Permission.BAN_USER)">
                         <li v-if="!user.banned"><a @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></a></li>
                         <li v-else class="disabled"><a v-t="'ban.done'"></a></li>
