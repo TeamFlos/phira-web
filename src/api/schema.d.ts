@@ -540,9 +540,54 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Staff queue: all issues, filterable by status and target. */
         get: operations["issue_list"];
         put?: never;
+        /**
+         * Submit a report (or feedback). Public — no account required; logged-in
+         *     reporters additionally get an in-game view via `/me/issues`.
+         */
         post: operations["issue_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/issue/public/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Anonymous reporter view via magic link (from the notification email).
+         *     Internal notes are filtered; a wrong token is a 404.
+         */
+        get: operations["issue_public_by_id"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/issue/public/{id}/record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Anonymous reporter reply via magic link. Replying to a closed issue
+         *     reopens it and pings the staff channel.
+         */
+        post: operations["issue_public_append_record"];
         delete?: never;
         options?: never;
         head?: never;
@@ -556,6 +601,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Issue detail. Staff see everything; the reporter sees their own issue
+         *     without internal notes; anyone else gets a 404 (existence is private).
+         */
         get: operations["issue_by_id"];
         put?: never;
         post?: never;
@@ -574,7 +623,31 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Append a comment / reply, or (staff) transition the state. A reporter
+         *     commenting on a closed issue automatically reopens it.
+         */
         post: operations["issue_append_record"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/issue/{id}/title": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Staff-only: assign or edit the issue's title (queue summary). An empty
+         *     title clears it back to the default.
+         */
+        put: operations["issue_update_title"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1095,7 +1168,10 @@ export interface components {
             series: components["schemas"]["ActiveDay"][];
         };
         AppendRecordP: {
+            /** @description Staff-only internal note, invisible to the reporter. */
+            internal?: boolean;
             operation?: null | components["schemas"]["IssueOperation"];
+            /** @description 1–2000 chars. */
             text: string;
         };
         AuthorizeR: {
@@ -1289,8 +1365,23 @@ export interface components {
             status?: string | null;
         };
         CreateIssueP: {
+            /**
+             * @description Cloudflare Turnstile response token; required for anonymous
+             *     submission when `turnstileSecret` is configured.
+             */
+            captcha?: string | null;
+            category: components["schemas"]["IssueCategory"];
+            /** @description Contact email; the only mandatory channel for anonymous reporters. */
+            email: string;
+            /** @description Temp upload ids (from `POST /upload/{name}`) to materialize. */
+            files?: string[];
+            related?: null | components["schemas"]["IssueRelated"];
             target?: null | components["schemas"]["IssueTarget"];
-            /** @description The reason / body text of the opening record. 10–200 chars. */
+            /**
+             * @description Rich-text body, 10–2000 chars. May reference `files` entries by their
+             *     temp upload id — ids are rewritten to permanent `/files/{uuid}` URLs
+             *     on save.
+             */
             text: string;
         };
         DetailedCollection: components["schemas"]["Collection"] & {
@@ -1356,39 +1447,85 @@ export interface components {
             time: string;
         };
         IssueBrief: {
+            category: components["schemas"]["IssueCategory"];
             /** Format: date-time */
             createdAt: string;
             /** Format: int32 */
-            createdBy: number;
+            createdBy?: number | null;
+            email: string;
             /** Format: int32 */
             id: number;
+            status: components["schemas"]["IssueOperation"];
             target?: null | components["schemas"]["IssueTarget"];
+            /** @description Staff-assigned summary; empty by default. */
+            title: string;
         };
+        /**
+         * @description Why the issue was raised. Stored as smallint; values are stable.
+         *
+         *     `Plagiarism` (盗传) deliberately sits at 0: it is the dominant report
+         *     reason and must not be confused with `RightsInfringement` (侵权).
+         * @enum {string}
+         */
+        IssueCategory: "plagiarism" | "rightsInfringement" | "pornographic" | "political" | "provokingConflict" | "illegal" | "insultOrHarassment" | "badValues" | "other" | "question" | "featureRequest";
         IssueDetail: {
+            category: components["schemas"]["IssueCategory"];
             /** Format: date-time */
             createdAt: string;
             /** Format: int32 */
-            createdBy: number;
+            createdBy?: number | null;
+            email: string;
             /** Format: int32 */
             id: number;
-            open: boolean;
             records: components["schemas"]["IssueRecordView"][];
+            related: components["schemas"]["IssueRelated"];
+            status: components["schemas"]["IssueOperation"];
             target?: null | components["schemas"]["IssueTarget"];
+            /** @description Staff-assigned summary; empty by default. */
+            title: string;
         };
-        /** @enum {string} */
-        IssueOperation: "open" | "close";
+        IssueListBrief: components["schemas"]["IssueBrief"] & {
+            /** Format: int64 */
+            recordCount: number;
+        };
+        IssueListR: {
+            /** Format: int64 */
+            count: number;
+            results: components["schemas"]["IssueListBrief"][];
+        };
+        /**
+         * @description A state transition attached to a record. The same value space persists in
+         *     `issue.status`; the last transition wins.
+         * @enum {string}
+         */
+        IssueOperation: "open" | "resolved" | "rejected" | "duplicated";
         IssueRecordView: {
             /** Format: date-time */
             createdAt: string;
-            /** Format: int32 */
-            createdBy: number;
+            /**
+             * Format: int32
+             * @description `null` when appended through the magic link (anonymous reporter).
+             */
+            createdBy?: number | null;
             /** Format: int32 */
             id: number;
+            internal: boolean;
             /** Format: int32 */
             issueId: number;
             operation?: null | components["schemas"]["IssueOperation"];
             text: string;
         };
+        /**
+         * @description Structured, category-dependent references carried on the issue. File
+         *     references are public FileUrls (`/{uuid}`) materialized from temp uploads
+         *     at submission time; they may also appear inline in the record's rich text.
+         */
+        IssueRelated: {
+            evidences?: string[];
+            identityProofs?: string[];
+            originalUrl?: string | null;
+        };
+        /** @description What an issue reports. Serialized as `{"type": "chart", "id": 42}`. */
         IssueTarget: {
             /** Format: int32 */
             id: number;
@@ -1500,22 +1637,23 @@ export interface components {
             results: components["schemas"]["MyChartEntry"][];
         };
         MyIssueBrief: {
+            category: components["schemas"]["IssueCategory"];
             /** Format: date-time */
             createdAt: string;
             /** Format: int32 */
-            createdBy: number;
+            createdBy?: number | null;
             /** Format: int32 */
             id: number;
-            /**
-             * @description Whether the issue is currently open (derived from the last record
-             *     with a non-NULL operation; defaults to open if no transition exists).
-             */
-            open: boolean;
             /**
              * Format: int64
              * @description Count of records (comments + state transitions) on this issue.
              */
             recordCount: number;
+            /**
+             * @description Current state, persisted on the issue row (`open` / `resolved` /
+             *     `rejected` / `duplicated`).
+             */
+            status: components["schemas"]["IssueOperation"];
             target?: null | components["schemas"]["IssueTarget"];
         };
         MyIssuesR: {
@@ -1617,19 +1755,6 @@ export interface components {
                 updated: string;
             }[];
         };
-        PaginationR_IssueBrief: {
-            /** Format: int64 */
-            count: number;
-            results: {
-                /** Format: date-time */
-                createdAt: string;
-                /** Format: int32 */
-                createdBy: number;
-                /** Format: int32 */
-                id: number;
-                target?: null | components["schemas"]["IssueTarget"];
-            }[];
-        };
         PaginationR_QueryR: {
             /** Format: int64 */
             count: number;
@@ -1709,6 +1834,15 @@ export interface components {
             record: number;
             /** Format: double */
             rks: number;
+        };
+        PublicAppendP: {
+            /**
+             * @description Cloudflare Turnstile response token; required when `turnstileSecret`
+             *     is configured.
+             */
+            captcha?: string | null;
+            /** @description 1–2000 chars. */
+            text: string;
         };
         PutP: components["schemas"]["CollectionContent"] & {
             /** Format: date-time */
@@ -1936,6 +2070,10 @@ export interface components {
             add?: number;
             /** Format: int32 */
             remove?: number;
+        };
+        UpdateTitleP: {
+            /** @description 0–100 chars after trimming; empty clears it back to the default. */
+            title: string;
         };
         UploadR: {
             /** Format: date-time */
@@ -2971,10 +3109,12 @@ export interface operations {
         parameters: {
             query?: {
                 page?: number;
-                pageNum?: number;
-                search?: string;
-                order?: string;
-                tags?: string;
+                pageSize?: number;
+                /** @description Filter by current status. */
+                status?: components["schemas"]["IssueOperation"];
+                /** @description Filter by target (both fields required together). */
+                targetType?: number;
+                targetId?: number;
             };
             header?: never;
             path?: never;
@@ -2987,7 +3127,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginationR_IssueBrief"];
+                    "application/json": components["schemas"]["IssueListR"];
                 };
             };
         };
@@ -3011,6 +3151,60 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IssueDetail"];
+                };
+            };
+        };
+    };
+    issue_public_by_id: {
+        parameters: {
+            query: {
+                /** @description Magic-link token from the notification email. */
+                token: string;
+            };
+            header?: never;
+            path: {
+                /** @description Issue ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssueDetail"];
+                };
+            };
+        };
+    };
+    issue_public_append_record: {
+        parameters: {
+            query: {
+                /** @description Magic-link token from the notification email. */
+                token: string;
+            };
+            header?: never;
+            path: {
+                /** @description Issue ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicAppendP"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssueRecordView"];
                 };
             };
         };
@@ -3059,6 +3253,32 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IssueRecordView"];
+                };
+            };
+        };
+    };
+    issue_update_title: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Issue ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTitleP"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssueBrief"];
                 };
             };
         };

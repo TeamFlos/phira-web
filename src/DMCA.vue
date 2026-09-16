@@ -47,6 +47,12 @@ Room 416, South Building 10#, Tsinghua University
 Beijing, 100084
 China</pre
       >
+      <div class="divider"></div>
+      <p>
+        You may also file a rights-infringement report online:
+        <router-link to="/issue/submit?category=rightsInfringement" class="link link-hover italic">Submit a report form</router-link>
+        — identity proofs and evidence can be attached directly.
+      </p>
     </article>
   </div>
 </template>

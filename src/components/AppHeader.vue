@@ -8,12 +8,14 @@ en:
   download: Download
   censor: Censor tool
   review: Review
+  tickets: Tickets
 
   wip: Work in progress
 
   me:
     profile: Profile
     charts: My Charts
+    tickets: My Tickets
     settings: Settings
     logout: Logout
 
@@ -26,12 +28,14 @@ zh-CN:
   download: 下载
   censor: 审核工具
   review: 待审队列
+  tickets: 工单
 
   wip: 功能暂未开放
 
   me:
     profile: 主页
     charts: 稿件中心
+    tickets: 我的工单
     settings: 设置
     logout: 登出
 
@@ -95,6 +99,9 @@ const NAVS = computed(() => {
   }
   if (canReview.value) {
     routes.push({ path: '/review', icon: 'fa-clipboard-check', text: 'review' });
+  }
+  if (user.value && userPermissions(user.value).has(Permission.ISSUE_OPS)) {
+    routes.push({ path: '/issue', icon: 'fa-headset', text: 'tickets' });
   }
   return routes;
 });
@@ -186,6 +193,9 @@ onUnmounted(() => {
                   </li>
                   <li>
                     <router-link to="/my/charts" @click="blur" v-t="'me.charts'"></router-link>
+                  </li>
+                  <li>
+                    <router-link to="/my/issues" @click="blur" v-t="'me.tickets'"></router-link>
                   </li>
                   <li>
                     <router-link to="/settings" @click="blur" v-t="'me.settings'"></router-link>

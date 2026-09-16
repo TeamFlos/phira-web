@@ -16,6 +16,11 @@ import ChartVersionsView from '../views/ChartVersionsView.vue';
 import ConfirmCollabView from '../views/ConfirmCollabView.vue';
 import ReviewQueueView from '../views/ReviewQueueView.vue';
 
+import IssueQueueView from '../views/IssueQueueView.vue';
+import IssueSubmitView from '../views/IssueSubmitView.vue';
+import IssueView from '../views/IssueView.vue';
+import MyIssuesView from '../views/MyIssuesView.vue';
+
 import CollectionView from '../views/CollectionView.vue';
 import CollectionsView from '../views/CollectionsView.vue';
 
@@ -54,12 +59,17 @@ const router = createRouter({
     { path: '/chart/:id(\\d+)/versions/:vid(\\d+)?', name: 'chart-versions', component: ChartVersionsView },
     { path: '/chart/confirm-collab', name: 'confirm-collab', component: ConfirmCollabView },
 
+    { path: '/issue', name: 'issue-queue', component: IssueQueueView },
+    { path: '/issue/submit', name: 'issue-submit', component: IssueSubmitView },
+    { path: '/issue/:id(\\d+)', name: 'issue', component: IssueView },
+
     { path: '/collection', name: 'collections', component: CollectionsView },
     { path: '/collection/:id(\\d+)', name: 'collection', component: CollectionView },
 
     { path: '/user', name: 'users', component: UsersView },
     { path: '/user/:id(\\d+)', name: 'user', component: UserView },
     { path: '/my/charts', name: 'my-charts', component: MyChartsView },
+    { path: '/my/issues', name: 'my-issues', component: MyIssuesView },
 
     { path: '/settings', redirect: () => '/settings/account' },
     { path: '/settings/:category', name: 'settings', component: SettingsView },

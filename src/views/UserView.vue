@@ -11,8 +11,6 @@ en:
 
   report:
     button: Report User
-    hint: Report reason. 10 to 200 characters.
-    done: Reported successfully. Thank you for your contribution to the health of the Phira community!
 
   login-ban:
     banned: This users is banned. Please contact the administrator if you have any questions.
@@ -53,8 +51,6 @@ zh-CN:
 
   report:
     button: 举报用户
-    hint: 请填写举报理由，10 - 200 字
-    done: 举报成功，感谢你对 Phira 社区健康作出的贡献！
 
   login-ban:
     banned: 人生自古谁无死？不幸地，该账号已被封禁，因此无法继续与您互动。如有疑问，请联系管理员。
@@ -141,6 +137,11 @@ const stats = statsRes.data;
 
 // type IConfirmDialog = InstanceType<typeof ConfirmDialog>;
 
+/** Collapse the "…" dropdown after picking an item (same as AppHeader). */
+function blur() {
+  (document.activeElement as HTMLElement).blur();
+}
+
 const confirmBanDialog = ref<IConfirmDialog>();
 async function doBan() {
   const { error } = await api.POST('/user/{id}/ban', { params: { path: { id } }, toastError: true });
@@ -163,18 +164,6 @@ async function doBanLogin() {
   if (error) return;
   toast(t('login-ban.done'));
   user.login_banned = true;
-}
-
-const reportDialog = ref<IConfirmDialog>();
-const reportReason = ref('');
-async function doReport() {
-  const { error } = await api.POST('/user/{id}/report', {
-    params: { path: { id } },
-    body: { reason: reportReason.value! },
-    toastError: true,
-  });
-  if (error) return;
-  toast(t('report.done'));
 }
 
 const showModifyRoles = computed(() => {
@@ -271,14 +260,7 @@ const currentBestPool = ref(true);
                     </label>
                     <ul tabindex="0" class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-48 lg:!right-auto">
                       <li>
-                        <a
-                          @click="
-                            () => {
-                              reportReason = '';
-                              reportDialog!.showModal();
-                            }
-                          "
-                          v-t="'report.button'"></a>
+                        <router-link :to="`/issue/submit?type=user&id=${id}`" @click="blur" v-t="'report.button'"></router-link>
                       </li>
                       <template v-if="me && userPermissions(me).has(Permission.BAN_USER)">
                         <li v-if="!user.banned"><a @click="confirmBanDialog!.showModal()" v-t="'ban.button'"></a></li>
@@ -393,10 +375,6 @@ const currentBestPool = ref(true);
   <ConfirmDialog :do="doBanLogin" ref="confirmLoginBanDialog">
     <h3 class="font-bold text-lg" v-t="'warning'"></h3>
     <p class="py-4" v-t="'login-ban.confirm'"></p>
-  </ConfirmDialog>
-  <ConfirmDialog :do="doReport" ref="reportDialog">
-    <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
-    <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
   </ConfirmDialog>
   <ConfirmDialog :do="doModifyRoles" ref="modifyRolesDialog" :onError="cancelModifyRoles">
     <h3 class="font-bold text-lg" v-t="'roles.modify'"></h3>

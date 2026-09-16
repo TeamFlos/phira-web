@@ -61,6 +61,39 @@ const i18n = createI18n({
       'title-my-charts': 'My Charts',
       'title-dlink': 'Open in Phira',
       'title-download': 'Download',
+      'title-issue-queue': 'Ticket Queue',
+      'title-issue-submit': 'Feedback',
+      'title-issue': 'Ticket',
+      'title-my-issues': 'My Tickets',
+
+      // Shared by the ticket queue / detail / my-tickets views. Values mirror
+      // phira-api's IssueCategory / IssueOperation serde enums.
+      'issue-category': {
+        rightsInfringement: 'Rights infringement',
+        pornographic: 'Pornographic or vulgar content',
+        plagiarism: 'Plagiarizing others’ works',
+        political: 'Spreading political rumors',
+        provokingConflict: 'Inciting group conflict or flame wars',
+        illegal: 'Violating laws and regulations',
+        insultOrHarassment: 'Insults, attacks or inciting cyberbullying',
+        badValues: 'Promoting harmful values or behavior',
+        other: 'Other',
+        question: 'Question',
+        featureRequest: 'Feature request',
+      },
+      'issue-status': {
+        open: 'Open',
+        resolved: 'Resolved',
+        rejected: 'Rejected',
+        duplicated: 'Duplicated',
+      },
+      'issue-target': {
+        chart: 'Chart #{id}',
+        collection: 'Collection #{id}',
+        user: 'User #{id}',
+        none: 'No target',
+      },
+      'issue-untitled': 'Untitled',
 
       // Shared by the version timeline, the detail/diff panels and the queue.
       'version-status': {
@@ -153,6 +186,37 @@ const i18n = createI18n({
       'title-my-charts': '稿件中心',
       'title-dlink': '在 Phira 中打开',
       'title-download': '下载',
+      'title-issue-queue': '工单队列',
+      'title-issue-submit': '反馈',
+      'title-issue': '工单',
+      'title-my-issues': '我的工单',
+
+      'issue-category': {
+        rightsInfringement: '侵权',
+        pornographic: '色情低俗',
+        plagiarism: '抄袭搬运他人作品',
+        political: '散布政治谣言',
+        provokingConflict: '煽动群体对立或引战',
+        illegal: '违反法律法规',
+        insultOrHarassment: '侮辱攻击或引导网暴',
+        badValues: '宣传不良价值观或行为',
+        other: '其他',
+        question: '问题反馈',
+        featureRequest: '功能请求',
+      },
+      'issue-status': {
+        open: '处理中',
+        resolved: '成立已处理',
+        rejected: '不成立',
+        duplicated: '重复举报',
+      },
+      'issue-target': {
+        chart: '谱面 #{id}',
+        collection: '合集 #{id}',
+        user: '用户 #{id}',
+        none: '无对象',
+      },
+      'issue-untitled': '未命名',
 
       'version-status': {
         pending: '待审核',

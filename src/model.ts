@@ -33,6 +33,16 @@ export type OAuthApp = S['OAuthAppView'];
 export type PartialCollection = S['Collection']; // /collection list item
 export type Collection = S['DetailedCollection']; // /collection/{id} (with charts)
 
+// Issue (工单) shapes — the strings are the API's serde enum values.
+export type IssueCategory = S['IssueCategory'];
+export type IssueOperation = S['IssueOperation'];
+export type IssueTarget = S['IssueTarget'];
+export type IssueRelated = S['IssueRelated'];
+export type IssueDetail = S['IssueDetail'];
+export type IssueRecord = S['IssueRecordView'];
+export type IssueListItem = S['IssueListBrief']; // staff queue entry
+export type MyIssue = S['MyIssueBrief']; // /me/issues entry
+
 // Generic page helper; structurally identical to the schema's PaginationR<T>.
 // Kept as a utility since the generated schema only emits concrete per-T page
 // types (PaginationR_ChartView, …), not a generic.

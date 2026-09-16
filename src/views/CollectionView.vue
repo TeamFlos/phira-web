@@ -8,8 +8,6 @@ en:
   no-charts: This collection does not include any charts.
   report:
     button: Report
-    hint: Report reason. 10 to 200 characters.
-    done: Reported successfully. Thank you for your contribution to the health of the Phira community!
   import:
     label: Import
     toast: Copied to clipboard. Please paste it in "Favorites" -> "Import" in-game.
@@ -31,8 +29,6 @@ zh-CN:
   no-charts: 该合集没有收录谱面。
   report:
     button: 举报
-    hint: 请填写举报理由，10 - 200 字
-    done: 举报成功，感谢你对 Phira 社区健康作出的贡献！
   import:
     label: 导入
     toast: 已复制到剪贴板，请粘贴到游戏内“收藏夹”->“导入”中
@@ -53,13 +49,12 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { detailedTime, loggedIn, pleaseLogin, setTitle, toast, type IConfirmDialog } from '../common';
+import { detailedTime, loggedIn, pleaseLogin, setTitle, toast } from '../common';
 import { useApi } from '../api/client';
 import type { Collection } from '../model';
 
 import CoverBackdrop from '../components/CoverBackdrop.vue';
 import ChartCard from '../components/ChartCard.vue';
-import ConfirmDialog from '../components/ConfirmDialog.vue';
 import PropItem from '../components/PropItem.vue';
 import SimpleUserCard from '../components/SimpleUserCard.vue';
 import { useClipboard } from '@vueuse/core';
@@ -89,18 +84,6 @@ const description = computed(() => {
 });
 
 const visibilityLabel = computed(() => (collection.value?.public ? t('visibility.public') : t('visibility.private')));
-
-const reportDialog = ref<IConfirmDialog>();
-const reportReason = ref('');
-async function doReport() {
-  const { error } = await api.POST('/collection/{id}/report', {
-    params: { path: { id } },
-    body: { reason: reportReason.value! },
-    toastError: true,
-  });
-  if (error) return;
-  toast(t('report.done'));
-}
 
 const { copy } = useClipboard();
 function copyUrl() {
@@ -158,17 +141,10 @@ function doLike() {
             <i class="fa-solid fa-file-arrow-down mr-1"></i>
             {{ t('import.label') }}
           </button>
-          <button
-            class="btn btn-error btn-sm"
-            @click="
-              () => {
-                reportReason = '';
-                reportDialog!.showModal();
-              }
-            ">
+          <router-link class="btn btn-error btn-sm" :to="`/issue/submit?type=collection&id=${id}`">
             <i class="fa-regular fa-flag mr-1"></i>
             {{ t('report.button') }}
-          </button>
+          </router-link>
         </div>
       </div>
       <p class="max-w-3xl whitespace-pre-line break-words text-base-content/70">{{ description }}</p>
@@ -200,10 +176,5 @@ function doLike() {
         </div>
       </div>
     </div>
-
-    <ConfirmDialog :do="doReport" ref="reportDialog">
-      <h3 class="font-bold text-lg" v-t="'report.button'"></h3>
-      <textarea class="textarea textarea-bordered h-32 w-full mt-4" :placeholder="t('report.hint')" v-model="reportReason"></textarea>
-    </ConfirmDialog>
   </div>
 </template>
