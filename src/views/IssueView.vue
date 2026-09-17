@@ -87,7 +87,7 @@ function fileUrl(name: string): string {
   return `${API_BASE}/files/${name}`;
 }
 
-// --- staff display names ----------------------------------------------------
+// --- record author (staff names link to their user page) --------------------
 
 const staffNames = ref(new Map<number, string>());
 async function resolveStaff(record: IssueRecord) {
@@ -214,12 +214,6 @@ async function send() {
   replyInternal.value = false;
   toast(t('replied'), 'success');
 }
-
-function authorLabel(record: IssueRecord): string {
-  if (recordIsReporter(issue.value?.createdBy, record)) return t('reporter');
-  const uid = record.createdBy;
-  return uid != null ? `${t('staff')} · ${staffNames.value.get(uid) ?? `#${uid}`}` : t('staff');
-}
 </script>
 
 <template>
@@ -294,7 +288,11 @@ function authorLabel(record: IssueRecord): string {
             class="card bg-base-100 border shadow p-4 flex flex-col gap-2"
             :class="record.internal ? 'border-warning' : 'border-base-300'">
             <div class="flex items-center gap-2 flex-wrap text-sm">
-              <span class="font-bold">{{ authorLabel(record) }}</span>
+              <span v-if="recordIsReporter(issue?.createdBy, record)" class="font-bold" v-t="'reporter'"></span>
+              <span v-else-if="record.createdBy != null" class="font-bold">
+                {{ t('staff') }} · <router-link :to="`/user/${record.createdBy}`" class="link link-hover">{{ staffNames.get(record.createdBy) ?? `#${record.createdBy}` }}</router-link>
+              </span>
+              <span v-else class="font-bold" v-t="'staff'"></span>
               <span v-if="record.internal" class="badge badge-warning badge-sm" v-t="'internal-note'"></span>
               <!-- `open` is the default state — the initial record always
                    carries it, and it means nothing next to a message. -->
