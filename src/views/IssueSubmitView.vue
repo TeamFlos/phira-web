@@ -30,6 +30,8 @@ en:
   validate-category: Please choose a category
   validate-text: Description must be 10–2000 characters
   validate-proofs: Infringement reports need both identity proofs and evidence
+  contact-pre: You can also write to
+  contact-post: to reach us
   success-title: Submitted
   success-body: 'We have received your submission. A receipt with a link to follow the progress has been sent to {email}.'
 
@@ -63,6 +65,8 @@ zh-CN:
   validate-category: 请选择分类
   validate-text: 描述需在 10–2000 字之间
   validate-proofs: 侵权举报需要上传身份证明与证据材料
+  contact-pre: 你也可以发送邮件至
+  contact-post: 来联系我们
   success-title: 提交成功
   success-body: 我们已收到你的反馈，回执邮件已发送到 {email}，可以在邮件中的链接内查看后续进度
 </i18n>
@@ -333,6 +337,12 @@ async function submit() {
           <span v-if="submitting" class="loading loading-spinner loading-sm"></span>
           {{ submitting ? t('submitting') : t('submit') }}
         </button>
+
+        <p class="text-sm opacity-60 text-center">
+          {{ t('contact-pre') }}
+          <a class="link link-hover" href="mailto:contact@phira.cn">contact@phira.cn</a>
+          {{ t('contact-post') }}
+        </p>
       </form>
     </div>
   </div>
