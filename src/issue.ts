@@ -57,10 +57,13 @@ export function issueTargetPath(target: IssueTarget): string {
   }
 }
 
-/** i18n key + params for `谱面 #42`-style labels. */
-export function issueTargetLabel(target: IssueTarget): { key: string; id: number } {
-  const kind = target.type.toLowerCase();
-  return { key: `issue-target.${kind}`, id: target.id };
+/** i18n key for the target kind; the caller renders it as `<label> #<id>`.
+ * Deliberately interpolation-free: inline messages in main.ts are NOT
+ * precompiled by unplugin-vue-i18n, and production builds use the
+ * runtime-only vue-i18n (no JIT compiler), so `{id}` placeholders in them
+ * would render literally. */
+export function issueTargetLabel(target: IssueTarget): string {
+  return `issue-target.${target.type.toLowerCase()}`;
 }
 
 /**

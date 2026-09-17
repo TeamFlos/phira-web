@@ -87,10 +87,13 @@ const i18n = createI18n({
         rejected: 'Rejected',
         duplicated: 'Duplicated',
       },
+      // No `{id}` placeholders here — see the note in issue.ts
+      // (issueTargetLabel): runtime-only vue-i18n in production builds
+      // cannot compile interpolated inline messages.
       'issue-target': {
-        chart: 'Chart #{id}',
-        collection: 'Collection #{id}',
-        user: 'User #{id}',
+        chart: 'Chart',
+        collection: 'Collection',
+        user: 'User',
         none: 'No target',
       },
       'issue-untitled': 'Untitled',
@@ -211,9 +214,9 @@ const i18n = createI18n({
         duplicated: '重复举报',
       },
       'issue-target': {
-        chart: '谱面 #{id}',
-        collection: '合集 #{id}',
-        user: '用户 #{id}',
+        chart: '谱面',
+        collection: '合集',
+        user: '用户',
         none: '无对象',
       },
       'issue-untitled': '未命名',
