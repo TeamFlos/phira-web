@@ -152,12 +152,12 @@ onUnmounted(() => {
       <input id="drawer" type="checkbox" class="drawer-toggle" v-model="drawerOpened" />
       <div class="drawer-content flex flex-col">
         <div class="w-full navbar h-16 fixed top-0 z-30 transition-all" :class="{ 'shadow-xl': !atTop, 'backdrop-blur-lg': !atTop }">
-          <div class="navbar-start">
-            <label for="drawer" class="btn btn-square btn-ghost md:hidden">
+          <div class="navbar-start w-auto flex-1 min-w-0">
+            <label for="drawer" class="btn btn-square btn-ghost lg:hidden">
               <i class="fa-solid fa-bars text-xl"></i>
             </label>
-            <router-link to="/" class="btn btn-ghost normal-case text-2xl">Phira</router-link>
-            <div class="ms-8 gap-2 hidden md:flex">
+            <router-link to="/" class="btn btn-ghost normal-case text-2xl flex-none">Phira</router-link>
+            <div class="ms-8 gap-2 hidden lg:flex flex-nowrap">
               <router-link
                 v-for="nav in NAVS"
                 :to="nav.path"
@@ -172,7 +172,7 @@ onUnmounted(() => {
               </router-link>
             </div>
           </div>
-          <div class="navbar-end">
+          <div class="navbar-end w-auto flex-none">
             <label class="swap swap-rotate text-2xl mr-4">
               <input type="checkbox" v-model="darkTheme" />
               <i class="fa-solid fa-moon swap-on fill-current"></i>
