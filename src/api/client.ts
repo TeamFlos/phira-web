@@ -27,29 +27,38 @@ export function storeTokens(r: { token: string; refreshToken: string; expireAt: 
 // burn the (still-valid) refresh token N times at once.
 let refreshing: Promise<boolean> | null = null;
 
+/** Exchange the refresh token for a fresh pair; `false` means rejected, throws on network failure. */
 async function doRefresh(refreshToken: string): Promise<boolean> {
-  try {
-    const resp = await fetch(`${API_HOST}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (!resp.ok) return false;
-    const data = (await resp.json()) as { token: string; refreshToken: string; expireAt: string };
-    storeTokens(data);
-    return true;
-  } catch {
-    return false;
-  }
+  const resp = await fetch(`${API_HOST}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  });
+  if (!resp.ok) return false;
+  const data = (await resp.json()) as { token: string; refreshToken: string; expireAt: string };
+  storeTokens(data);
+  return true;
 }
 
 function ensureRefreshed(refreshToken: string): Promise<boolean> {
   if (!refreshing) {
-    refreshing = doRefresh(refreshToken).finally(() => {
-      refreshing = null;
-    });
+    refreshing = doRefresh(refreshToken)
+      .catch(() => false)
+      .finally(() => {
+        refreshing = null;
+      });
   }
   return refreshing;
+}
+
+/** On a cold start the 401 refresh above never fires, so restore the session manually. */
+export async function bootstrapAuth(): Promise<void> {
+  if (getCookie('access_token') || !getCookie('refresh_token')) return;
+  try {
+    if (!(await doRefresh(getCookie('refresh_token')!))) logout();
+  } catch {
+    // offline / server unreachable — keep the refresh token for the next load
+  }
 }
 
 /**

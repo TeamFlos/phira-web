@@ -4,6 +4,7 @@ import { createApp } from 'vue';
 import { createI18n } from 'vue-i18n';
 
 import { changeLocale } from './common';
+import { bootstrapAuth } from './api/client';
 
 import App from './App.vue';
 import router from './router';
@@ -285,6 +286,10 @@ changeLocale(locale);
 const app = createApp(App);
 app.use(i18n).use(router).use(FloatingVue);
 
-app.mount('#app');
+// Restore any surviving session before mount.
+void (async () => {
+  await bootstrapAuth();
+  app.mount('#app');
+})();
 
 export { i18n };
