@@ -253,14 +253,14 @@ const currentBestPool = ref(true);
                   <del v-if="user.login_banned" v-tooltip="t('login-ban.banned')">{{ user.name }}</del>
                   <span v-else>{{ user.name }}</span>
                 </span>
-                <div class="flex flex-row join min-w-[12rem] lg:min-w-0 gap-[0.15rem]">
-                  <FollowButton class="join-item grow btn-md lg:btn-sm" :id="id" :initFollowing="user.following" />
-                  <router-link class="btn btn-error btn-md lg:btn-sm rounded-s-none" :to="`/issue/submit?type=user&id=${id}`">
+                <div class="flex flex-row min-w-[12rem] lg:min-w-0">
+                  <FollowButton class="grow btn-md lg:btn-sm rounded-e-none" :id="id" :initFollowing="user.following" />
+                  <router-link class="btn btn-error btn-md lg:btn-sm rounded-s-none -ms-px" :class="{ 'rounded-e-none': showModeration }" :to="`/issue/submit?type=user&id=${id}`">
                     <i class="fa-regular fa-flag mr-1"></i>
                     {{ t('report.button') }}
                   </router-link>
                   <div class="dropdown dropdown-end" v-if="showModeration">
-                    <label tabindex="0" class="btn btn-secondary btn-md lg:btn-sm rounded-s-none">
+                    <label tabindex="0" class="btn btn-secondary btn-md lg:btn-sm rounded-s-none -ms-px">
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </label>
                     <ul tabindex="0" class="p-2 shadow menu bg-base-300 dropdown-content z-[1] rounded-box w-48 lg:!right-auto">
