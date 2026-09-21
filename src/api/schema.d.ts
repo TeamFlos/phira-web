@@ -1484,6 +1484,11 @@ export interface components {
             target?: null | components["schemas"]["IssueTarget"];
             /** @description Staff-assigned summary; empty by default. */
             title: string;
+            /**
+             * Format: date-time
+             * @description Last activity on the issue (any appended record).
+             */
+            updatedAt: string;
         };
         /**
          * @description Why the issue was raised. Stored as smallint; values are stable.
@@ -1516,6 +1521,11 @@ export interface components {
             target?: null | components["schemas"]["IssueTarget"];
             /** @description Staff-assigned summary; empty by default. */
             title: string;
+            /**
+             * Format: date-time
+             * @description Last activity on the issue (any appended record).
+             */
+            updatedAt: string;
         };
         IssueListBrief: components["schemas"]["IssueBrief"] & {
             /** Format: int64 */
@@ -1696,6 +1706,11 @@ export interface components {
              */
             status: components["schemas"]["IssueOperation"];
             target?: null | components["schemas"]["IssueTarget"];
+            /**
+             * Format: date-time
+             * @description Last activity on the issue (any appended record).
+             */
+            updatedAt: string;
         };
         MyIssuesR: {
             /** Format: int64 */

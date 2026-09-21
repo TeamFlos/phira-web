@@ -124,7 +124,7 @@ watch(
             <IssueCategoryBadge :category="item.category" />
             <IssueStatusBadge :status="item.status" />
             <IssueSourceBadge :source="item.source" />
-            <span class="text-xs opacity-60 ml-auto shrink-0"> {{ moment(item.createdAt).fromNow() }} · {{ t('records', { n: item.recordCount }) }} </span>
+            <span class="text-xs opacity-60 ml-auto shrink-0" :title="moment(item.updatedAt).format('LLLL')"> {{ moment(item.updatedAt).fromNow() }} · {{ t('records', { n: item.recordCount }) }} </span>
           </div>
         </router-link>
       </div>
