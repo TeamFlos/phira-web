@@ -72,12 +72,17 @@ async function load(page: number) {
 
 await load(initialPage);
 
-function setStatus(next: IssueOperation | undefined) {
+async function setStatus(next: IssueOperation | undefined) {
   if (status.value === next) return;
   status.value = next;
-  if (pagination.value) pagination.value.current = 1;
+  // Await the URL update so the pagination watcher below (which compares
+  // against route.query) sees the committed query, not the pre-switch one.
+  await router.replace({ query: { ...route.query, status: next ?? 'all', page: undefined } });
+  // Resetting `current` to 1 only reloads via the pagination watcher when the
+  // page actually changes; from page 1 (or with no paginator at all) the
+  // assignment is a no-op, so load directly.
+  if (pagination.value && pagination.value.current !== 1) pagination.value.current = 1;
   else load(1);
-  router.replace({ query: { ...route.query, status: next ?? 'all', page: undefined } });
 }
 
 watch(
