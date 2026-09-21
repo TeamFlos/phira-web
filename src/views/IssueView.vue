@@ -2,6 +2,8 @@
 en:
   not-found: Ticket not found or not accessible.
   created: Submitted
+  user: User
+  user-anonymous: Not signed in
   email: Contact
   email-verified: Verified
   email-unverified: Unverified
@@ -28,6 +30,8 @@ en:
 zh-CN:
   not-found: 工单不存在或无权访问。
   created: 提交时间
+  user: 用户
+  user-anonymous: 未登录
   email: 联系邮箱
   email-verified: 已验证
   email-unverified: 未验证
@@ -106,15 +110,14 @@ const emailVerifiedTitle = computed(() => {
   return emailVerified.value ? t('email-verified-by-mail') : undefined;
 });
 
-// --- record author (staff names link to their user page) --------------------
+// --- record author / reporter (user names link to their user page) -----------
 
-const staffNames = ref(new Map<number, string>());
-async function resolveStaff(record: IssueRecord) {
-  const uid = record.createdBy;
-  if (uid == null || staffNames.value.has(uid)) return;
-  staffNames.value.set(uid, `#${uid}`);
+const userNames = ref(new Map<number, string>());
+async function resolveUser(uid?: number | null) {
+  if (uid == null || userNames.value.has(uid)) return;
+  userNames.value.set(uid, `#${uid}`);
   const { data } = await api.GET('/user/{id}', { params: { path: { id: uid } } });
-  if (data?.name) staffNames.value.set(uid, data.name);
+  if (data?.name) userNames.value.set(uid, data.name);
 }
 
 // --- load -------------------------------------------------------------------
@@ -149,8 +152,9 @@ if (!(loggedIn() && (await loadAuth())) && !(token.value && (await loadPublic())
   notFound.value = true;
 }
 if (issue.value) {
+  resolveUser(issue.value.createdBy);
   for (const record of issue.value.records) {
-    if (!recordIsReporter(issue.value.createdBy, record)) resolveStaff(record);
+    if (!recordIsReporter(issue.value.createdBy, record)) resolveUser(record.createdBy);
   }
 }
 
@@ -227,7 +231,7 @@ async function send() {
   // replying to a closed issue reopens it.
   if (record.operation) issue.value.status = record.operation;
   else if (!isStaff.value && issue.value.status !== 'open') issue.value.status = 'open';
-  if (!recordIsReporter(issue.value.createdBy, record)) resolveStaff(record);
+  if (!recordIsReporter(issue.value.createdBy, record)) resolveUser(record.createdBy);
   replyText.value = '';
   replyOperation.value = 'none';
   replyInternal.value = false;
@@ -269,6 +273,11 @@ async function send() {
             <div class="flex gap-2">
               <span class="opacity-60 shrink-0" v-t="'created'"></span>
               <span>{{ detailedTime(issue.createdAt) }}</span>
+            </div>
+            <div class="flex gap-2 items-baseline min-w-0">
+              <span class="opacity-60 shrink-0" v-t="'user'"></span>
+              <router-link v-if="issue.createdBy != null" :to="`/user/${issue.createdBy}`" class="link link-hover truncate">{{ userNames.get(issue.createdBy) ?? `#${issue.createdBy}` }}</router-link>
+              <span v-else class="italic opacity-50" v-t="'user-anonymous'"></span>
             </div>
             <div class="flex gap-2 items-baseline min-w-0">
               <span class="opacity-60 shrink-0" v-t="'email'"></span>
@@ -314,7 +323,7 @@ async function send() {
             <div class="flex items-center gap-2 flex-wrap text-sm">
               <span v-if="recordIsReporter(issue?.createdBy, record)" class="font-bold" v-t="'reporter'"></span>
               <span v-else-if="record.createdBy != null" class="font-bold">
-                {{ t('staff') }} · <router-link :to="`/user/${record.createdBy}`" class="link link-hover">{{ staffNames.get(record.createdBy) ?? `#${record.createdBy}` }}</router-link>
+                {{ t('staff') }} · <router-link :to="`/user/${record.createdBy}`" class="link link-hover">{{ userNames.get(record.createdBy) ?? `#${record.createdBy}` }}</router-link>
               </span>
               <span v-else class="font-bold" v-t="'staff'"></span>
               <span v-if="record.internal" class="badge badge-warning badge-sm" v-t="'internal-note'"></span>
