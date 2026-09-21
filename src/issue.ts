@@ -2,7 +2,7 @@
 // API's serde enums (see phira-api model/issue.rs); i18n label maps live in
 // main.ts (`issue-category`, `issue-status`, `issue-target`) because they are
 // used across several components.
-import type { IssueCategory, IssueOperation, IssueRecord, IssueTarget } from './model';
+import type { IssueCategory, IssueOperation, IssueRecord, IssueSource, IssueTarget } from './model';
 
 /** Violation categories — the sub-select on the "Report Content" card, in the
  * API's stable numeric order. `question` / `featureRequest` are first-level
@@ -30,6 +30,10 @@ export function categoryLabelKey(category: IssueCategory): string {
 
 export function statusLabelKey(status: IssueOperation): string {
   return `issue-status.${status}`;
+}
+
+export function sourceLabelKey(source: IssueSource): string {
+  return `issue-source.${source}`;
 }
 
 /** daisyui badge class per status — color carries the state. */

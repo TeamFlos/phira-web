@@ -36,6 +36,7 @@ export type Collection = S['DetailedCollection']; // /collection/{id} (with char
 // Issue (工单) shapes — the strings are the API's serde enum values.
 export type IssueCategory = S['IssueCategory'];
 export type IssueOperation = S['IssueOperation'];
+export type IssueSource = S['IssueSource'];
 export type IssueTarget = S['IssueTarget'];
 export type IssueRelated = S['IssueRelated'];
 export type IssueDetail = S['IssueDetail'];

@@ -3,6 +3,10 @@ en:
   not-found: Ticket not found or not accessible.
   created: Submitted
   email: Contact
+  email-verified: Verified
+  email-unverified: Unverified
+  email-verified-at: Email verified at {time}
+  email-verified-by-mail: Address proven by the incoming email
   target: Target
   original-url: Original URL
   identity-proofs: Identity proofs
@@ -25,6 +29,10 @@ zh-CN:
   not-found: 工单不存在或无权访问。
   created: 提交时间
   email: 联系邮箱
+  email-verified: 已验证
+  email-unverified: 未验证
+  email-verified-at: 邮箱验证于 {time}
+  email-verified-by-mail: 地址由来信邮箱证实
   target: 举报对象
   original-url: 原作链接
   identity-proofs: 身份证明
@@ -60,6 +68,7 @@ import Turnstile from '../components/Turnstile.vue';
 import LoadView from '../components/LoadView.vue';
 import IssueCategoryBadge from '../components/issue/IssueCategoryBadge.vue';
 import IssueStatusBadge from '../components/issue/IssueStatusBadge.vue';
+import IssueSourceBadge from '../components/issue/IssueSourceBadge.vue';
 import IssueTargetLink from '../components/issue/IssueTargetLink.vue';
 
 const { t } = useI18n();
@@ -86,6 +95,16 @@ if (loggedIn()) {
 function fileUrl(name: string): string {
   return `${API_BASE}/files/${name}`;
 }
+
+// --- email verification -------------------------------------------------------
+
+// Mirrors the server's rule: a mail import has no `emailVerifiedAt` because
+// the incoming mail itself proves the sender's address.
+const emailVerified = computed(() => issue.value?.source === 'mail' || issue.value?.emailVerifiedAt != null);
+const emailVerifiedTitle = computed(() => {
+  if (issue.value?.emailVerifiedAt) return t('email-verified-at', { time: detailedTime(issue.value.emailVerifiedAt) });
+  return emailVerified.value ? t('email-verified-by-mail') : undefined;
+});
 
 // --- record author (staff names link to their user page) --------------------
 
@@ -244,6 +263,7 @@ async function send() {
           <div class="flex items-center gap-2 flex-wrap">
             <IssueCategoryBadge :category="issue.category" />
             <IssueStatusBadge :status="issue.status" />
+            <IssueSourceBadge :source="issue.source" />
           </div>
           <div class="flex flex-col gap-1 text-sm">
             <div class="flex gap-2">
@@ -253,6 +273,10 @@ async function send() {
             <div class="flex gap-2 items-baseline min-w-0">
               <span class="opacity-60 shrink-0" v-t="'email'"></span>
               <span class="truncate">{{ issue.email }}</span>
+              <span class="badge badge-sm gap-1 shrink-0 self-center whitespace-nowrap" :class="emailVerified ? 'badge-success' : 'badge-ghost'" :title="emailVerifiedTitle">
+                <i class="fa-solid text-[0.6rem]" :class="emailVerified ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+                {{ t(emailVerified ? 'email-verified' : 'email-unverified') }}
+              </span>
             </div>
             <div class="flex gap-2 items-baseline min-w-0">
               <span class="opacity-60 shrink-0" v-t="'target'"></span>

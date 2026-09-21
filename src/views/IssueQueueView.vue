@@ -28,6 +28,7 @@ import LoadView from '../components/LoadView.vue';
 import PageIndicator from '../components/PageIndicator.vue';
 import IssueCategoryBadge from '../components/issue/IssueCategoryBadge.vue';
 import IssueStatusBadge from '../components/issue/IssueStatusBadge.vue';
+import IssueSourceBadge from '../components/issue/IssueSourceBadge.vue';
 
 const { t } = useI18n();
 const api = useApi();
@@ -117,6 +118,7 @@ watch(
           <div class="flex items-center gap-2 flex-wrap">
             <IssueCategoryBadge :category="item.category" />
             <IssueStatusBadge :status="item.status" />
+            <IssueSourceBadge :source="item.source" />
             <span class="text-xs opacity-60 ml-auto shrink-0"> {{ moment(item.createdAt).fromNow() }} · {{ t('records', { n: item.recordCount }) }} </span>
           </div>
         </router-link>

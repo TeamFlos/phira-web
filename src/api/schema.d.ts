@@ -654,6 +654,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/issue/{id}/verify-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Staff-only: mark the reporter's control of `issue.email` as proven (the
+         *     ops mailbox received the challenge code from that address). Appends a
+         *     visible record so the reporter gets a confirmation mail. Idempotent —
+         *     re-verifying returns without a duplicate record.
+         */
+        put: operations["issue_verify_email"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/login": {
         parameters: {
             query?: never;
@@ -1376,9 +1398,10 @@ export interface components {
             /** @description Temp upload ids (from `POST /upload/{name}`) to materialize. */
             files?: string[];
             related?: null | components["schemas"]["IssueRelated"];
+            source?: null | components["schemas"]["IssueSource"];
             target?: null | components["schemas"]["IssueTarget"];
             /**
-             * @description Rich-text body, 10–2000 chars. May reference `files` entries by their
+             * @description Rich-text body, 5–2000 chars. May reference `files` entries by their
              *     temp upload id — ids are rewritten to permanent `/files/{uuid}` URLs
              *     on save.
              */
@@ -1455,6 +1478,8 @@ export interface components {
             email: string;
             /** Format: int32 */
             id: number;
+            /** @description Submission channel; `mail` implies the reporter's address is proven. */
+            source: components["schemas"]["IssueSource"];
             status: components["schemas"]["IssueOperation"];
             target?: null | components["schemas"]["IssueTarget"];
             /** @description Staff-assigned summary; empty by default. */
@@ -1475,10 +1500,18 @@ export interface components {
             /** Format: int32 */
             createdBy?: number | null;
             email: string;
+            /**
+             * Format: date-time
+             * @description When the reporter proved control of `email`; NULL = unverified.
+             *     Mail imports stay NULL — their `source` alone counts as verified.
+             */
+            emailVerifiedAt?: string | null;
             /** Format: int32 */
             id: number;
             records: components["schemas"]["IssueRecordView"][];
             related: components["schemas"]["IssueRelated"];
+            /** @description Submission channel; `mail` implies the reporter's address is proven. */
+            source: components["schemas"]["IssueSource"];
             status: components["schemas"]["IssueOperation"];
             target?: null | components["schemas"]["IssueTarget"];
             /** @description Staff-assigned summary; empty by default. */
@@ -1525,6 +1558,14 @@ export interface components {
             identityProofs?: string[];
             originalUrl?: string | null;
         };
+        /**
+         * @description Where an issue came from. Stored as smallint; values are stable.
+         *     Mail imports arrive through the ops mailbox, so their sender address
+         *     is proven by the mail itself — ops automation exempts them from the
+         *     email-verification challenge.
+         * @enum {string}
+         */
+        IssueSource: "form" | "mail";
         /** @description What an issue reports. Serialized as `{"type": "chart", "id": 42}`. */
         IssueTarget: {
             /** Format: int32 */
@@ -3272,6 +3313,28 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateTitleP"];
             };
         };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssueBrief"];
+                };
+            };
+        };
+    };
+    issue_verify_email: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Issue ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {

@@ -88,6 +88,12 @@ const i18n = createI18n({
         rejected: 'Rejected',
         duplicated: 'Duplicated',
       },
+      // Where the issue came from; `mail` imports arrive through the ops
+      // mailbox, so their sender address is proven by the mail itself.
+      'issue-source': {
+        form: 'Web form',
+        mail: 'Email import',
+      },
       // No `{id}` placeholders here — see the note in issue.ts
       // (issueTargetLabel): runtime-only vue-i18n in production builds
       // cannot compile interpolated inline messages.
@@ -213,6 +219,10 @@ const i18n = createI18n({
         resolved: '成立已处理',
         rejected: '不成立',
         duplicated: '重复举报',
+      },
+      'issue-source': {
+        form: '网页创建',
+        mail: '邮箱导入',
       },
       'issue-target': {
         chart: '谱面',
