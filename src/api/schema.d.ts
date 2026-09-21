@@ -1531,7 +1531,7 @@ export interface components {
          *     `issue.status`; the last transition wins.
          * @enum {string}
          */
-        IssueOperation: "open" | "resolved" | "rejected" | "duplicated";
+        IssueOperation: "open" | "resolved" | "rejected" | "duplicated" | "waitingUser";
         IssueRecordView: {
             /** Format: date-time */
             createdAt: string;

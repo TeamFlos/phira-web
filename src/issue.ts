@@ -19,7 +19,7 @@ export const ISSUE_CATEGORIES: IssueCategory[] = [
   'other',
 ];
 
-export const ISSUE_OPERATIONS: IssueOperation[] = ['open', 'resolved', 'rejected', 'duplicated'];
+export const ISSUE_OPERATIONS: IssueOperation[] = ['open', 'waitingUser', 'resolved', 'rejected', 'duplicated'];
 
 /** Cloudflare Turnstile widget for the anonymous report endpoints. */
 export const TURNSTILE_SITE_KEY = '0x4AAAAAAE36fNWFAj7pl0tl';
@@ -41,6 +41,8 @@ export function statusBadgeClass(status: IssueOperation): string {
   switch (status) {
     case 'open':
       return 'badge-info';
+    case 'waitingUser':
+      return 'badge-accent';
     case 'resolved':
       return 'badge-success';
     case 'rejected':

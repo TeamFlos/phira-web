@@ -84,6 +84,7 @@ const i18n = createI18n({
       },
       'issue-status': {
         open: 'Open',
+        waitingUser: 'Waiting for reply',
         resolved: 'Resolved',
         rejected: 'Rejected',
         duplicated: 'Duplicated',
@@ -216,6 +217,7 @@ const i18n = createI18n({
       },
       'issue-status': {
         open: '处理中',
+        waitingUser: '等待用户回复',
         resolved: '成立已处理',
         rejected: '不成立',
         duplicated: '重复举报',
