@@ -11,8 +11,11 @@ en:
   email-verified-by-mail: Address proven by the incoming email
   target: Target
   original-url: Original URL
+  real-name: Real name
+  contact: Contact
+  delegated: Delegated report
   identity-proofs: Identity proofs
-  evidences: Evidence
+  attachments: Attachments
   attachment: Item {n}
   reporter: Reporter
   staff: Staff
@@ -39,8 +42,11 @@ zh-CN:
   email-verified-by-mail: 地址由来信邮箱证实
   target: 举报对象
   original-url: 原作链接
+  real-name: 真实姓名
+  contact: 联系方式
+  delegated: 受委托举报
   identity-proofs: 身份证明
-  evidences: 证据材料
+  attachments: 附件
   attachment: 材料 {n}
   reporter: 举报人
   staff: 客服
@@ -295,7 +301,18 @@ async function send() {
               <span class="opacity-60 shrink-0" v-t="'original-url'"></span>
               <a :href="issue.related.originalUrl" target="_blank" rel="noopener" class="link link-hover truncate">{{ issue.related.originalUrl }}</a>
             </div>
+            <div v-if="issue.related.realName" class="flex gap-2 items-baseline min-w-0">
+              <span class="opacity-60 shrink-0" v-t="'real-name'"></span>
+              <span class="truncate">{{ issue.related.realName }}</span>
+              <!-- Marks the name as the delegate's, not the rights holder's. -->
+              <span v-if="issue.related.delegated" class="badge badge-sm badge-outline shrink-0 self-center" v-t="'delegated'"></span>
+            </div>
+            <div v-if="issue.related.contact" class="flex gap-2 items-baseline min-w-0">
+              <span class="opacity-60 shrink-0" v-t="'contact'"></span>
+              <span class="truncate">{{ issue.related.contact }}</span>
+            </div>
           </div>
+          <!-- Legacy file proofs from before the text-fields rework. -->
           <div v-if="issue.related.identityProofs?.length" class="flex flex-col gap-1 text-sm">
             <span class="opacity-60" v-t="'identity-proofs'"></span>
             <div class="flex flex-wrap gap-2">
@@ -304,10 +321,10 @@ async function send() {
               </a>
             </div>
           </div>
-          <div v-if="issue.related.evidences?.length" class="flex flex-col gap-1 text-sm">
-            <span class="opacity-60" v-t="'evidences'"></span>
+          <div v-if="issue.related.attachments?.length" class="flex flex-col gap-1 text-sm">
+            <span class="opacity-60" v-t="'attachments'"></span>
             <div class="flex flex-wrap gap-2">
-              <a v-for="(f, i) in issue.related.evidences" :key="f" :href="fileUrl(f)" target="_blank" rel="noopener" class="badge badge-outline gap-1 hover:badge-neutral">
+              <a v-for="(f, i) in issue.related.attachments" :key="f" :href="fileUrl(f)" target="_blank" rel="noopener" class="badge badge-outline gap-1 hover:badge-neutral">
                 <i class="fa-solid fa-file"></i>{{ t('attachment', { n: i + 1 }) }}
               </a>
             </div>

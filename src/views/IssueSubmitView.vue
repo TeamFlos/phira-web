@@ -20,16 +20,20 @@ en:
   detail: Details
   detail-placeholder: Describe the situation (10–2000 chars)…
   original-url: Original URL
-  identity-proofs: Identity proofs
-  identity-proofs-hint: 'For infringement reports: proof of identity or authorization (ID document, business license, authorization letter, …).'
-  evidences: Evidence
+  real-name: Real name
+  real-name-hint: Real name of the rights holder or their delegate
+  contact: Contact
+  contact-hint: Phone number or another valid contact channel
+  delegated: Reporting on behalf of the rights holder
+  attachments: Attachments
+  attachments-hint: Evidence etc.; delegated reports should include the letter of authorization
   upload: Choose files
   submit: Submit
   submitting: Submitting…
   validate-id: Please enter the target ID
   validate-category: Please choose a category
   validate-text: Description must be 10–2000 characters
-  validate-proofs: Infringement reports need both identity proofs and evidence
+  validate-identity: Rights-infringement reports require your real name, a valid contact and evidence
   contact-pre: You can also write to
   contact-post: to reach us
   success-title: Submitted
@@ -55,16 +59,20 @@ zh-CN:
   detail: 详情描述
   detail-placeholder: 请描述具体情况（10–2000 字）…
   original-url: 原作链接
-  identity-proofs: 身份证明
-  identity-proofs-hint: 权利人身份证明或授权材料（身份证明文件、营业执照、授权书等）
-  evidences: 证据材料
+  real-name: 真实姓名
+  real-name-hint: 权利人或其受托人的真实姓名
+  contact: 联系方式
+  contact-hint: 电话或其他有效联系方式
+  delegated: 受委托举报（代表权利人）
+  attachments: 附件
+  attachments-hint: 侵权证据等材料；受委托举报请一并附上委托授权书
   upload: 选择文件
   submit: 提交
   submitting: 提交中…
   validate-id: 请填写对象 ID
   validate-category: 请选择分类
   validate-text: 描述需在 10–2000 字之间
-  validate-proofs: 侵权举报需要上传身份证明与证据材料
+  validate-identity: 侵权举报需填写真实姓名与联系方式，并上传侵权证据
   contact-pre: 你也可以发送邮件至
   contact-post: 来联系我们
   success-title: 提交成功
@@ -135,15 +143,22 @@ if (loggedIn()) {
   });
 }
 
+// Infringement-specific reporter identity (text fields replaced the old
+// file-based identity proofs).
+const realName = ref('');
+const contact = ref('');
+/** Reporting on behalf of the rights holder; the letter of authorization, if
+ * any, is uploaded among the regular attachments. */
+const delegated = ref(false);
+
 /** A file picked in the form, while its temp upload is in flight / done. */
 type Upload = { name: string; tempId?: string; failed?: boolean };
-const identityProofs = ref<Upload[]>([]);
-const evidences = ref<Upload[]>([]);
+const attachments = ref<Upload[]>([]);
 
 const needsTarget = computed(() => intent.value === 'report' && category.value !== 'other');
 const needsOriginalUrl = computed(() => intent.value === 'report' && (category.value === 'rightsInfringement' || category.value === 'plagiarism'));
 const needsProofs = computed(() => intent.value === 'report' && category.value === 'rightsInfringement');
-const busy = computed(() => submitting.value || [...identityProofs.value, ...evidences.value].some((u) => !u.tempId && !u.failed));
+const busy = computed(() => submitting.value || attachments.value.some((u) => !u.tempId && !u.failed));
 
 async function pickFiles(list: Upload[], files: FileList | null) {
   if (!files) return;
@@ -177,8 +192,10 @@ function validate(): string | null {
     const id = parseInt(targetId.value);
     if (!Number.isInteger(id) || id <= 0) return t('validate-id');
   }
-  if (needsProofs.value && (!identityProofs.value.some((u) => u.tempId) || !evidences.value.some((u) => u.tempId))) {
-    return t('validate-proofs');
+  if (needsProofs.value) {
+    if (!realName.value.trim() || !contact.value.trim() || !attachments.value.some((u) => u.tempId)) {
+      return t('validate-identity');
+    }
   }
   return null;
 }
@@ -198,8 +215,7 @@ async function submit() {
   }
   submitting.value = true;
   const id = parseInt(targetId.value);
-  const proofs = identityProofs.value.filter((u) => u.tempId).map((u) => u.tempId!);
-  const evidenceIds = evidences.value.filter((u) => u.tempId).map((u) => u.tempId!);
+  const attachmentIds = attachments.value.filter((u) => u.tempId).map((u) => u.tempId!);
   const { data, error } = await api.POST('/issue', {
     body: {
       text: text.value,
@@ -207,11 +223,13 @@ async function submit() {
       email: email.value,
       target: needsTarget.value ? { type: targetType.value, id } : undefined,
       related: {
-        identityProofs: proofs,
-        evidences: evidenceIds,
+        realName: needsProofs.value ? realName.value.trim() : undefined,
+        contact: needsProofs.value ? contact.value.trim() : undefined,
+        delegated: needsProofs.value && delegated.value ? true : undefined,
+        attachments: attachmentIds,
         originalUrl: originalUrl.value.trim() || undefined,
       },
-      files: [...proofs, ...evidenceIds],
+      files: attachmentIds,
       captcha: captchaToken.value ?? undefined,
     },
     toastError: true,
@@ -284,6 +302,22 @@ async function submit() {
           <input type="url" class="input input-bordered w-full" v-model="originalUrl" />
         </div>
 
+        <div v-if="needsProofs" class="form-control">
+          <label class="label">
+            <span class="label-text">{{ t('real-name') }} <span class="text-error">*</span></span>
+            <span class="label-text-alt opacity-60" v-t="'real-name-hint'"></span>
+          </label>
+          <input type="text" class="input input-bordered w-full" maxlength="100" v-model="realName" />
+        </div>
+
+        <div v-if="needsProofs" class="form-control">
+          <label class="label">
+            <span class="label-text">{{ t('contact') }} <span class="text-error">*</span></span>
+            <span class="label-text-alt opacity-60" v-t="'contact-hint'"></span>
+          </label>
+          <input type="text" class="input input-bordered w-full" maxlength="200" v-model="contact" />
+        </div>
+
         <div class="form-control">
           <label class="label">
             <span class="label-text" v-t="'detail'"></span>
@@ -293,38 +327,27 @@ async function submit() {
         </div>
 
         <div v-if="needsProofs" class="form-control">
-          <label class="label"
-            ><span class="label-text">{{ t('identity-proofs') }} <span class="text-error">*</span></span></label
-          >
-          <label class="label"><span class="label-text-alt opacity-70 -mt-2" v-t="'identity-proofs-hint'"></span></label>
-          <div class="flex flex-wrap gap-2 items-center">
-            <span v-for="(u, i) in identityProofs" :key="i" class="badge badge-lg gap-1 badge-outline">
-              <i v-if="!u.tempId && !u.failed" class="fa-solid fa-spinner fa-spin"></i>
-              <i v-else-if="u.failed" class="fa-solid fa-triangle-exclamation text-error"></i>
-              <span class="max-w-[12rem] truncate">{{ u.name }}</span>
-              <button type="button" class="fa-solid fa-xmark" @click="identityProofs.splice(i, 1)"></button>
-            </span>
-            <label class="btn btn-sm btn-ghost gap-1">
-              <i class="fa-solid fa-paperclip"></i>{{ t('upload') }}
-              <input type="file" class="hidden" multiple @change="(e) => pickFiles(identityProofs, (e.target as HTMLInputElement).files)" />
-            </label>
-          </div>
+          <label class="label justify-start gap-3 cursor-pointer py-1">
+            <input type="checkbox" class="checkbox checkbox-sm checkbox-primary" v-model="delegated" />
+            <span class="label-text" v-t="'delegated'"></span>
+          </label>
         </div>
 
         <div class="form-control">
           <label class="label">
-            <span class="label-text">{{ t('evidences') }} <span v-if="needsProofs" class="text-error">*</span></span>
+            <span class="label-text">{{ t('attachments') }} <span v-if="needsProofs" class="text-error">*</span></span>
+            <span v-if="needsProofs" class="label-text-alt opacity-60" v-t="'attachments-hint'"></span>
           </label>
           <div class="flex flex-wrap gap-2 items-center">
-            <span v-for="(u, i) in evidences" :key="i" class="badge badge-lg gap-1 badge-outline">
+            <span v-for="(u, i) in attachments" :key="i" class="badge badge-lg gap-1 badge-outline">
               <i v-if="!u.tempId && !u.failed" class="fa-solid fa-spinner fa-spin"></i>
               <i v-else-if="u.failed" class="fa-solid fa-triangle-exclamation text-error"></i>
               <span class="max-w-[12rem] truncate">{{ u.name }}</span>
-              <button type="button" class="fa-solid fa-xmark" @click="evidences.splice(i, 1)"></button>
+              <button type="button" class="fa-solid fa-xmark" @click="attachments.splice(i, 1)"></button>
             </span>
             <label class="btn btn-sm btn-ghost gap-1">
               <i class="fa-solid fa-paperclip"></i>{{ t('upload') }}
-              <input type="file" class="hidden" multiple @change="(e) => pickFiles(evidences, (e.target as HTMLInputElement).files)" />
+              <input type="file" class="hidden" multiple @change="(e) => pickFiles(attachments, (e.target as HTMLInputElement).files)" />
             </label>
           </div>
         </div>

@@ -1564,9 +1564,34 @@ export interface components {
          *     at submission time; they may also appear inline in the record's rich text.
          */
         IssueRelated: {
-            evidences?: string[];
+            /**
+             * @description All supporting files for the report — evidence, letters of
+             *     authorization, … — in one flat list.
+             */
+            attachments?: string[];
+            /**
+             * @description Valid contact channel (phone etc.); required and capped at 200 chars
+             *     for rights-infringement reports.
+             */
+            contact?: string | null;
+            /**
+             * @description Whether the reporter acts on behalf of the rights holder;
+             *     informational — the letter of authorization is just another entry in
+             *     [`Self::attachments`].
+             */
+            delegated?: boolean;
+            /**
+             * @description Legacy file-based identity proofs, kept read-only for issues created
+             *     before the switch to text fields (`realName` / `contact`). New
+             *     submissions never populate it.
+             */
             identityProofs?: string[];
             originalUrl?: string | null;
+            /**
+             * @description Real name of the rights holder (or their delegate); required and
+             *     capped at 100 chars for rights-infringement reports.
+             */
+            realName?: string | null;
         };
         /**
          * @description Where an issue came from. Stored as smallint; values are stable.
