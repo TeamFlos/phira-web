@@ -5,7 +5,8 @@
 import type { IssueCategory, IssueOperation, IssueRecord, IssueSource, IssueTarget } from './model';
 
 /** Violation categories — the sub-select on the "Report Content" card, in the
- * API's stable numeric order. `question` / `featureRequest` are first-level
+ * API's stable numeric order (`other` = 8 stays last as the catch-all despite
+ * `cheatingOrDisruption` = 11). `question` / `featureRequest` are first-level
  * intents on the submit page and are not part of this list. */
 export const ISSUE_CATEGORIES: IssueCategory[] = [
   'plagiarism',
@@ -16,6 +17,7 @@ export const ISSUE_CATEGORIES: IssueCategory[] = [
   'illegal',
   'insultOrHarassment',
   'badValues',
+  'cheatingOrDisruption',
   'other',
 ];
 

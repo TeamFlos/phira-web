@@ -1497,7 +1497,7 @@ export interface components {
          *     reason and must not be confused with `RightsInfringement` (侵权).
          * @enum {string}
          */
-        IssueCategory: "plagiarism" | "rightsInfringement" | "pornographic" | "political" | "provokingConflict" | "illegal" | "insultOrHarassment" | "badValues" | "other" | "question" | "featureRequest";
+        IssueCategory: "plagiarism" | "rightsInfringement" | "pornographic" | "political" | "provokingConflict" | "illegal" | "insultOrHarassment" | "badValues" | "other" | "question" | "featureRequest" | "cheatingOrDisruption";
         IssueDetail: {
             category: components["schemas"]["IssueCategory"];
             /** Format: date-time */
