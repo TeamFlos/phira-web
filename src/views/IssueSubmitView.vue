@@ -11,6 +11,7 @@ en:
     report: Report a rule-breaking chart, collection or user
   category: Category
   target: Target
+  target-optional: optional
   target-type:
     chart: Chart
     collection: Collection
@@ -50,6 +51,7 @@ zh-CN:
     report: 举报违规的谱面、合集或用户
   category: 举报分类
   target: 举报对象
+  target-optional: 选填
   target-type:
     chart: 谱面
     collection: 合集
@@ -155,7 +157,11 @@ const delegated = ref(false);
 type Upload = { name: string; tempId?: string; failed?: boolean };
 const attachments = ref<Upload[]>([]);
 
-const needsTarget = computed(() => intent.value === 'report' && category.value !== 'other');
+/** The target picker stays visible across the whole report card. The
+ * server's `IssueCategory::needs_target` makes it optional only for `other`
+ * — filled-in targets are accepted (and existence-checked) regardless. */
+const showTarget = computed(() => intent.value === 'report');
+const targetRequired = computed(() => showTarget.value && category.value !== 'other');
 const needsOriginalUrl = computed(() => intent.value === 'report' && (category.value === 'rightsInfringement' || category.value === 'plagiarism'));
 const needsProofs = computed(() => intent.value === 'report' && category.value === 'rightsInfringement');
 const busy = computed(() => submitting.value || attachments.value.some((u) => !u.tempId && !u.failed));
@@ -187,10 +193,11 @@ function validate(): string | null {
   }
   const n = Array.from(text.value).length;
   if (n < 10 || n > 2000) return t('validate-text');
-  if (needsTarget.value) {
-    if (!targetId.value) return t('validate-id');
+  if (targetId.value) {
     const id = parseInt(targetId.value);
     if (!Number.isInteger(id) || id <= 0) return t('validate-id');
+  } else if (targetRequired.value) {
+    return t('validate-id');
   }
   if (needsProofs.value) {
     if (!realName.value.trim() || !contact.value.trim() || !attachments.value.some((u) => u.tempId)) {
@@ -221,7 +228,7 @@ async function submit() {
       text: text.value,
       category: effectiveCategory.value!,
       email: email.value,
-      target: needsTarget.value ? { type: targetType.value, id } : undefined,
+      target: showTarget.value && targetId.value ? { type: targetType.value, id } : undefined,
       related: {
         realName: needsProofs.value ? realName.value.trim() : undefined,
         contact: needsProofs.value ? contact.value.trim() : undefined,
@@ -280,8 +287,14 @@ async function submit() {
           </select>
         </div>
 
-        <div v-if="needsTarget" class="form-control">
-          <label class="label"><span class="label-text" v-t="'target'"></span></label>
+        <div v-if="showTarget" class="form-control">
+          <label class="label">
+            <span class="label-text">
+              {{ t('target') }}
+              <span v-if="targetRequired" class="text-error">*</span>
+              <span v-else class="text-xs opacity-60">({{ t('target-optional') }})</span>
+            </span>
+          </label>
           <div class="flex gap-2">
             <select class="select select-bordered w-36" v-model="targetType">
               <option value="Chart" v-t="'target-type.chart'"></option>
