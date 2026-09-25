@@ -75,10 +75,14 @@ watch(
   },
 );
 
-/** Deep-link straight to the version actually under review. */
-function target(item: ReviewQueueItem): string {
+/** Deep-link straight to the version actually under review, carrying the
+ * current queue page so the detail view can come back here after a denial. */
+function target(item: ReviewQueueItem) {
   const base = `/chart/${item.chart.id}/versions`;
-  return item.pendingVersionId ? `${base}/${item.pendingVersionId}` : base;
+  return {
+    path: item.pendingVersionId ? `${base}/${item.pendingVersionId}` : base,
+    query: { reviewPage: String(pageFromQuery()) },
+  };
 }
 </script>
 
