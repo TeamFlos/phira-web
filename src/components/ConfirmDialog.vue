@@ -22,7 +22,8 @@ async function onConfirm() {
   doing.value = true;
   try {
     await props.do();
-    dialogE.value!.close();
+    // The action may have navigated away, unmounting the dialog.
+    dialogE.value?.close();
   } catch (e) {
     toastError(e);
     if (props.onError) props.onError();
