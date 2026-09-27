@@ -95,7 +95,7 @@ async function applyVisibility() {
           <span class="flex items-center gap-1">
             <i class="fa-solid fa-star text-yellow-500"></i>
             <template v-if="entry.rating != null">
-              <span>{{ entry.rating.toFixed(1) }}</span>
+              <span>{{ (entry.rating * 5).toFixed(2) }}</span>
               <span class="opacity-50">({{ entry.ratingCount }})</span>
             </template>
             <span v-else class="opacity-50">{{ t('no-ratings') }}</span>
