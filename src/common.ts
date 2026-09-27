@@ -31,7 +31,7 @@ export function userPermissions(user: User) {
  * transparently refreshes it (see `ensureSession` in `api/client`).
  */
 export function loggedIn() {
-  return !!(getCookie('access_token') || getCookie('refresh_token'));
+  return !!(getToken('access_token') || getToken('refresh_token'));
 }
 
 export function setTitle(title: string) {
@@ -117,10 +117,11 @@ export const COOKIE_PATH = '/';
 /**
  * Cookies written by older builds omitted `path`, so the browser scoped them
  * to the directory of whatever page stored the token (`/chart`, `/user/123`,
- * …). Such leftovers shadow the real cookie and survive logout from other
- * pages, so every write/delete also expires a same-named cookie on every
- * ancestor directory of the current URL — exactly the scopes the old default
- * `path` could have produced.
+ * …). They survive logout from other pages and pollute the jar, so every
+ * write/delete also expires a same-named cookie on every ancestor directory of
+ * the current URL — exactly the scopes the old default `path` could have
+ * produced. Cookies on paths this code cannot reach are neutralized by the
+ * logout flag / shallowest-path reads instead.
  */
 function legacyCookiePaths(): string[] {
   const paths: string[] = [];
@@ -150,29 +151,68 @@ export function deleteCookie(key: string) {
   triggerCookie();
 }
 
+/**
+ * Root-scoped flag set by `logout()`. Tokens are written at the site root, but
+ * older builds used the browser default `path` (the directory of whichever
+ * page happened to store/refresh them), so a logout can only delete the scopes
+ * visible from its own URL. Stale same-named cookies on other paths would
+ * otherwise be read again once the user navigates there, so while this flag is
+ * set every token cookie is ignored — the next successful login clears it.
+ */
+const LOGGED_OUT_COOKIE = 'auth_logged_out';
+
+/** 30d, so the flag outlives any refresh token left behind by an old build. */
+function loggedOutExpiry(): string {
+  return new Date(Date.now() + 30 * 86400 * 1000).toUTCString();
+}
+
+/** Whether a logout happened in this browser since the last successful login. */
+export function isLoggedOut(): boolean {
+  return getCookie(LOGGED_OUT_COOKIE) !== undefined;
+}
+
+/**
+ * Read an auth token. Unlike raw `getCookie`, this ignores everything left
+ * behind by a logout and is what `access_token` / `refresh_token` readers
+ * must use.
+ */
+export function getToken(name: string): string | undefined {
+  if (isLoggedOut()) return undefined;
+  return getCookie(name);
+}
+
+/** A fresh login (or refresh) supersedes the logout flag. */
+export function clearLogoutFlag() {
+  deleteCookie(LOGGED_OUT_COOKIE);
+}
+
 export function logout() {
+  // Set the flag before deleting the tokens so cookie listeners never observe
+  // a half-cleared jar that still reads as logged in.
+  setCookie(LOGGED_OUT_COOKIE, '1', loggedOutExpiry());
   deleteCookie('access_token');
   deleteCookie('refresh_token');
 }
 
 /**
- * First exact-name match wins. Browsers list cookies by descending path
- * length, so a second same-named cookie (from the old directory-scoped
- * writes) no longer masks the value, as it did when the split-based lookup
- * required exactly one match.
+ * Read a cookie by name. When several cookies share the name (legacy
+ * directory-scoped writes), the shallowest path wins: browsers list longer
+ * paths first, so the last match is the site-root cookie this code writes.
  */
 export function getCookie(name: string): string | undefined {
   const prefix = `${name}=`;
+  let raw: string | undefined;
   for (const part of document.cookie.split(';')) {
     const item = part.trim();
     if (!item.startsWith(prefix)) continue;
-    const raw = item.slice(prefix.length);
-    try {
-      return decodeURIComponent(raw);
-    } catch {
-      // Cookies written before values were encoded may contain stray `%`.
-      return raw;
-    }
+    raw = item.slice(prefix.length);
+  }
+  if (raw === undefined) return undefined;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    // Cookies written before values were encoded may contain stray `%`.
+    return raw;
   }
 }
 

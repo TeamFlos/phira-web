@@ -47,7 +47,7 @@ import { useRoute } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 
-import { getCookie, addCookieListener, logout, toast, userPermissions } from '../common';
+import { getToken, addCookieListener, logout, toast, userPermissions } from '../common';
 import { useApi } from '../api/client';
 import { Permission, type User } from '../model';
 
@@ -116,7 +116,7 @@ function navActive(path: string): boolean {
 }
 
 addCookieListener(() => {
-  accessToken.value = getCookie('access_token');
+  accessToken.value = getToken('access_token');
   user.value = undefined;
   if (accessToken.value) {
     api.GET('/me').then(({ data }) => {

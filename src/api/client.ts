@@ -1,7 +1,7 @@
 import createClient, { type Client } from 'openapi-fetch';
 import type { paths } from './schema';
 import { useRouter } from 'vue-router';
-import { API_BASE, getCookie, setCookie, logout, pleaseLogin, toastError } from '../common';
+import { API_BASE, getToken, isLoggedOut, clearLogoutFlag, setCookie, logout, pleaseLogin, toastError } from '../common';
 
 /** API host shared with the existing local-development configuration. */
 const API_HOST = API_BASE;
@@ -24,6 +24,9 @@ export function storeTokens(r: { token: string; refreshToken: string; expireAt: 
   const expireAt = Date.parse(r.expireAt);
   setCookie('access_token', r.token, Number.isFinite(expireAt) ? new Date(expireAt).toUTCString() : refreshCookieExpiry());
   setCookie('refresh_token', r.refreshToken, refreshCookieExpiry());
+  // Lift the logout flag only after the fresh tokens are in place, so cookie
+  // listeners never briefly observe an old token that a logout invalidated.
+  clearLogoutFlag();
 }
 
 // --- refresh de-dup -------------------------------------------------------
@@ -55,6 +58,9 @@ async function doRefresh(refreshToken: string): Promise<RefreshResult> {
     return 'error';
   }
   if (resp.ok) {
+    // A logout that happened (in another tab) while this refresh was in flight
+    // wins; keep the session cleared instead of resurrecting it.
+    if (isLoggedOut()) return 'rejected';
     const data = (await resp.json()) as { token: string; refreshToken: string; expireAt: string };
     storeTokens(data);
     return 'ok';
@@ -69,7 +75,7 @@ function ensureRefreshed(refreshToken: string): Promise<RefreshResult> {
     refreshing = withRefreshLock(async () => {
       // Another tab may have refreshed while we queued for the lock; the new
       // tokens are already in the shared cookie jar, so use them as-is.
-      const current = getCookie('refresh_token');
+      const current = getToken('refresh_token');
       if (!current) return 'rejected';
       if (current !== refreshToken) return 'ok';
       return doRefresh(refreshToken);
@@ -89,8 +95,8 @@ function ensureRefreshed(refreshToken: string): Promise<RefreshResult> {
  * rejection clears the stored session.
  */
 export async function ensureSession(): Promise<boolean> {
-  if (getCookie('access_token')) return true;
-  const refreshToken = getCookie('refresh_token');
+  if (getToken('access_token')) return true;
+  const refreshToken = getToken('refresh_token');
   if (!refreshToken) return false;
   const result = await ensureRefreshed(refreshToken);
   if (result === 'rejected') {
@@ -124,7 +130,7 @@ export function useApi(): Client<paths> {
     // can therefore replay the original request exactly once after refresh.
     onRequest: ({ request, id }) => {
       const headers = new Headers(request.headers);
-      const token = getCookie('access_token');
+      const token = getToken('access_token');
       if (token) headers.set('Authorization', `Bearer ${token}`);
       const next = new Request(request, { headers });
       replaySources.set(id, next.clone());
@@ -134,7 +140,7 @@ export function useApi(): Client<paths> {
       const source = replaySources.get(id);
       replaySources.delete(id);
       if (response.status !== 401 || schemaPath === '/login') return;
-      const refreshToken = getCookie('refresh_token');
+      const refreshToken = getToken('refresh_token');
       const result = refreshToken ? await ensureRefreshed(refreshToken) : 'rejected';
       if (result === 'rejected') {
         logout();
@@ -144,7 +150,7 @@ export function useApi(): Client<paths> {
       // Transient refresh failure: keep the session and surface the 401
       // instead of logging the user out over a hiccup.
       if (result === 'error' || !source) return;
-      const token = getCookie('access_token');
+      const token = getToken('access_token');
       if (!token) return;
       const headers = new Headers(source.headers);
       headers.set('Authorization', `Bearer ${token}`);
