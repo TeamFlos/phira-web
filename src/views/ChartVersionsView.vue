@@ -204,7 +204,8 @@ watch(
 );
 
 function syncUrl(versionId: number, replace = false) {
-  const to = { path: `/chart/${id}/versions/${versionId}`, hash: route.hash };
+  // Keep query params (e.g. the review-queue origin) across version switches.
+  const to = { path: `/chart/${id}/versions/${versionId}`, hash: route.hash, query: route.query };
   // Return the navigation promise so callers can wait for `route` to settle.
   return replace ? router.replace(to) : router.push(to);
 }
@@ -217,7 +218,7 @@ function select(versionId: number) {
 }
 
 function switchTab(name: 'detail' | 'diff') {
-  router.replace({ path: route.path, hash: '#' + name });
+  router.replace({ path: route.path, hash: '#' + name, query: route.query });
 }
 
 /** Picking what to compare against from the timeline is only meaningful on the
@@ -235,6 +236,20 @@ async function refresh() {
   if (!allVersions.value.some((v) => v.id === selectedId.value)) {
     selectedId.value = preferredVersion()?.id;
   }
+}
+
+/** A denied chart can disappear immediately, so reloading this page would only
+ * produce a NOT_FOUND toast. Replace the now-dead entry with the review queue
+ * instead, restoring the page the item was opened from. */
+function backToReviewQueue() {
+  const n = parseInt(String(route.query.reviewPage));
+  const page = Number.isInteger(n) && n > 1 ? String(n) : undefined;
+  router.replace({ name: 'review-queue', query: { page } });
+}
+
+function onReviewed(action: 'approve' | 'deny') {
+  if (action === 'deny') backToReviewQueue();
+  else refresh();
 }
 </script>
 
@@ -303,7 +318,7 @@ async function refresh() {
               :uploader-id="chart?.uploader"
               :version="selected"
               :findings="metadataFindings"
-              @reviewed="refresh" />
+              @reviewed="onReviewed" />
           </template>
           <p v-else-if="!loading" class="italic opacity-60 py-8 text-center" v-t="'empty'"></p>
         </div>

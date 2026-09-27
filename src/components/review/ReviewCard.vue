@@ -109,7 +109,7 @@ function censorTemplateBody(): string {
 const api = useApi();
 
 const props = defineProps<{ chart: number; uploaderId: number | undefined; version: ChartVersion; findings: MetadataFinding[] }>();
-const emit = defineEmits<{ (e: 'reviewed'): void }>();
+const emit = defineEmits<{ (e: 'reviewed', action: Action): void }>();
 
 const { loading, copyright, copyrightQuery, copyrightSuppressed, censorHits, stolenMatches, duplicateMatches, problem, hasProblems } = useReviewChecks(
   () => props.version,
@@ -249,12 +249,13 @@ function openConfirm() {
 }
 
 async function submitVote() {
-  if (submitting.value) return;
+  const decision = action.value;
+  if (submitting.value || !decision) return;
   submitting.value = true;
   try {
-    const { passed } = await reviewChart(api, props.chart, action.value === 'approve' ? { approve: true } : { approve: false, reason: reason.value.trim() });
-    toast(t(action.value === 'approve' ? (passed ? 'approved-passed' : 'approved') : 'denied'), 'success');
-    emit('reviewed');
+    const { passed } = await reviewChart(api, props.chart, decision === 'approve' ? { approve: true } : { approve: false, reason: reason.value.trim() });
+    toast(t(decision === 'approve' ? (passed ? 'approved-passed' : 'approved') : 'denied'), 'success');
+    emit('reviewed', decision);
   } catch (e) {
     toastError(e);
   } finally {

@@ -48,6 +48,9 @@ const initialPage = pageFromQuery();
 const items = ref<ReviewQueueItem[]>();
 const totalCount = ref(0);
 const pagination = ref<typeof PageIndicator>();
+/** The page on screen. Usually matches ?page=, but may step back after the
+ * queue shrinks (see `load`). */
+const currentPage = ref(initialPage);
 
 async function load(page: number) {
   items.value = undefined;
@@ -59,8 +62,17 @@ async function load(page: number) {
     items.value = [];
     return;
   }
-  items.value = data.results as ReviewQueueItem[];
+  // Denying a chart drops it from the queue, which can empty the last page —
+  // e.g. returning from page 2 that held a single entry. Step back to the last
+  // page that still has entries instead of stranding the reviewer on a blank
+  // list with no paginator to escape it.
+  const lastPage = Math.max(1, Math.ceil(data.count / PAGE_NUM));
+  if (page > lastPage) return load(lastPage);
   totalCount.value = data.count;
+  currentPage.value = page;
+  items.value = data.results as ReviewQueueItem[];
+  // replace(): paging shouldn't spam history; undefined drops the param on page 1.
+  if (page !== pageFromQuery()) router.replace({ query: { ...route.query, page: page > 1 ? String(page) : undefined } });
 }
 
 await load(initialPage);
@@ -68,17 +80,19 @@ await load(initialPage);
 watch(
   () => pagination.value?.current,
   (page) => {
-    if (page === undefined) return;
+    if (page === undefined || page === currentPage.value) return;
     load(page);
-    // replace(): paging shouldn't spam history; undefined drops the param on page 1.
-    if (page !== pageFromQuery()) router.replace({ query: { ...route.query, page: page > 1 ? String(page) : undefined } });
   },
 );
 
-/** Deep-link straight to the version actually under review. */
-function target(item: ReviewQueueItem): string {
+/** Deep-link straight to the version actually under review, carrying the
+ * current queue page so the detail view can come back here after a denial. */
+function target(item: ReviewQueueItem) {
   const base = `/chart/${item.chart.id}/versions`;
-  return item.pendingVersionId ? `${base}/${item.pendingVersionId}` : base;
+  return {
+    path: item.pendingVersionId ? `${base}/${item.pendingVersionId}` : base,
+    query: { reviewPage: String(pageFromQuery()) },
+  };
 }
 </script>
 
@@ -121,7 +135,7 @@ function target(item: ReviewQueueItem): string {
         </router-link>
       </div>
 
-      <PageIndicator v-if="totalCount > PAGE_NUM" :init="initialPage" :total="pageCount(totalCount, PAGE_NUM)" class="mt-4" ref="pagination" />
+      <PageIndicator v-if="totalCount > PAGE_NUM" :init="currentPage" :total="pageCount(totalCount, PAGE_NUM)" class="mt-4" ref="pagination" />
     </div>
   </div>
 </template>
