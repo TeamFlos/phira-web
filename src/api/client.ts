@@ -65,9 +65,11 @@ async function doRefresh(refreshToken: string): Promise<RefreshResult> {
     storeTokens(data);
     return 'ok';
   }
-  // A 4xx means the refresh token itself was rejected (expired/revoked), so
-  // the session is gone. Transient failures (5xx, network) must keep it.
-  return resp.status >= 400 && resp.status < 500 ? 'rejected' : 'error';
+  // Only the API's "login failed" answers mean the refresh token is dead:
+  // 400 is the documented failure, 401 is what a bad refresh token returns,
+  // 403 covers account-level denials. Anything else — notably 429 Too Many
+  // Requests — is transient and must keep the session.
+  return resp.status === 400 || resp.status === 401 || resp.status === 403 ? 'rejected' : 'error';
 }
 
 function ensureRefreshed(refreshToken: string): Promise<RefreshResult> {
