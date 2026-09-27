@@ -1,7 +1,7 @@
 import createClient, { type Client } from 'openapi-fetch';
 import type { paths } from './schema';
 import { useRouter } from 'vue-router';
-import { API_BASE, getCookie, setCookie, logout, pleaseLogin, toastError } from '../common';
+import { API_BASE, batchCookieChanges, clearLogoutFlag, getAuthEpoch, getToken, isLoggedOut, logout, pleaseLogin, rotateAuthEpoch, setCookie, toastError } from '../common';
 
 /** API host shared with the existing local-development configuration. */
 const API_HOST = API_BASE;
@@ -17,48 +17,143 @@ function refreshCookieExpiry(): string {
  * JS-readable cookies (SameSite=None; Secure via `setCookie`) — the API never
  * sets them, we just use the cookie as client-side storage.
  */
-export function storeTokens(r: { token: string; refreshToken: string; expireAt: string }) {
-  setCookie('access_token', r.token, new Date(Date.parse(r.expireAt)).toUTCString());
-  setCookie('refresh_token', r.refreshToken, refreshCookieExpiry());
+export function storeTokens(r: { token: string; refreshToken: string; expireAt: string }, expectedEpoch?: string, expectedRefreshToken?: string): boolean {
+  // A response must not be allowed to undo a logout or overwrite a newer
+  // login which happened while its request was in flight.
+  if (expectedEpoch !== undefined && getAuthEpoch() !== expectedEpoch) return false;
+  if (expectedRefreshToken !== undefined && getToken('refresh_token') !== expectedRefreshToken) return false;
+
+  // `expireAt` is RFC3339. If it ever fails to parse, use the documented access
+  // token lifetime rather than the refresh lifetime; an unparseable `expires`
+  // would otherwise silently turn the cookie into a session cookie.
+  const expireAt = Date.parse(r.expireAt);
+  const accessCookieExpiry = Number.isFinite(expireAt) ? new Date(expireAt).toUTCString() : new Date(Date.now() + 6 * 60 * 60 * 1000).toUTCString();
+  batchCookieChanges(() => {
+    // A new login starts a new session epoch. Refresh keeps the epoch stable
+    // so an unrelated in-flight login is not discarded just because the
+    // existing session renewed in another request/tab.
+    if (expectedRefreshToken === undefined) rotateAuthEpoch();
+    setCookie('access_token', r.token, accessCookieExpiry);
+    setCookie('refresh_token', r.refreshToken, refreshCookieExpiry());
+    // Lift the logout flag only after the fresh tokens are in place, so cookie
+    // listeners never briefly observe an old token that a logout invalidated.
+    clearLogoutFlag();
+  });
+  return true;
 }
 
 // --- refresh de-dup -------------------------------------------------------
 // A single in-flight refresh promise shared across concurrent 401s so we don't
 // burn the (still-valid) refresh token N times at once.
-let refreshing: Promise<boolean> | null = null;
+type RefreshResult = 'ok' | 'rejected' | 'error';
+type RefreshFlight = {
+  refreshToken: string;
+  epoch: string;
+  promise: Promise<RefreshResult>;
+};
+let refreshing: RefreshFlight | null = null;
 
-/** Exchange the refresh token for a fresh pair; `false` means rejected, throws on network failure. */
-async function doRefresh(refreshToken: string): Promise<boolean> {
-  const resp = await fetch(`${API_HOST}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
-  });
-  if (!resp.ok) return false;
-  const data = (await resp.json()) as { token: string; refreshToken: string; expireAt: string };
-  storeTokens(data);
-  return true;
+type LockManagerLike = {
+  request<T>(name: string, callback: () => Promise<T>): Promise<T>;
+};
+
+/**
+ * Serialize refreshes across tabs (Web Locks, when available). Refresh tokens
+ * rotate on every exchange, so two tabs refreshing the same token at once
+ * would make one of them see a rejected token and tear down the session both
+ * tabs share through their common cookies.
+ */
+function withRefreshLock<T>(fn: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator !== 'undefined' ? (navigator as Navigator & { locks?: LockManagerLike }).locks : undefined;
+  return locks ? locks.request('phira-web-refresh', fn) : fn();
 }
 
-function ensureRefreshed(refreshToken: string): Promise<boolean> {
-  if (!refreshing) {
-    refreshing = doRefresh(refreshToken)
-      .catch(() => false)
-      .finally(() => {
-        refreshing = null;
-      });
+function resultAfterAuthChange(): RefreshResult {
+  return isLoggedOut() || !getToken('refresh_token') ? 'rejected' : 'ok';
+}
+
+/** Exchange the refresh token for a fresh pair. */
+async function doRefresh(refreshToken: string, epoch: string): Promise<RefreshResult> {
+  let resp: Response;
+  try {
+    resp = await fetch(`${API_HOST}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+  } catch {
+    return getAuthEpoch() === epoch ? 'error' : resultAfterAuthChange();
   }
-  return refreshing;
+
+  // A logout or a newer login has precedence over every response from the old
+  // session, including a response saying that the old refresh token expired.
+  if (getAuthEpoch() !== epoch) return resultAfterAuthChange();
+  // Another tab may have completed a refresh while this request was in flight.
+  // Its rotated token is now authoritative; ignore both stale successes and
+  // stale rejection responses.
+  if (getToken('refresh_token') !== refreshToken) return resultAfterAuthChange();
+
+  if (resp.ok) {
+    try {
+      const data = (await resp.json()) as { token: string; refreshToken: string; expireAt: string };
+      return storeTokens(data, epoch, refreshToken) ? 'ok' : resultAfterAuthChange();
+    } catch {
+      return 'error';
+    }
+  }
+  // Only the API's "login failed" answers mean the refresh token is dead:
+  // 400 is the documented failure, 401 is what a bad refresh token returns,
+  // 403 covers account-level denials. Anything else — notably 429 Too Many
+  // Requests — is transient and must keep the session.
+  return resp.status === 400 || resp.status === 401 || resp.status === 403 ? 'rejected' : 'error';
+}
+
+function ensureRefreshed(refreshToken: string, epoch: string): Promise<RefreshResult> {
+  if (refreshing?.refreshToken === refreshToken && refreshing.epoch === epoch) return refreshing.promise;
+
+  const promise = withRefreshLock(async () => {
+    // Another tab may have refreshed while we queued for the lock; the new
+    // tokens are already in the shared cookie jar, so use them as-is.
+    const current = getToken('refresh_token');
+    if (!current) return 'rejected';
+    if (getAuthEpoch() !== epoch || current !== refreshToken) return resultAfterAuthChange();
+    return doRefresh(refreshToken, epoch);
+  }).catch((): RefreshResult => 'error');
+  const flight: RefreshFlight = { refreshToken, epoch, promise };
+  refreshing = flight;
+  void promise.then(
+    () => {
+      if (refreshing === flight) refreshing = null;
+    },
+    () => {
+      if (refreshing === flight) refreshing = null;
+    },
+  );
+  return promise;
+}
+
+/**
+ * Make sure an access token is available, refreshing it when only the 30d
+ * refresh token is left (cold start, or the 6h access cookie expired while
+ * the tab stayed open). Returns whether a session exists; an outright
+ * rejection clears the stored session.
+ */
+export async function ensureSession(): Promise<boolean> {
+  if (getToken('access_token')) return true;
+  const refreshToken = getToken('refresh_token');
+  if (!refreshToken) return false;
+  const epoch = getAuthEpoch();
+  const result = await ensureRefreshed(refreshToken, epoch);
+  if (result === 'rejected') {
+    if (logout(epoch)) return false;
+    return !!getToken('access_token');
+  }
+  return result !== 'error' && !!getToken('access_token');
 }
 
 /** On a cold start the 401 refresh above never fires, so restore the session manually. */
 export async function bootstrapAuth(): Promise<void> {
-  if (getCookie('access_token') || !getCookie('refresh_token')) return;
-  try {
-    if (!(await doRefresh(getCookie('refresh_token')!))) logout();
-  } catch {
-    // offline / server unreachable — keep the refresh token for the next load
-  }
+  await ensureSession();
 }
 
 /**
@@ -73,33 +168,66 @@ export async function bootstrapAuth(): Promise<void> {
 export function useApi(): Client<paths> {
   const router = useRouter();
   const client = createClient<paths>({ baseUrl: API_HOST });
-  const replaySources = new Map();
+  type ReplaySource = {
+    request: Request;
+    accessToken?: string;
+    epoch: string;
+  };
+  const replaySources = new Map<string, ReplaySource>();
+
+  function replay(source: ReplaySource, token: string, fetch: typeof globalThis.fetch) {
+    const headers = new Headers(source.request.headers);
+    headers.set('Authorization', `Bearer ${token}`);
+    return fetch(new Request(source.request, { headers }));
+  }
+
+  function endSession(source?: ReplaySource): boolean {
+    if (logout(source?.epoch)) return true;
+    // bootstrapAuth may have discovered the invalid refresh token before this
+    // request's 401 handler. It already cleared the cookies, so still route a
+    // protected request to login even though this handler cannot own logout.
+    return !!source && source.epoch !== getAuthEpoch() && !getToken('refresh_token');
+  }
 
   client.use({
     // Keep an unread clone before fetch disturbs POST/PUT bodies. A later 401
     // can therefore replay the original request exactly once after refresh.
     onRequest: ({ request, id }) => {
       const headers = new Headers(request.headers);
-      const token = getCookie('access_token');
+      const token = getToken('access_token');
       if (token) headers.set('Authorization', `Bearer ${token}`);
       const next = new Request(request, { headers });
-      replaySources.set(id, next.clone());
+      replaySources.set(id, { request: next.clone(), accessToken: token, epoch: getAuthEpoch() });
       return next;
     },
     onResponse: async ({ response, schemaPath, id, options }) => {
       const source = replaySources.get(id);
       replaySources.delete(id);
       if (response.status !== 401 || schemaPath === '/login') return;
-      const refreshToken = getCookie('refresh_token');
-      if (!refreshToken || !(await ensureRefreshed(refreshToken))) {
-        logout();
-        pleaseLogin(router);
+
+      // Never replay a request under a different signed-in account.
+      if (source && source.epoch !== getAuthEpoch() && (getToken('access_token') || getToken('refresh_token'))) return;
+
+      const currentToken = getToken('access_token');
+      // Another request/tab may already have rotated the access token. Do not
+      // rotate the refresh token a second time just because this request was
+      // sent with the old token.
+      if (source && currentToken && source.accessToken !== currentToken) {
+        return replay(source, currentToken, options.fetch);
+      }
+
+      const refreshToken = getToken('refresh_token');
+      const result = refreshToken ? await ensureRefreshed(refreshToken, source?.epoch ?? getAuthEpoch()) : 'rejected';
+      if (result === 'rejected') {
+        if (endSession(source)) pleaseLogin(router);
         return;
       }
-      if (!source) return;
-      const headers = new Headers(source.headers);
-      headers.set('Authorization', `Bearer ${getCookie('access_token')}`);
-      return options.fetch(new Request(source, { headers }));
+      // Transient refresh failure: keep the session and surface the 401
+      // instead of logging the user out over a hiccup.
+      if (result === 'error' || !source) return;
+      const token = getToken('access_token');
+      if (!token) return;
+      return replay(source, token, options.fetch);
     },
     onError: ({ id }) => {
       replaySources.delete(id);

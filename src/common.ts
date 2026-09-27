@@ -25,8 +25,13 @@ export function userPermissions(user: User) {
   return Roles.from(user.roles).permissions(user.banned);
 }
 
+/**
+ * A session still exists when either token is present: the 6h access token may
+ * have lapsed while the 30d refresh token is fine, and the next API call then
+ * transparently refreshes it (see `ensureSession` in `api/client`).
+ */
 export function loggedIn() {
-  return !!getCookie('access_token');
+  return !!(getToken('access_token') || getToken('refresh_token'));
 }
 
 export function setTitle(title: string) {
@@ -101,30 +106,185 @@ export function validatePassword(t: any, password: string, repeat?: string) {
 
 const cookieListener: (() => void)[] = [];
 
-function triggerCookie() {
+const AUTH_CHANGE_STORAGE_KEY = 'phira-auth-change';
+let cookieBatchDepth = 0;
+let cookieChangePending = false;
+
+function notifyCookieListeners() {
   for (const listener of cookieListener) listener();
 }
 
+function broadcastCookieChange() {
+  try {
+    // Cookies do not generate an event in other tabs. A throw here is expected
+    // in private browsing / storage-disabled environments, so cookie auth must
+    // continue to work without the cross-tab notification.
+    localStorage.setItem(AUTH_CHANGE_STORAGE_KEY, `${Date.now()}:${Math.random()}`);
+  } catch {
+    // Ignore storage failures; the cookie remains the source of truth.
+  }
+}
+
+function triggerCookie() {
+  if (cookieBatchDepth) {
+    cookieChangePending = true;
+    return;
+  }
+  notifyCookieListeners();
+  broadcastCookieChange();
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === AUTH_CHANGE_STORAGE_KEY) notifyCookieListeners();
+  });
+}
+
+/** Apply a group of cookie changes as one observable auth-state transition. */
+export function batchCookieChanges(action: () => void) {
+  cookieBatchDepth++;
+  try {
+    action();
+  } finally {
+    cookieBatchDepth--;
+    if (!cookieBatchDepth && cookieChangePending) {
+      cookieChangePending = false;
+      triggerCookie();
+    }
+  }
+}
+
+/** Every auth cookie is stored at the site root so its scope doesn't depend on
+ * which page happened to (re)write it. */
+export const COOKIE_PATH = '/';
+
+/**
+ * Cookies written by older builds omitted `path`, so the browser scoped them
+ * to the directory of whatever page stored the token (`/chart`, `/user/123`,
+ * …). They survive logout from other pages and pollute the jar, so every
+ * write/delete also expires a same-named cookie on every ancestor directory of
+ * the current URL — exactly the scopes the old default `path` could have
+ * produced. Cookies on paths this code cannot reach are neutralized by the
+ * logout flag / shallowest-path reads instead.
+ */
+function legacyCookiePaths(): string[] {
+  const paths: string[] = [];
+  const pathname = location.pathname;
+  const segments = pathname.split('/').filter(Boolean);
+  const directoryCount = pathname.endsWith('/') ? segments.length : segments.length - 1;
+  let path = '';
+  for (let i = 0; i < directoryCount; i++) {
+    path += `/${segments[i]}`;
+    paths.push(path);
+  }
+  return paths;
+}
+
 export function setCookie(key: string, value: string, expires: string) {
-  document.cookie = `${key}=${value}; expires=${expires}; SameSite=None; Secure`;
+  document.cookie = `${key}=${encodeURIComponent(value)}; expires=${expires}; path=${COOKIE_PATH}; SameSite=None; Secure`;
+  for (const path of legacyCookiePaths()) {
+    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}; SameSite=None; Secure`;
+  }
   triggerCookie();
 }
 
 export function deleteCookie(key: string) {
-  document.cookie = `${key}=test; Max-Age=-99999999; SameSite=None; Secure`;
+  const expired = 'Thu, 01 Jan 1970 00:00:00 GMT';
+  document.cookie = `${key}=; expires=${expired}; Max-Age=0; path=${COOKIE_PATH}; SameSite=None; Secure`;
+  for (const path of legacyCookiePaths()) {
+    document.cookie = `${key}=; expires=${expired}; Max-Age=0; path=${path}; SameSite=None; Secure`;
+  }
   triggerCookie();
 }
 
-export function logout() {
-  deleteCookie('access_token');
-  deleteCookie('refresh_token');
+/**
+ * Root-scoped flag set by `logout()`. Tokens are written at the site root, but
+ * older builds used the browser default `path` (the directory of whichever
+ * page happened to store/refresh them), so a logout can only delete the scopes
+ * visible from its own URL. Stale same-named cookies on other paths would
+ * otherwise be read again once the user navigates there, so while this flag is
+ * set every token cookie is ignored — the next successful login clears it.
+ */
+const LOGGED_OUT_COOKIE = 'auth_logged_out';
+
+/** 30d, so the flag outlives any refresh token left behind by an old build. */
+function authCookieExpiry(): string {
+  return new Date(Date.now() + 30 * 86400 * 1000).toUTCString();
 }
 
-// From https://stackoverflow.com/questions/10730362/get-cookie-by-name
+function newAuthEpoch(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return `${Date.now()}-${Math.random()}`;
+}
+
+/**
+ * Changes whenever the active auth state is replaced. Refresh responses keep
+ * the epoch they started with; this prevents a late response from resurrecting
+ * a session after logout or overwriting a newer login.
+ */
+export function getAuthEpoch(): string {
+  return getCookie('auth_epoch') ?? '';
+}
+
+export function rotateAuthEpoch(): string {
+  const epoch = newAuthEpoch();
+  setCookie('auth_epoch', epoch, authCookieExpiry());
+  return epoch;
+}
+
+/** Whether a logout happened in this browser since the last successful login. */
+export function isLoggedOut(): boolean {
+  return getCookie(LOGGED_OUT_COOKIE) !== undefined;
+}
+
+/**
+ * Read an auth token. Unlike raw `getCookie`, this ignores everything left
+ * behind by a logout and is what `access_token` / `refresh_token` readers
+ * must use.
+ */
+export function getToken(name: string): string | undefined {
+  if (isLoggedOut()) return undefined;
+  return getCookie(name);
+}
+
+/** A fresh login (or refresh) supersedes the logout flag. */
+export function clearLogoutFlag() {
+  deleteCookie(LOGGED_OUT_COOKIE);
+}
+
+export function logout(expectedEpoch?: string): boolean {
+  if (expectedEpoch !== undefined && getAuthEpoch() !== expectedEpoch) return false;
+  batchCookieChanges(() => {
+    // The epoch and flag are written before deleting tokens. The batch keeps
+    // listeners from observing any of those intermediate states.
+    rotateAuthEpoch();
+    setCookie(LOGGED_OUT_COOKIE, '1', authCookieExpiry());
+    deleteCookie('access_token');
+    deleteCookie('refresh_token');
+  });
+  return true;
+}
+
+/**
+ * Read a cookie by name. When several cookies share the name (legacy
+ * directory-scoped writes), the shallowest path wins: browsers list longer
+ * paths first, so the last match is the site-root cookie this code writes.
+ */
 export function getCookie(name: string): string | undefined {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()!.split(';').shift();
+  const prefix = `${name}=`;
+  let raw: string | undefined;
+  for (const part of document.cookie.split(';')) {
+    const item = part.trim();
+    if (!item.startsWith(prefix)) continue;
+    raw = item.slice(prefix.length);
+  }
+  if (raw === undefined) return undefined;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    // Cookies written before values were encoded may contain stray `%`.
+    return raw;
+  }
 }
 
 export function addCookieListener(listener: () => void) {
