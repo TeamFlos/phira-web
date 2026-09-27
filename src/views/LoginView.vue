@@ -39,7 +39,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { API_BASE, validateEmail, validatePassword, toast, changeLocale, type IConfirmDialog } from '../common';
+import { API_BASE, getAuthEpoch, validateEmail, validatePassword, toast, changeLocale, type IConfirmDialog } from '../common';
 import { useApi, storeTokens, apiError } from '../api/client';
 
 import LoadOr from '../components/LoadOr.vue';
@@ -63,6 +63,7 @@ let pendingBody: { email: string; password: string } | undefined;
 const deleteRequestDialog = ref<IConfirmDialog>();
 
 async function performLogin(body: { email: string; password: string }, cancelDeleteRequest = false) {
+  const epoch = getAuthEpoch();
   const { data, error } = await api.POST('/login', {
     body: { ...body, cancelDeleteRequest },
   });
@@ -76,7 +77,10 @@ async function performLogin(body: { email: string; password: string }, cancelDel
     errorMessage.value = err.message || t('login-failed');
     return;
   }
-  storeTokens(data);
+  // Do not let a login response that started before logout resurrect the old
+  // session. The user can submit the form again if the state changed while it
+  // was in flight.
+  if (!storeTokens(data, epoch)) return;
   toast(t('logged-in'));
   router.back();
   api.GET('/me').then(({ data: me }) => {

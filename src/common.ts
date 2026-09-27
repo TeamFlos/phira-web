@@ -106,8 +106,52 @@ export function validatePassword(t: any, password: string, repeat?: string) {
 
 const cookieListener: (() => void)[] = [];
 
-function triggerCookie() {
+const AUTH_CHANGE_STORAGE_KEY = 'phira-auth-change';
+let cookieBatchDepth = 0;
+let cookieChangePending = false;
+
+function notifyCookieListeners() {
   for (const listener of cookieListener) listener();
+}
+
+function broadcastCookieChange() {
+  try {
+    // Cookies do not generate an event in other tabs. A throw here is expected
+    // in private browsing / storage-disabled environments, so cookie auth must
+    // continue to work without the cross-tab notification.
+    localStorage.setItem(AUTH_CHANGE_STORAGE_KEY, `${Date.now()}:${Math.random()}`);
+  } catch {
+    // Ignore storage failures; the cookie remains the source of truth.
+  }
+}
+
+function triggerCookie() {
+  if (cookieBatchDepth) {
+    cookieChangePending = true;
+    return;
+  }
+  notifyCookieListeners();
+  broadcastCookieChange();
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === AUTH_CHANGE_STORAGE_KEY) notifyCookieListeners();
+  });
+}
+
+/** Apply a group of cookie changes as one observable auth-state transition. */
+export function batchCookieChanges(action: () => void) {
+  cookieBatchDepth++;
+  try {
+    action();
+  } finally {
+    cookieBatchDepth--;
+    if (!cookieBatchDepth && cookieChangePending) {
+      cookieChangePending = false;
+      triggerCookie();
+    }
+  }
 }
 
 /** Every auth cookie is stored at the site root so its scope doesn't depend on
@@ -125,9 +169,11 @@ export const COOKIE_PATH = '/';
  */
 function legacyCookiePaths(): string[] {
   const paths: string[] = [];
-  const segments = location.pathname.split('/').filter(Boolean);
+  const pathname = location.pathname;
+  const segments = pathname.split('/').filter(Boolean);
+  const directoryCount = pathname.endsWith('/') ? segments.length : segments.length - 1;
   let path = '';
-  for (let i = 0; i < segments.length - 1; i++) {
+  for (let i = 0; i < directoryCount; i++) {
     path += `/${segments[i]}`;
     paths.push(path);
   }
@@ -162,8 +208,28 @@ export function deleteCookie(key: string) {
 const LOGGED_OUT_COOKIE = 'auth_logged_out';
 
 /** 30d, so the flag outlives any refresh token left behind by an old build. */
-function loggedOutExpiry(): string {
+function authCookieExpiry(): string {
   return new Date(Date.now() + 30 * 86400 * 1000).toUTCString();
+}
+
+function newAuthEpoch(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return `${Date.now()}-${Math.random()}`;
+}
+
+/**
+ * Changes whenever the active auth state is replaced. Refresh responses keep
+ * the epoch they started with; this prevents a late response from resurrecting
+ * a session after logout or overwriting a newer login.
+ */
+export function getAuthEpoch(): string {
+  return getCookie('auth_epoch') ?? '';
+}
+
+export function rotateAuthEpoch(): string {
+  const epoch = newAuthEpoch();
+  setCookie('auth_epoch', epoch, authCookieExpiry());
+  return epoch;
 }
 
 /** Whether a logout happened in this browser since the last successful login. */
@@ -186,12 +252,17 @@ export function clearLogoutFlag() {
   deleteCookie(LOGGED_OUT_COOKIE);
 }
 
-export function logout() {
-  // Set the flag before deleting the tokens so cookie listeners never observe
-  // a half-cleared jar that still reads as logged in.
-  setCookie(LOGGED_OUT_COOKIE, '1', loggedOutExpiry());
-  deleteCookie('access_token');
-  deleteCookie('refresh_token');
+export function logout(expectedEpoch?: string): boolean {
+  if (expectedEpoch !== undefined && getAuthEpoch() !== expectedEpoch) return false;
+  batchCookieChanges(() => {
+    // The epoch and flag are written before deleting tokens. The batch keeps
+    // listeners from observing any of those intermediate states.
+    rotateAuthEpoch();
+    setCookie(LOGGED_OUT_COOKIE, '1', authCookieExpiry());
+    deleteCookie('access_token');
+    deleteCookie('refresh_token');
+  });
+  return true;
 }
 
 /**

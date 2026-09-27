@@ -300,10 +300,10 @@ changeLocale(locale);
 const app = createApp(App);
 app.use(i18n).use(router).use(FloatingVue);
 
-// Restore any surviving session before mount.
-void (async () => {
-  await bootstrapAuth();
-  app.mount('#app');
-})();
+// Mount immediately. A refresh token may require a network request, and auth
+// failures must not leave the whole application blank; API requests started
+// during bootstrap share the same refresh flight.
+app.mount('#app');
+void bootstrapAuth();
 
 export { i18n };

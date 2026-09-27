@@ -43,11 +43,11 @@ zh-CN:
 
 <script lang="ts">
 import { ref, watch, onUnmounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 
-import { getToken, addCookieListener, logout, toast, userPermissions } from '../common';
+import { getAuthEpoch, getToken, addCookieListener, loggedIn, logout, toast, userPermissions } from '../common';
 import { useApi } from '../api/client';
 import { Permission, type User } from '../model';
 
@@ -80,9 +80,11 @@ watch(
 );
 
 const route = useRoute();
+const router = useRouter();
 
 const api = useApi();
 
+const sessionActive = ref(false);
 const accessToken = ref<string>();
 const user = ref<User>();
 const drawerOpened = ref(false);
@@ -116,11 +118,18 @@ function navActive(path: string): boolean {
 }
 
 addCookieListener(() => {
-  accessToken.value = getToken('access_token');
+  const wasActive = sessionActive.value;
+  const token = getToken('access_token');
+  const epoch = getAuthEpoch();
+  sessionActive.value = loggedIn();
+  accessToken.value = token;
   user.value = undefined;
-  if (accessToken.value) {
+  if (wasActive && !sessionActive.value && route.name !== 'login') void router.push('/login');
+  if (token) {
     api.GET('/me').then(({ data }) => {
-      if (data) user.value = data as User;
+      // A response from the previous session must not repopulate the header
+      // after logout or after another tab has logged into a different session.
+      if (data && accessToken.value === token && getAuthEpoch() === epoch) user.value = data as User;
     });
   }
 });
@@ -178,7 +187,7 @@ onUnmounted(() => {
               <i class="fa-solid fa-moon swap-on fill-current"></i>
               <i class="fa-solid fa-sun swap-off fill-current"></i>
             </label>
-            <router-link v-if="!accessToken" to="/login" class="btn" v-t="'login'"></router-link>
+            <router-link v-if="!sessionActive" to="/login" class="btn" v-t="'login'"></router-link>
             <template v-else>
               <div class="dropdown dropdown-end">
                 <label tabindex="0" class="btn btn-ghost btn-circle avatar">
