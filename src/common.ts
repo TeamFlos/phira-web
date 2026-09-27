@@ -25,8 +25,13 @@ export function userPermissions(user: User) {
   return Roles.from(user.roles).permissions(user.banned);
 }
 
+/**
+ * A session still exists when either token is present: the 6h access token may
+ * have lapsed while the 30d refresh token is fine, and the next API call then
+ * transparently refreshes it (see `ensureSession` in `api/client`).
+ */
 export function loggedIn() {
-  return !!getCookie('access_token');
+  return !!(getCookie('access_token') || getCookie('refresh_token'));
 }
 
 export function setTitle(title: string) {
@@ -105,13 +110,43 @@ function triggerCookie() {
   for (const listener of cookieListener) listener();
 }
 
+/** Every auth cookie is stored at the site root so its scope doesn't depend on
+ * which page happened to (re)write it. */
+export const COOKIE_PATH = '/';
+
+/**
+ * Cookies written by older builds omitted `path`, so the browser scoped them
+ * to the directory of whatever page stored the token (`/chart`, `/user/123`,
+ * …). Such leftovers shadow the real cookie and survive logout from other
+ * pages, so every write/delete also expires a same-named cookie on every
+ * ancestor directory of the current URL — exactly the scopes the old default
+ * `path` could have produced.
+ */
+function legacyCookiePaths(): string[] {
+  const paths: string[] = [];
+  const segments = location.pathname.split('/').filter(Boolean);
+  let path = '';
+  for (let i = 0; i < segments.length - 1; i++) {
+    path += `/${segments[i]}`;
+    paths.push(path);
+  }
+  return paths;
+}
+
 export function setCookie(key: string, value: string, expires: string) {
-  document.cookie = `${key}=${value}; expires=${expires}; SameSite=None; Secure`;
+  document.cookie = `${key}=${encodeURIComponent(value)}; expires=${expires}; path=${COOKIE_PATH}; SameSite=None; Secure`;
+  for (const path of legacyCookiePaths()) {
+    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}; SameSite=None; Secure`;
+  }
   triggerCookie();
 }
 
 export function deleteCookie(key: string) {
-  document.cookie = `${key}=test; Max-Age=-99999999; SameSite=None; Secure`;
+  const expired = 'Thu, 01 Jan 1970 00:00:00 GMT';
+  document.cookie = `${key}=; expires=${expired}; Max-Age=0; path=${COOKIE_PATH}; SameSite=None; Secure`;
+  for (const path of legacyCookiePaths()) {
+    document.cookie = `${key}=; expires=${expired}; Max-Age=0; path=${path}; SameSite=None; Secure`;
+  }
   triggerCookie();
 }
 
@@ -120,11 +155,25 @@ export function logout() {
   deleteCookie('refresh_token');
 }
 
-// From https://stackoverflow.com/questions/10730362/get-cookie-by-name
+/**
+ * First exact-name match wins. Browsers list cookies by descending path
+ * length, so a second same-named cookie (from the old directory-scoped
+ * writes) no longer masks the value, as it did when the split-based lookup
+ * required exactly one match.
+ */
 export function getCookie(name: string): string | undefined {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()!.split(';').shift();
+  const prefix = `${name}=`;
+  for (const part of document.cookie.split(';')) {
+    const item = part.trim();
+    if (!item.startsWith(prefix)) continue;
+    const raw = item.slice(prefix.length);
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      // Cookies written before values were encoded may contain stray `%`.
+      return raw;
+    }
+  }
 }
 
 export function addCookieListener(listener: () => void) {

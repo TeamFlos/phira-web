@@ -15,7 +15,7 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import { getCookie, pageCount, pleaseLogin } from '../common';
+import { loggedIn, pageCount, pleaseLogin } from '../common';
 import { useApi } from '../api/client';
 import type { MyChartEntry } from '../model';
 
@@ -28,10 +28,6 @@ const PAGE_NUM = 5;
 const { t } = useI18n();
 const api = useApi();
 const router = useRouter();
-
-if (!getCookie('access_token')) {
-  pleaseLogin(router);
-}
 
 const entries = ref<MyChartEntry[]>();
 const pager = ref<InstanceType<typeof PageIndicator>>();
@@ -58,7 +54,9 @@ async function fetchCharts() {
   }
 }
 
-if (getCookie('access_token')) {
+if (!loggedIn()) {
+  pleaseLogin(router);
+} else {
   await fetchCharts();
 }
 </script>

@@ -18,32 +18,63 @@ function refreshCookieExpiry(): string {
  * sets them, we just use the cookie as client-side storage.
  */
 export function storeTokens(r: { token: string; refreshToken: string; expireAt: string }) {
-  setCookie('access_token', r.token, new Date(Date.parse(r.expireAt)).toUTCString());
+  // `expireAt` is RFC3339. If it ever fails to parse, fall back to the refresh
+  // window: an unparseable `expires` is ignored by the browser, which would
+  // silently turn the cookie into a session cookie.
+  const expireAt = Date.parse(r.expireAt);
+  setCookie('access_token', r.token, Number.isFinite(expireAt) ? new Date(expireAt).toUTCString() : refreshCookieExpiry());
   setCookie('refresh_token', r.refreshToken, refreshCookieExpiry());
 }
 
 // --- refresh de-dup -------------------------------------------------------
 // A single in-flight refresh promise shared across concurrent 401s so we don't
 // burn the (still-valid) refresh token N times at once.
-let refreshing: Promise<boolean> | null = null;
+type RefreshResult = 'ok' | 'rejected' | 'error';
+let refreshing: Promise<RefreshResult> | null = null;
 
-/** Exchange the refresh token for a fresh pair; `false` means rejected, throws on network failure. */
-async function doRefresh(refreshToken: string): Promise<boolean> {
-  const resp = await fetch(`${API_HOST}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
-  });
-  if (!resp.ok) return false;
-  const data = (await resp.json()) as { token: string; refreshToken: string; expireAt: string };
-  storeTokens(data);
-  return true;
+/**
+ * Serialize refreshes across tabs (Web Locks, when available). Refresh tokens
+ * rotate on every exchange, so two tabs refreshing the same token at once
+ * would make one of them see a rejected token and tear down the session both
+ * tabs share through their common cookies.
+ */
+function withRefreshLock<T>(fn: () => Promise<T>): Promise<T> {
+  return navigator.locks ? navigator.locks.request('phira-web-refresh', fn) : fn();
 }
 
-function ensureRefreshed(refreshToken: string): Promise<boolean> {
+/** Exchange the refresh token for a fresh pair. */
+async function doRefresh(refreshToken: string): Promise<RefreshResult> {
+  let resp: Response;
+  try {
+    resp = await fetch(`${API_HOST}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+  } catch {
+    return 'error';
+  }
+  if (resp.ok) {
+    const data = (await resp.json()) as { token: string; refreshToken: string; expireAt: string };
+    storeTokens(data);
+    return 'ok';
+  }
+  // A 4xx means the refresh token itself was rejected (expired/revoked), so
+  // the session is gone. Transient failures (5xx, network) must keep it.
+  return resp.status >= 400 && resp.status < 500 ? 'rejected' : 'error';
+}
+
+function ensureRefreshed(refreshToken: string): Promise<RefreshResult> {
   if (!refreshing) {
-    refreshing = doRefresh(refreshToken)
-      .catch(() => false)
+    refreshing = withRefreshLock(async () => {
+      // Another tab may have refreshed while we queued for the lock; the new
+      // tokens are already in the shared cookie jar, so use them as-is.
+      const current = getCookie('refresh_token');
+      if (!current) return 'rejected';
+      if (current !== refreshToken) return 'ok';
+      return doRefresh(refreshToken);
+    })
+      .catch((): RefreshResult => 'error')
       .finally(() => {
         refreshing = null;
       });
@@ -51,14 +82,27 @@ function ensureRefreshed(refreshToken: string): Promise<boolean> {
   return refreshing;
 }
 
+/**
+ * Make sure an access token is available, refreshing it when only the 30d
+ * refresh token is left (cold start, or the 6h access cookie expired while
+ * the tab stayed open). Returns whether a session exists; an outright
+ * rejection clears the stored session.
+ */
+export async function ensureSession(): Promise<boolean> {
+  if (getCookie('access_token')) return true;
+  const refreshToken = getCookie('refresh_token');
+  if (!refreshToken) return false;
+  const result = await ensureRefreshed(refreshToken);
+  if (result === 'rejected') {
+    logout();
+    return false;
+  }
+  return result === 'ok';
+}
+
 /** On a cold start the 401 refresh above never fires, so restore the session manually. */
 export async function bootstrapAuth(): Promise<void> {
-  if (getCookie('access_token') || !getCookie('refresh_token')) return;
-  try {
-    if (!(await doRefresh(getCookie('refresh_token')!))) logout();
-  } catch {
-    // offline / server unreachable — keep the refresh token for the next load
-  }
+  await ensureSession();
 }
 
 /**
@@ -91,14 +135,19 @@ export function useApi(): Client<paths> {
       replaySources.delete(id);
       if (response.status !== 401 || schemaPath === '/login') return;
       const refreshToken = getCookie('refresh_token');
-      if (!refreshToken || !(await ensureRefreshed(refreshToken))) {
+      const result = refreshToken ? await ensureRefreshed(refreshToken) : 'rejected';
+      if (result === 'rejected') {
         logout();
         pleaseLogin(router);
         return;
       }
-      if (!source) return;
+      // Transient refresh failure: keep the session and surface the 401
+      // instead of logging the user out over a hiccup.
+      if (result === 'error' || !source) return;
+      const token = getCookie('access_token');
+      if (!token) return;
       const headers = new Headers(source.headers);
-      headers.set('Authorization', `Bearer ${getCookie('access_token')}`);
+      headers.set('Authorization', `Bearer ${token}`);
       return options.fetch(new Request(source, { headers }));
     },
     onError: ({ id }) => {
