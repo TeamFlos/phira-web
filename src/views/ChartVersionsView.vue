@@ -68,10 +68,8 @@ if (loggedIn()) {
 }
 const canReview = computed(() => !!me.value && userPermissions(me.value).has(Permission.REVIEW));
 
-function copyChartId() {
-  copy(`#${id}`);
-  toast(t('chart-id-copied', { id }));
-}
+async function copyChartId() {
+  if (await copy(`#${id}`)) toast(t('chart-id-copied', { id }));
 
 // Metadata rule findings, shared by the detail panel (inline hints next to
 // the fields) and the review card (rejection templates). Reviewers only.
