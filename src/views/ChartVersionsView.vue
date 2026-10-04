@@ -2,6 +2,7 @@
 en:
   back: Back to chart
   chart-id-copied: 'Copied chart ID #{id} to clipboard.'
+  chart-id-copy-failed: Failed to copy chart ID to clipboard.
   timeline: Versions
   uploader: Uploader
   detail: Details
@@ -14,7 +15,8 @@ en:
 
 zh-CN:
   back: 返回谱面
-  chart-id-copied: 已复制谱面编号 #{id}
+  chart-id-copied: '已复制谱面编号 #{id}'
+  chart-id-copy-failed: 复制谱面编号失败，请检查浏览器剪贴板权限。
   timeline: 版本历史
   uploader: 上传者
   detail: 详情
@@ -30,9 +32,8 @@ zh-CN:
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useClipboard } from '@vueuse/core';
 
-import { fileToURL, loggedIn, pageCount, setTitle, toast, userPermissions } from '../common';
+import { copyToClipboard, fileToURL, loggedIn, pageCount, setTitle, toast, userPermissions } from '../common';
 import { useApi } from '../api/client';
 import { Permission, type Chart, type ChartVersion, type User, type UserView } from '../model';
 import { runMetadataRules } from '../review/metadata';
@@ -46,7 +47,6 @@ import VersionDiff from '../components/VersionDiff.vue';
 import VersionTimeline from '../components/VersionTimeline.vue';
 
 const { t } = useI18n();
-const { copy } = useClipboard();
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -69,7 +69,12 @@ if (loggedIn()) {
 const canReview = computed(() => !!me.value && userPermissions(me.value).has(Permission.REVIEW));
 
 async function copyChartId() {
-  await copy(`#${id}`);
+  try {
+    await copyToClipboard(`#${id}`);
+  } catch {
+    toast(t('chart-id-copy-failed'), 'error');
+    return;
+  }
   toast(t('chart-id-copied', { id }));
 }
 

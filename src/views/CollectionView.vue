@@ -11,6 +11,7 @@ en:
   import:
     label: Import
     toast: Copied to clipboard. Please paste it in "Favorites" -> "Import" in-game.
+    copy-failed: Failed to copy the collection link to clipboard.
   like:
     label: Like
   visibility:
@@ -32,6 +33,7 @@ zh-CN:
   import:
     label: 导入
     toast: 已复制到剪贴板，请粘贴到游戏内“收藏夹”->“导入”中
+    copy-failed: 复制合集链接失败，请检查浏览器剪贴板权限。
   like:
     label: 点赞
   visibility:
@@ -49,7 +51,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { detailedTime, loggedIn, pleaseLogin, setTitle, toast } from '../common';
+import { copyToClipboard, detailedTime, loggedIn, pleaseLogin, setTitle, toast } from '../common';
 import { useApi } from '../api/client';
 import type { Collection } from '../model';
 
@@ -57,7 +59,6 @@ import CoverBackdrop from '../components/CoverBackdrop.vue';
 import ChartCard from '../components/ChartCard.vue';
 import PropItem from '../components/PropItem.vue';
 import SimpleUserCard from '../components/SimpleUserCard.vue';
-import { useClipboard } from '@vueuse/core';
 
 const route = useRoute();
 const router = useRouter();
@@ -85,10 +86,14 @@ const description = computed(() => {
 
 const visibilityLabel = computed(() => (collection.value?.public ? t('visibility.public') : t('visibility.private')));
 
-const { copy } = useClipboard();
-function copyUrl() {
+async function copyUrl() {
   const url = `${window.location.origin}/collection/${id}`;
-  copy(url);
+  try {
+    await copyToClipboard(url);
+  } catch {
+    toast(t('import.copy-failed'), 'error');
+    return;
+  }
   toast(t('import.toast'));
 }
 
