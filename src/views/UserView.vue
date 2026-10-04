@@ -247,7 +247,7 @@ const currentBestPool = ref(true);
                 <UserAvatar :url="user.avatar" />
               </div>
             </div>
-            <div class="flex flex-col items-center mt-3 lg:mt-0 lg:ml-4 lg:items-start grow">
+            <div class="flex flex-col items-center mt-3 lg:mt-0 lg:ml-4 lg:items-start grow min-w-0">
               <div class="flex flex-col lg:flex-row items-center lg:items-end gap-2">
                 <span class="font-black text-3xl max-w-sm truncate" :class="[userNameClass(user.badges)]">
                   <del v-if="user.login_banned" v-tooltip="t('login-ban.banned')">{{ user.name }}</del>
@@ -279,8 +279,9 @@ const currentBestPool = ref(true);
                   </div>
                 </div>
               </div>
-              <div class="mt-2 lg:mt-0">
-                <span v-if="user.bio" class="whitespace-nowrap max-w-xs truncate">{{ user.bio }}</span> <span v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></span>
+              <div class="mt-2 lg:mt-0 max-w-xs min-w-0">
+                <span v-if="user.bio" class="block whitespace-pre-wrap break-words">{{ user.bio }}</span>
+                <span v-else class="text-sm italic text-gray-500" v-t="'bio-empty'"></span>
               </div>
               <UserBadges :badges="user.badges" :names="user.badgeNames" class="mt-2 justify-center lg:justify-start" />
             </div>
