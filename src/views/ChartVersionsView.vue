@@ -1,6 +1,8 @@
 <i18n>
 en:
   back: Back to chart
+  chart-id-copied: 'Copied chart ID #{id} to clipboard.'
+  chart-id-copy-failed: Failed to copy chart ID to clipboard.
   timeline: Versions
   uploader: Uploader
   detail: Details
@@ -13,6 +15,8 @@ en:
 
 zh-CN:
   back: 返回谱面
+  chart-id-copied: '已复制谱面编号 #{id}'
+  chart-id-copy-failed: 复制谱面编号失败，请检查浏览器剪贴板权限。
   timeline: 版本历史
   uploader: 上传者
   detail: 详情
@@ -29,7 +33,7 @@ import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import { fileToURL, loggedIn, pageCount, setTitle, toast, userPermissions } from '../common';
+import { copyToClipboard, fileToURL, loggedIn, pageCount, setTitle, toast, userPermissions } from '../common';
 import { useApi } from '../api/client';
 import { Permission, type Chart, type ChartVersion, type User, type UserView } from '../model';
 import { runMetadataRules } from '../review/metadata';
@@ -63,6 +67,16 @@ if (loggedIn()) {
   });
 }
 const canReview = computed(() => !!me.value && userPermissions(me.value).has(Permission.REVIEW));
+
+async function copyChartId() {
+  try {
+    await copyToClipboard(`#${id}`);
+  } catch {
+    toast(t('chart-id-copy-failed'), 'error');
+    return;
+  }
+  toast(t('chart-id-copied', { id }));
+}
 
 // Metadata rule findings, shared by the detail panel (inline hints next to
 // the fields) and the review card (rejection templates). Reviewers only.
@@ -264,6 +278,7 @@ function onReviewed(action: 'approve' | 'deny') {
         <div class="flex flex-col min-w-0 grow">
           <span class="text-sm opacity-70 truncate">{{ chart.composer }}</span>
           <router-link :to="`/chart/${id}`" class="text-2xl font-black truncate link link-hover">{{ chart.name }}</router-link>
+          <button type="button" class="link link-hover text-sm font-mono opacity-70 w-fit" @click="copyChartId">#{{ id }}</button>
           <div class="flex gap-2 mt-1 flex-wrap">
             <span v-if="chart.stable" class="badge badge-success badge-outline" v-t="'stable'"></span>
             <span v-if="!chart.reviewed" class="badge badge-warning badge-outline" v-t="'pending'"></span>

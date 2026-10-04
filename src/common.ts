@@ -82,6 +82,38 @@ export function toastError(error: any) {
   if (msg.length) toast(msg, 'error');
 }
 
+function legacyCopy(text: string): boolean {
+  if (typeof document === 'undefined' || !document.body || typeof document.execCommand !== 'function') return false;
+
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  textarea.setAttribute('readonly', '');
+  document.body.appendChild(textarea);
+
+  try {
+    textarea.select();
+    return document.execCommand('copy');
+  } finally {
+    textarea.remove();
+  }
+}
+
+export async function copyToClipboard(text: string): Promise<void> {
+  const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+  if (clipboard && typeof clipboard.writeText === 'function') {
+    try {
+      await clipboard.writeText(text);
+      return;
+    } catch (error) {
+      if (legacyCopy(text)) return;
+      throw error;
+    }
+  }
+  if (!legacyCopy(text)) throw new Error('Clipboard copy failed');
+}
+
 export function fileToURL(file: string) {
   // return file;
   return file.replace(/https:\/\/api.phira.cn\/files\//g, 'https://phira.5wyxi.com/files/');
