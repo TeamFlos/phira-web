@@ -33,6 +33,7 @@ import SettingsView from '../views/SettingsView.vue';
 import OAuthView from '../views/OAuthView.vue';
 import StaffView from '../views/StaffView.vue';
 import DLinkView from '../views/DLinkView.vue';
+import AppAuthView from '../views/AppAuthView.vue';
 
 import DMCA from '../DMCA.vue';
 import PrivacyPolicy from '../PrivacyPolicy.vue';
@@ -87,6 +88,7 @@ const router = createRouter({
     { path: '/review', name: 'review-queue', component: ReviewQueueView },
     { path: '/censor', name: 'censor', component: CensorView },
     { path: '/dlink/:action(chart|import)', name: 'dlink', component: DLinkView },
+    { path: '/auth/app', name: 'auth-app', component: AppAuthView },
   ],
   scrollBehavior(_to, from, savedPosition) {
     return new Promise((resolve) => {
