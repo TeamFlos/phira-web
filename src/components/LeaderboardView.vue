@@ -29,6 +29,7 @@ zh-CN:
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -48,6 +49,19 @@ import moment from 'moment';
 const props = defineProps<{ chart: number }>();
 
 const api = useApi();
+const router = useRouter();
+
+function recordTarget(record: PlayRecord) {
+  return { name: 'record', params: { record_code: record.id } };
+}
+
+function openRecord(record: PlayRecord, event: MouseEvent) {
+  // Keep the player link and native record links working independently.
+  if (event.target instanceof Element && event.target.closest('a, button')) return;
+  const target = recordTarget(record);
+  if (event.ctrlKey || event.metaKey) window.open(router.resolve(target).href, '_blank', 'noopener');
+  else router.push(target);
+}
 
 const pagination = ref<typeof PageIndicator>();
 
@@ -124,7 +138,7 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="record in records" :key="record.id" class="hover text-lg">
+            <tr v-for="record in records" :key="record.id" class="hover text-lg cursor-pointer" @click="openRecord(record, $event)">
               <th class="text-center">
                 <i v-if="record.rank === 1" class="fa-solid fa-trophy text-[#ffd700]"></i>
                 <i v-if="record.rank === 2" class="fa-solid fa-trophy text-[#c0c0c0]"></i>
@@ -142,14 +156,14 @@ onMounted(() => {
                 </router-link>
               </td>
               <td v-if="!std" class="font-black font-mono text-2xl">
-                {{ record.score }}
+                <router-link :to="recordTarget(record)" class="hover:underline">{{ record.score }}</router-link>
               </td>
-              <td v-if="record.std_score" class="font-black font-mono text-2xl">
-                {{ Math.floor(record.std_score) }}
+              <td v-if="record.std_score !== undefined && record.std_score !== null" class="font-black font-mono text-2xl">
+                <router-link :to="recordTarget(record)" class="hover:underline">{{ Math.floor(record.std_score) }}</router-link>
               </td>
               <td v-else class="text-xl" v-t="'no-std'"></td>
               <td v-if="std" class="font-black font-mono text-2xl">
-                {{ record.score }}
+                <router-link :to="recordTarget(record)" class="hover:underline">{{ record.score }}</router-link>
               </td>
               <td>{{ (record.accuracy * 100).toFixed(2) + '%' }}</td>
               <td>{{ record.perfect }}</td>

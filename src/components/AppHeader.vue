@@ -113,6 +113,7 @@ const NAVS = computed(() => {
  * for reviewers, Charts for everyone else. */
 const onVersions = computed(() => /^\/chart\/\d+\/versions/.test(route.path));
 function navActive(path: string): boolean {
+  if (route.name === 'record') return path === '/chart';
   if (!onVersions.value) return route.path.startsWith(path);
   return canReview.value ? path === '/review' : path === '/chart';
 }
