@@ -11,7 +11,6 @@ en:
   miss: Miss
   time: Time
   no-std: NaN
-  record-detail: View record details
 
 zh-CN:
   rank: 排名
@@ -25,7 +24,6 @@ zh-CN:
   miss: Miss
   time: 时间
   no-std: 无数据
-  record-detail: 查看成绩详情
 
 </i18n>
 
@@ -158,14 +156,14 @@ onMounted(() => {
                 </router-link>
               </td>
               <td v-if="!std" class="font-black font-mono text-2xl">
-                <router-link :to="recordTarget(record)" :aria-label="t('record-detail')" class="hover:underline">{{ record.score }}</router-link>
+                <router-link :to="recordTarget(record)" class="hover:underline">{{ record.score }}</router-link>
               </td>
               <td v-if="record.std_score !== undefined && record.std_score !== null" class="font-black font-mono text-2xl">
-                <router-link :to="recordTarget(record)" :aria-label="t('record-detail')" class="hover:underline">{{ Math.floor(record.std_score) }}</router-link>
+                <router-link :to="recordTarget(record)" class="hover:underline">{{ Math.floor(record.std_score) }}</router-link>
               </td>
               <td v-else class="text-xl" v-t="'no-std'"></td>
               <td v-if="std" class="font-black font-mono text-2xl">
-                <router-link :to="recordTarget(record)" :aria-label="t('record-detail')" class="hover:underline">{{ record.score }}</router-link>
+                <router-link :to="recordTarget(record)" class="hover:underline">{{ record.score }}</router-link>
               </td>
               <td>{{ (record.accuracy * 100).toFixed(2) + '%' }}</td>
               <td>{{ record.perfect }}</td>
