@@ -94,7 +94,12 @@ let loadId = 0;
 onBeforeUnmount(() => loadId++);
 
 const isAllPerfect = computed(() => record.value?.accuracy === 1);
-const judgments = ['perfect', 'good', 'bad', 'miss'] as const;
+const judgments = [
+  { key: 'perfect', color: 'border-amber-400/40 bg-amber-400/10' },
+  { key: 'good', color: 'border-sky-400/40 bg-sky-400/10' },
+  { key: 'bad', color: 'border-red-400/40 bg-red-400/10' },
+  { key: 'miss', color: 'border-gray-400/40 bg-gray-400/10' },
+] as const;
 
 const playedAt = computed(() => {
   if (!record.value) return '';
@@ -198,20 +203,24 @@ watch(recordCode, load, { immediate: true });
               </span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="rounded-box bg-base-200 p-4 min-w-0">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <div class="rounded-box bg-base-200 p-4 min-w-0 flex flex-col justify-center items-start">
                 <p class="text-sm opacity-60">{{ t('fields.score') }}</p>
                 <p class="font-mono font-black text-4xl sm:text-3xl xl:text-4xl mt-1">{{ String(record.score).padStart(7, '0') }}</p>
                 <span v-if="record.best" class="badge badge-primary badge-outline mt-3">{{ t('fields.best') }}</span>
               </div>
-              <div class="rounded-box bg-base-200 p-4 min-w-0">
+              <div class="rounded-box bg-base-200 p-4 min-w-0 flex flex-col justify-center items-start">
                 <p class="text-sm opacity-60">{{ t('fields.std_score') }}</p>
                 <p class="font-mono font-black text-4xl sm:text-3xl xl:text-4xl mt-1">{{ record.std_score == null ? t('no-data') : Math.floor(record.std_score) }}</p>
                 <span v-if="record.best_std" class="badge badge-primary badge-outline mt-3">{{ t('fields.best_std') }}</span>
               </div>
-              <div class="rounded-box bg-base-200 p-4 min-w-0">
+              <div class="rounded-box bg-base-200 p-4 min-w-0 flex flex-col justify-center items-start">
                 <p class="text-sm opacity-60">{{ t('fields.accuracy') }}</p>
                 <p class="font-mono font-black text-4xl sm:text-3xl xl:text-4xl mt-1">{{ (record.accuracy * 100).toFixed(2) }}%</p>
+              </div>
+              <div class="rounded-box bg-base-200 p-4 min-w-0 flex flex-col justify-center items-start">
+                <p class="text-sm opacity-60">{{ t('fields.max_combo') }}</p>
+                <p class="font-mono font-black text-4xl sm:text-3xl xl:text-4xl mt-1">{{ record.max_combo }}</p>
               </div>
             </div>
           </div>
@@ -243,12 +252,11 @@ watch(recordCode, load, { immediate: true });
             <section class="card bg-base-100 shadow-xl p-4 sm:p-6 gap-4">
               <h2 class="text-xl font-bold">{{ t('judgments') }}</h2>
               <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div v-for="judgment in judgments" :key="judgment" class="rounded-box bg-base-200 p-4">
-                  <dt class="text-sm opacity-60">{{ t(`fields.${judgment}`) }}</dt>
-                  <dd class="font-mono font-bold text-2xl mt-1">{{ record[judgment] }}</dd>
+                <div v-for="judgment in judgments" :key="judgment.key" class="rounded-box border p-4" :class="judgment.color">
+                  <dt class="text-sm opacity-60">{{ t(`fields.${judgment.key}`) }}</dt>
+                  <dd class="font-mono font-bold text-2xl mt-1">{{ record[judgment.key] }}</dd>
                 </div>
               </dl>
-              <PropItem :title="t('fields.max_combo')" :value="String(record.max_combo)" />
             </section>
 
             <section class="card bg-base-100 shadow-xl p-4 sm:p-6 gap-4">
