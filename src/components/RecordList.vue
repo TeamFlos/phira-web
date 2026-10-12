@@ -93,7 +93,7 @@ function getRankIcon(record: PlayRecord): string {
     <router-link
       v-for="record in records"
       :key="record.id"
-      :to="`/chart/${record.chart}`"
+      :to="{ name: 'record', params: { record_code: record.id } }"
       class="group card relative image-full bg-base-100 shadow-xl illustration interactive-card aspect-[4/1] lg:aspect-[8/3] min-h-0 min-w-0">
       <figure v-if="record?.chartDetail">
         <img class="w-full aspect-[4/1] lg:aspect-[8/3]" :src="fileToURL(record?.chartDetail?.illustration) + '.thumbnail'" />

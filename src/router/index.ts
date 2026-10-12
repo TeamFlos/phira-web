@@ -13,6 +13,7 @@ import TransferConfirmView from '../views/TransferConfirmView.vue';
 import ChartsView from '../views/ChartsView.vue';
 import ChartView from '../views/ChartView.vue';
 import ChartVersionsView from '../views/ChartVersionsView.vue';
+import RecordView from '../views/RecordView.vue';
 import ConfirmCollabView from '../views/ConfirmCollabView.vue';
 import ReviewQueueView from '../views/ReviewQueueView.vue';
 
@@ -59,6 +60,7 @@ const router = createRouter({
     { path: '/chart/:id(\\d+)', name: 'chart', component: ChartView },
     { path: '/chart/:id(\\d+)/versions/:vid(\\d+)?', name: 'chart-versions', component: ChartVersionsView },
     { path: '/chart/confirm-collab', name: 'confirm-collab', component: ConfirmCollabView },
+    { path: '/record/:record_code', name: 'record', component: RecordView },
 
     { path: '/issue', name: 'issue-queue', component: IssueQueueView },
     { path: '/issue/submit', name: 'issue-submit', component: IssueSubmitView },
@@ -90,7 +92,9 @@ const router = createRouter({
     { path: '/dlink/:action(chart|import)', name: 'dlink', component: DLinkView },
     { path: '/auth/app', name: 'auth-app', component: AppAuthView },
   ],
-  scrollBehavior(_to, from, savedPosition) {
+  scrollBehavior(to, from, savedPosition) {
+    // RecordView mounts synchronously, before the shared loaded callback is set.
+    if (to.name === 'record') return savedPosition ?? { left: 0, top: 0 };
     return new Promise((resolve) => {
       onLoaded.value = () => {
         resolve(savedPosition ? savedPosition : { top: 0 });
