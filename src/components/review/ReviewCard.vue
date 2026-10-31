@@ -20,6 +20,9 @@ en:
   cl-play: The chart file downloads and plays correctly
   auto-reply: Auto-reply from remaining findings
   quick-templates: Quick templates
+  tpl-offset: Delay alignment
+  tpl-body-offset-misaligned: 'Recommended delay {recommended} ms (current delay {current} ms).'
+  tpl-body-offset-failed: This chart is not correctly aligned with the audio and cannot be approved.
   reason-label: Rejection message
   tpl-pirate: Duplicate file
   tpl-copyright-forbidden: Copyright (forbidden)
@@ -61,6 +64,9 @@ zh-CN:
   cl-play: 谱面文件可正常下载游玩
   auto-reply: 自动回复（未忽略的问题）
   quick-templates: 快速模板
+  tpl-offset: 对音
+  tpl-body-offset-misaligned: 推荐延迟 {recommended} ms（当前延迟 {current} ms）
+  tpl-body-offset-failed: 谱面未正确对音，不予通过
   reason-label: 拒绝理由
   tpl-pirate: 撞车
   tpl-copyright-forbidden: 版权（禁止）
@@ -91,10 +97,13 @@ import { useApi } from '../../api/client';
 import { reviewChart } from '../../api/review';
 import type { ChartVersion } from '../../model';
 import { REVIEW_MANUAL_ITEMS, censoredFields, problemDetail, useReviewChecks } from '../../review';
+import { formatDelayMs } from '../../review/auto-offset';
+import type { OffsetVerdict } from '../../review/auto-offset';
 import type { MetadataFinding } from '../../review/metadata';
 
 import ConfirmDialog from '../ConfirmDialog.vue';
 import LoadOr from '../LoadOr.vue';
+import AutoOffsetCheck from './AutoOffsetCheck.vue';
 import CensorResults from './CensorResults.vue';
 import CopyrightResults from './CopyrightResults.vue';
 import PirateResults from './PirateResults.vue';
@@ -177,10 +186,25 @@ const autoReply = ref(true);
 const reason = ref('');
 const submitting = ref(false);
 
+/** The most recent delay-alignment verdict, used by the reply templates. */
+const offsetVerdict = ref<OffsetVerdict>();
+const offsetReply = computed(() => {
+  const verdict = offsetVerdict.value;
+  if (!verdict || verdict.kind === 'aligned') return '';
+  if (verdict.kind === 'misaligned') {
+    return t('tpl-body-offset-misaligned', {
+      recommended: formatDelayMs(verdict.recommendedOffset),
+      current: formatDelayMs(verdict.currentOffset),
+    });
+  }
+  return t('tpl-body-offset-failed');
+});
+
 /** The message composed from whatever problem rows are still un-ignored. */
 const composedReply = computed(() => {
   const parts: string[] = [];
   const on = (key: string) => !ignored.value[key];
+  if (offsetReply.value) parts.push(offsetReply.value);
   if (on('stolen') && stolenMatches.value.length) parts.push(t('tpl-body-pirate', { detail: pirateDetail() }));
   if (on('duplicate') && duplicateMatches.value.length) parts.push(t('tpl-body-duplicate', duplicateDetail()));
   if (on('copyright') && problem.value) parts.push(t(`tpl-body-${problem.value}`, { detail: problemDetail(copyright.value, problem.value, copyrightQuery.value) }));
@@ -203,6 +227,12 @@ function onReasonInput(e: Event) {
   reason.value = (e.target as HTMLTextAreaElement).value;
 }
 
+function applyOffsetTemplate() {
+  if (!offsetReply.value) return;
+  autoReply.value = false;
+  reason.value = offsetReply.value;
+}
+
 function applyTemplate(kind: 'pirate' | 'duplicate' | 'forbidden' | 'restricted' | 'censored' | 'metadata') {
   autoReply.value = false;
   if (kind === 'metadata') {
@@ -216,6 +246,19 @@ function applyTemplate(kind: 'pirate' | 'duplicate' | 'forbidden' | 'restricted'
   } else {
     reason.value = t(`tpl-body-${kind}`, { detail: problemDetail(copyright.value, problem.value ?? 'forbidden', copyrightQuery.value) });
   }
+}
+
+function onOffsetVerdict(verdict: OffsetVerdict) {
+  const previous = offsetReply.value;
+  offsetVerdict.value = verdict;
+  if (verdict.kind === 'aligned') {
+    // Re-checking an already rejected chart can make the previous delay
+    // message stale. Only drop it when it is the text still in the box.
+    if (!autoReply.value && reason.value === previous) reason.value = composedReply.value;
+    return;
+  }
+  action.value = 'deny';
+  autoReply.value = true;
 }
 
 const manualChecks = ref<Record<string, boolean>>({});
@@ -233,6 +276,7 @@ watch(loading, (isLoading) => {
   if (isLoading) return;
   ignored.value = {};
   openGroups.value = {};
+  offsetVerdict.value = undefined;
   autoReply.value = true;
   manualChecks.value = {};
   action.value = hasProblems.value ? 'deny' : 'approve';
@@ -307,6 +351,8 @@ async function submitVote() {
         {{ t('checks-clean') }}
       </p>
 
+      <AutoOffsetCheck :version="version" @verdict="onOffsetVerdict" />
+
       <!-- decision -->
       <div class="flex flex-col gap-2">
         <h3 class="text-xs font-bold tracking-wider opacity-50" v-t="'decision'"></h3>
@@ -354,6 +400,9 @@ async function submitVote() {
               </li>
               <li :class="{ disabled: !warningReasons.length }">
                 <a @click="warningReasons.length && applyTemplate('metadata')">{{ t('tpl-metadata') }}</a>
+              </li>
+              <li :class="{ disabled: !offsetReply }">
+                <a @click="offsetReply && applyOffsetTemplate()">{{ t('tpl-offset') }}</a>
               </li>
             </ul>
           </div>

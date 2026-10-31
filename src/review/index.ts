@@ -25,8 +25,9 @@ export type CensorHit = { field: 'name' | 'description' | 'tags'; segments: Cens
  * Items the reviewer must tick before approving. i18n labels live in
  * ReviewCard.vue keyed by these ids. These are the checks automation cannot
  * make; the automated findings themselves are triaged with the review card's
- * per-finding ignore toggles instead. cl-sync retires when the delay-alignment
- * wasm check lands; delete it here when that happens.
+ * per-finding ignore toggles instead. cl-sync stays alongside the advisory
+ * auto-offset check: that check needs a public package and a browser that can
+ * decode the audio, so it cannot gate every vote.
  */
 export const REVIEW_MANUAL_ITEMS = ['cl-sync', 'cl-content', 'cl-thorough', 'cl-play'] as const;
 
