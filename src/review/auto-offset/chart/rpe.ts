@@ -37,8 +37,9 @@ export function parseRpe(json: unknown): { notes: ParsedNote[] } {
       const time = bpm.timeBeats(beats(note.startTime));
       if (!Number.isFinite(time) || time < 0) continue;
       const endTime = note.endTime != null ? bpm.timeBeats(beats(note.endTime)) : time;
-      if (kind === 'hold' && endTime > time) notes.push({ time, kind, endTime });
-      else notes.push({ time, kind });
+      const fake = Number(note.isFake ?? 0) !== 0;
+      if (kind === 'hold' && endTime > time) notes.push({ time, kind, endTime, fake });
+      else notes.push({ time, kind, fake });
     }
   }
   notes.sort((a, b) => a.time - b.time);
