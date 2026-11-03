@@ -37,9 +37,12 @@ import { copyToClipboard, fileToURL, loggedIn, pageCount, setTitle, toast, userP
 import { useApi } from '../api/client';
 import { Permission, type Chart, type ChartVersion, type User, type UserView } from '../model';
 import { runMetadataRules } from '../review/metadata';
+import { estimateVersionOffset } from '../review/auto-offset';
+import type { AutoOffsetResult } from '../review/auto-offset';
 
 import LoadView from '../components/LoadView.vue';
 import PageIndicator from '../components/PageIndicator.vue';
+import AutoOffsetCheck from '../components/review/AutoOffsetCheck.vue';
 import ReviewCard from '../components/review/ReviewCard.vue';
 import SimpleUserCard from '../components/SimpleUserCard.vue';
 import VersionDetail from '../components/VersionDetail.vue';
@@ -123,6 +126,55 @@ const allVersions = computed(() => {
 });
 
 const selected = computed(() => allVersions.value.find((v) => v.id === selectedId.value));
+
+// --- delay alignment ---------------------------------------------------------
+// Reviewers get the alignment check automatically for a pending version: the
+// review card's reply template consumes the same result, so it must not wait
+// for a click. Downloading the package is slow, so the panel renders its
+// spinner from the moment the version is selected.
+
+const offsetRunning = ref(false);
+const offsetResult = ref<AutoOffsetResult>();
+const offsetFailure = ref<unknown>();
+let offsetRunId = 0;
+let offsetController: AbortController | undefined;
+
+async function runAutoOffset(version: ChartVersion) {
+  const runId = ++offsetRunId;
+  offsetController?.abort();
+  const controller = new AbortController();
+  offsetController = controller;
+  offsetRunning.value = true;
+  offsetResult.value = undefined;
+  offsetFailure.value = undefined;
+  try {
+    const outcome = await estimateVersionOffset(version, controller.signal);
+    if (runId !== offsetRunId) return;
+    offsetResult.value = outcome;
+  } catch (failure) {
+    if (runId !== offsetRunId || controller.signal.aborted) return;
+    offsetFailure.value = failure;
+  } finally {
+    if (runId === offsetRunId) offsetRunning.value = false;
+  }
+}
+
+watch(
+  () => [selected.value?.id, canReview.value, selected.value?.status] as const,
+  ([, allowed, status]) => {
+    const version = selected.value;
+    if (!version || !allowed || status !== 'pending') {
+      offsetRunId++;
+      offsetController?.abort();
+      offsetRunning.value = false;
+      offsetResult.value = undefined;
+      offsetFailure.value = undefined;
+      return;
+    }
+    runAutoOffset(version);
+  },
+  { immediate: true },
+);
 
 /** The version the selected one is compared against: an explicit pick, else the
  * next older version — or, when the selection is the oldest one we can see, the
@@ -313,16 +365,22 @@ function onReviewed(action: 'approve' | 'deny') {
                 <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': tab === 'detail' }" @click="switchTab('detail')" v-t="'detail'"></a>
                 <a class="tab tab-lifted text-base-content" :class="{ 'tab-active': tab === 'diff' }" @click="switchTab('diff')" v-t="'diff'"></a>
               </div>
-              <div class="card bg-base-100 border border-base-300 shadow-lg p-4 rounded-ss-none">
+              <div class="card bg-base-100 border border-base-300 shadow-lg p-4 rounded-ss-none flex flex-col gap-4">
                 <VersionDetail v-if="tab === 'detail'" :version="selected" :findings="metadataFindings" />
+                <AutoOffsetCheck
+                  v-if="tab === 'detail' && canReview && selected.status === 'pending'"
+                  :running="offsetRunning"
+                  :result="offsetResult"
+                  :failure="offsetFailure"
+                  @run="runAutoOffset(selected)" />
                 <VersionDiff
-                  v-else-if="diffPair"
+                  v-if="tab !== 'detail' && diffPair"
                   :base="diffPair.base"
                   :target="diffPair.target"
                   :compareId="counterpart!.id"
                   :candidates="allVersions.filter((v) => v.id !== selected!.id)"
                   @update:compareId="compareId = $event" />
-                <p v-else class="italic opacity-60 py-4" v-t="'need-two'"></p>
+                <p v-if="tab !== 'detail' && !diffPair" class="italic opacity-60 py-4" v-t="'need-two'"></p>
               </div>
             </div>
             <!-- Only while the version actually awaits a vote: on decided
@@ -333,6 +391,7 @@ function onReviewed(action: 'approve' | 'deny') {
               :uploader-id="chart?.uploader"
               :version="selected"
               :findings="metadataFindings"
+              :offsetResult="offsetResult"
               @reviewed="onReviewed" />
           </template>
           <p v-else-if="!loading" class="italic opacity-60 py-8 text-center" v-t="'empty'"></p>

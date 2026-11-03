@@ -2,12 +2,10 @@
 en:
   current-label: Current
   recommended-label: Recommended
-  threshold-label: Threshold
   aria: 'Correlation curve: recommended delay {recommended} ms, current delay {current} ms.'
 zh-CN:
   current-label: 当前
   recommended-label: 推荐
-  threshold-label: 阈值
   aria: '相关系数曲线：推荐延迟 {recommended} ms，当前延迟 {current} ms。'
 </i18n>
 
@@ -24,6 +22,7 @@ const props = defineProps<{
   recommendedScore: number;
   currentOffset: number;
   threshold: number;
+  referenceThreshold?: number;
 }>();
 
 const { t } = useI18n();
@@ -183,12 +182,13 @@ function draw() {
   }
   ctx.restore();
 
-  // threshold line
-  if (props.threshold <= scoreTop + 1e-9) {
-    const y = yOf(props.threshold);
+  // score reference lines: the verdict threshold plus an optional level
+  const drawLevel = (level: number, color: string, dash: number[]) => {
+    if (level > scoreTop + 1e-9) return;
+    const y = yOf(level);
     ctx.save();
-    ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = palette.errorAlpha(0.55);
+    ctx.setLineDash(dash);
+    ctx.strokeStyle = color;
     ctx.beginPath();
     ctx.moveTo(PAD.left, y);
     ctx.lineTo(PAD.left + plotWidth, y);
@@ -196,10 +196,12 @@ function draw() {
     ctx.font = '10px ui-sans-serif, system-ui, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = palette.errorAlpha(0.8);
-    ctx.fillText(`${t('threshold-label')} ${props.threshold.toFixed(2)}`, PAD.left + plotWidth, y - 4);
+    ctx.fillStyle = color;
+    ctx.fillText(level.toFixed(2), PAD.left + plotWidth, y - 4);
     ctx.restore();
-  }
+  };
+  drawLevel(props.threshold, palette.errorAlpha(0.55), [4, 4]);
+  if (props.referenceThreshold !== undefined) drawLevel(props.referenceThreshold, palette.baseAlpha(0.5), [2, 4]);
 
   // correlation curve
   const area = ctx.createLinearGradient(0, PAD.top, 0, bottom);

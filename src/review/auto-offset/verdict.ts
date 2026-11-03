@@ -5,7 +5,13 @@ import type { CorrelationCurve } from './engine';
  * correlation reaches this threshold. The same value decides whether an
  * estimated offset is trustworthy enough to reject with, or is itself noise.
  */
-export const OFFSET_CORRELATION_THRESHOLD = 0.6;
+export const OFFSET_CORRELATION_THRESHOLD = 0.35;
+
+/**
+ * A delay gap above this, with a better-scoring delay on the other side, is
+ * still worth rejecting even when the current delay itself passes.
+ */
+export const OFFSET_GAP_THRESHOLD = 0.02;
 
 export type OffsetVerdictKind =
   /** The chart's declared delay already scores above the threshold. */
@@ -53,6 +59,7 @@ export function judgeOffset(input: { curve: CorrelationCurve; recommendedOffset:
   let kind: OffsetVerdictKind;
   if (input.recommendedScore < OFFSET_CORRELATION_THRESHOLD) kind = 'unreliable';
   else if (currentScore < OFFSET_CORRELATION_THRESHOLD) kind = 'misaligned';
+  else if (Math.abs(input.recommendedOffset - input.currentOffset) > OFFSET_GAP_THRESHOLD && input.recommendedScore > currentScore) kind = 'misaligned';
   else kind = 'aligned';
   return {
     kind,

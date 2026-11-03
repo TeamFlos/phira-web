@@ -98,12 +98,11 @@ import { reviewChart } from '../../api/review';
 import type { ChartVersion } from '../../model';
 import { REVIEW_MANUAL_ITEMS, censoredFields, problemDetail, useReviewChecks } from '../../review';
 import { formatDelayMs } from '../../review/auto-offset';
-import type { OffsetVerdict } from '../../review/auto-offset';
+import type { AutoOffsetResult, OffsetVerdict } from '../../review/auto-offset';
 import type { MetadataFinding } from '../../review/metadata';
 
 import ConfirmDialog from '../ConfirmDialog.vue';
 import LoadOr from '../LoadOr.vue';
-import AutoOffsetCheck from './AutoOffsetCheck.vue';
 import CensorResults from './CensorResults.vue';
 import CopyrightResults from './CopyrightResults.vue';
 import PirateResults from './PirateResults.vue';
@@ -117,7 +116,13 @@ function censorTemplateBody(): string {
 }
 const api = useApi();
 
-const props = defineProps<{ chart: number; uploaderId: number | undefined; version: ChartVersion; findings: MetadataFinding[] }>();
+const props = defineProps<{
+  chart: number;
+  uploaderId: number | undefined;
+  version: ChartVersion;
+  findings: MetadataFinding[];
+  offsetResult?: AutoOffsetResult;
+}>();
 const emit = defineEmits<{ (e: 'reviewed', action: Action): void }>();
 
 const { loading, copyright, copyrightQuery, copyrightSuppressed, censorHits, stolenMatches, duplicateMatches, problem, hasProblems } = useReviewChecks(
@@ -261,6 +266,14 @@ function onOffsetVerdict(verdict: OffsetVerdict) {
   autoReply.value = true;
 }
 
+watch(
+  () => props.offsetResult,
+  (outcome) => {
+    if (outcome) onOffsetVerdict(outcome.verdict);
+  },
+  { immediate: true },
+);
+
 const manualChecks = ref<Record<string, boolean>>({});
 
 const canSubmit = computed(() => {
@@ -350,8 +363,6 @@ async function submitVote() {
         <i class="fa-solid fa-circle-check text-success"></i>
         {{ t('checks-clean') }}
       </p>
-
-      <AutoOffsetCheck :version="version" @verdict="onOffsetVerdict" />
 
       <!-- decision -->
       <div class="flex flex-col gap-2">
