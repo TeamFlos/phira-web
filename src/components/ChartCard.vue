@@ -23,7 +23,7 @@ defineProps<{ chart: Chart }>();
       <img class="w-full aspect-[8/5]" :src="fileToURL(chart.illustration) + '.thumbnail'" />
     </figure>
     <span
-      v-if="!chart.reviewed"
+      v-if="!chart.reviewed || chart.stableRequest"
       class="absolute top-2 left-3 z-[11] text-2xl font-bold leading-none text-white"
       role="img"
       :title="t(chart.stableRequest ? 'stable-request' : 'unreviewed')"
