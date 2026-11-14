@@ -11,7 +11,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
@@ -30,25 +30,31 @@ const api = useApi();
 const router = useRouter();
 
 const entries = ref<MyChartEntry[]>();
+const totalCount = ref(0);
 const pager = ref<InstanceType<typeof PageIndicator>>();
 const page = ref(1);
-
-// `/me/charts` returns the whole list in one shot (pipeline state, denial
-// reason, collaborators included), so pagination is a client-side slice —
-// no refetch on page turn, no pager/fetch feedback loop.
-const pageRows = computed(() => entries.value?.slice((page.value - 1) * PAGE_NUM, page.value * PAGE_NUM));
+let requestId = 0;
 
 watch(
   () => pager.value?.current,
   (current) => {
-    page.value = current ?? 1;
+    if (current === undefined || current === page.value) return;
+    page.value = current;
+    fetchCharts();
   },
 );
 
 async function fetchCharts() {
+  const id = ++requestId;
   try {
-    const { data } = await api.GET('/me/charts', { toastError: true });
-    if (data) entries.value = data.results;
+    const { data } = await api.GET('/me/charts', {
+      params: { query: { page: page.value, pageSize: PAGE_NUM } },
+      toastError: true,
+    });
+    if (data && id === requestId) {
+      entries.value = data.results;
+      totalCount.value = data.count;
+    }
   } catch {
     // toast already shown by the client wrapper; the page stays on its shell
   }
@@ -67,8 +73,8 @@ if (!loggedIn()) {
       <h1 class="text-2xl font-bold">{{ t('heading') }}</h1>
       <LoadView v-if="!entries" />
       <template v-else-if="entries.length">
-        <MyChartRow v-for="entry in pageRows" :key="entry.id" :entry="entry" @refresh="fetchCharts" />
-        <PageIndicator :total="pageCount(entries.length, PAGE_NUM)" class="self-center mt-4" ref="pager" />
+        <MyChartRow v-for="entry in entries" :key="entry.id" :entry="entry" @refresh="fetchCharts" />
+        <PageIndicator :total="pageCount(totalCount, PAGE_NUM)" class="self-center mt-4" ref="pager" />
       </template>
       <div v-else class="flex flex-col items-center gap-1 p-8">
         <p class="italic opacity-60">{{ t('empty') }}</p>
