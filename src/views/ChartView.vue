@@ -23,6 +23,8 @@ en:
 
   hide: Hide
   hidden: Hidden
+  unhide: Unhide
+  unhidden: Visible again
 
   report: Report
 
@@ -62,6 +64,8 @@ zh-CN:
 
   hide: 隐藏
   hidden: 已隐藏
+  unhide: 取消隐藏
+  unhidden: 已取消隐藏
 
   report: 举报
 
@@ -214,13 +218,15 @@ async function doHide() {
   if (hiding.value) return;
   hiding.value = true;
   try {
+    const hide = !chart.hidden;
     const { error } = await api.POST('/chart/{id}/hide', {
       params: { path: { id } },
-      body: { hide: true },
+      body: { hide },
       toastError: true,
     });
     if (error) return;
-    toast(t('hidden'));
+    chart.hidden = hide;
+    toast(t(hide ? 'hidden' : 'unhidden'));
   } catch (e) {
     toastError(e);
   } finally {
@@ -245,8 +251,13 @@ async function doHide() {
             <button class="btn btn-neutral ml-4" v-if="me && userPermissions(me).has(Permission.REVIEW)" @click="doCensor">
               <LoadOr :loading="censoring">{{ t('censor') }}</LoadOr>
             </button>
-            <button class="btn btn-error ml-4" v-if="me && userPermissions(me).has(Permission.HIDE_CHART)" @click="doHide">
-              <LoadOr :loading="hiding">{{ t('hide') }}</LoadOr>
+            <button
+              class="btn ml-4"
+              :class="chart.hidden ? 'btn-success' : 'btn-error'"
+              v-if="me && userPermissions(me).has(Permission.HIDE_CHART)"
+              @click="doHide"
+            >
+              <LoadOr :loading="hiding">{{ t(chart.hidden ? 'unhide' : 'hide') }}</LoadOr>
             </button>
             <router-link class="btn btn-error btn-sm ml-auto self-end" :to="`/issue/submit?type=chart&id=${id}`">
               <i class="fa-regular fa-flag mr-1"></i>
