@@ -143,7 +143,12 @@ if (loggedIn()) {
 
 const statsRes = await api.GET('/user/{id}/stats', { params: { path: { id } } });
 if (statsRes.error || !statsRes.data) throw new Error();
-const stats = statsRes.data;
+const stats = ref(statsRes.data);
+
+async function reloadStats() {
+  const { data } = await api.GET('/user/{id}/stats', { params: { path: { id } } });
+  if (data) stats.value = data;
+}
 
 // type IConfirmDialog = InstanceType<typeof ConfirmDialog>;
 
@@ -177,10 +182,8 @@ async function doMarkCheat() {
   if (error || !data) return;
   toast(t('cheat.done', { count: data.marked, rks: data.rks.toFixed(2) }));
   user.rks = data.rks;
-  // Displayed record lists still show the pre-flagging results.
-  recentRecords.value = undefined;
-  bestPool.value = undefined;
-  recentPool.value = undefined;
+  // Everything derived from the user's records has changed server-side.
+  reloadStats();
   loadRecords();
 }
 
@@ -236,6 +239,10 @@ function loadRecords() {
     if (error || !data) return;
     let pool = data as RecordPool;
     async function dispatch(pool: PoolItem[], dest: Ref<PlayRecordEx[] | undefined>) {
+      if (!pool.length) {
+        dest.value = [];
+        return;
+      }
       const chartsRes = await api.GET('/chart/multi-get', {
         params: { query: { ids: pool.map((p) => p.chart).join(',') } },
       });
@@ -302,7 +309,7 @@ const currentBestPool = ref(true);
                         <li v-if="!user.login_banned"><a @click="confirmLoginBanDialog!.showModal()" v-t="'login-ban.button'"></a></li>
                         <li v-else class="disabled"><a v-t="'login-ban.done'"></a></li>
                       </template>
-                      <template v-if="me && userPermissions(me).has(Permission.BAN_USER)">
+                      <template v-if="me && userPermissions(me).has(Permission.BAN_USER_LOGIN)">
                         <li><a @click="confirmCheatDialog!.showModal()" v-t="'cheat.button'"></a></li>
                       </template>
                     </ul>
