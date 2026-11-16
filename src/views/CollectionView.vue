@@ -130,7 +130,7 @@ function doLike() {
         <div class="badge badge-outline">
           {{ visibilityLabel }}
         </div>
-        <div class="ml-auto flex items-center gap-2">
+        <div class="ml-auto flex flex-wrap items-center gap-2">
           <button
             class="btn btn-sm"
             :class="{

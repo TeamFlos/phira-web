@@ -240,15 +240,15 @@ async function doHide() {
       <div class="px-8 w-full lg:px-0 lg:w-3/4 gap-8">
         <div class="flex flex-col">
           <h1>{{ chart.composer }}</h1>
-          <div class="flex">
-            <h1 class="text-5xl font-black">{{ chart.name }}</h1>
-            <button class="btn btn-neutral ml-4" v-if="me && userPermissions(me).has(Permission.REVIEW)" @click="doCensor">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <h1 class="text-5xl font-black min-w-0 max-w-full break-words">{{ chart.name }}</h1>
+            <button class="btn btn-neutral" v-if="me && userPermissions(me).has(Permission.REVIEW)" @click="doCensor">
               <LoadOr :loading="censoring">{{ t('censor') }}</LoadOr>
             </button>
-            <button class="btn btn-error ml-4" v-if="me && userPermissions(me).has(Permission.HIDE_CHART)" @click="doHide">
+            <button class="btn btn-error" v-if="me && userPermissions(me).has(Permission.HIDE_CHART)" @click="doHide">
               <LoadOr :loading="hiding">{{ t('hide') }}</LoadOr>
             </button>
-            <router-link class="btn btn-error btn-sm ml-auto self-end" :to="`/issue/submit?type=chart&id=${id}`">
+            <router-link class="btn btn-error btn-sm ml-auto" :to="`/issue/submit?type=chart&id=${id}`">
               <i class="fa-regular fa-flag mr-1"></i>
               {{ t('report') }}
             </router-link>
