@@ -28,6 +28,11 @@ en:
     confirm: Are you sure to ban this user's avatar?
     done: Avatar Banned
 
+  cheat:
+    button: Mark Records as Cheating
+    confirm: Are you sure to mark ALL play records of this user as cheating? Their rks will be recalculated.
+    done: 'Marked {count} records as cheating, rks is now {rks}'
+
   upload:
     title: Uploaded charts
     more: See More
@@ -67,6 +72,11 @@ zh-CN:
     button: 封禁用户头像
     confirm: 你确定要封禁该用户的头像吗？
     done: 头像已封禁
+
+  cheat:
+    button: 标记成绩为作弊
+    confirm: 你确定要将该用户的所有成绩标记为作弊吗？其 rks 将被重新计算。
+    done: '已将 {count} 条成绩标记为作弊，当前 rks 为 {rks}'
 
   upload:
     title: 上传的谱面
@@ -161,6 +171,19 @@ async function doBanLogin() {
   user.login_banned = true;
 }
 
+const confirmCheatDialog = ref<IConfirmDialog>();
+async function doMarkCheat() {
+  const { data, error } = await api.POST('/user/{id}/cheat-records', { params: { path: { id } }, toastError: true });
+  if (error || !data) return;
+  toast(t('cheat.done', { count: data.marked, rks: data.rks.toFixed(2) }));
+  user.rks = data.rks;
+  // Displayed record lists still show the pre-flagging results.
+  recentRecords.value = undefined;
+  bestPool.value = undefined;
+  recentPool.value = undefined;
+  loadRecords();
+}
+
 const showModeration = computed(() => {
   if (!me.value) return false;
   const permissions = userPermissions(me.value);
@@ -197,38 +220,42 @@ function cancelModifyRoles() {
   }
 }
 
-const recentRecords = ref<PlayRecordEx[]>();
-api.GET('/record', { params: { query: { player: id } as any } }).then(({ data, error }) => {
-  if (error || !data) return;
-  let records = data as PlayRecordEx[];
-  if (records.length > 12) records.splice(12);
-  recentRecords.value = records;
-});
-
 const bestPool = ref<PlayRecord[]>(),
   recentPool = ref<PlayRecord[]>();
-api.GET('/record/get-pool/{id}', { params: { path: { id } } }).then(({ data, error }) => {
-  if (error || !data) return;
-  let pool = data as RecordPool;
-  async function dispatch(pool: PoolItem[], dest: Ref<PlayRecordEx[] | undefined>) {
-    const chartsRes = await api.GET('/chart/multi-get', {
-      params: { query: { ids: pool.map((p) => p.chart).join(',') } },
-    });
-    if (chartsRes.error || !chartsRes.data) return;
-    let charts = chartsRes.data as unknown as Chart[];
-    const resRes = await api.GET('/record/multi-get', {
-      params: { query: { ids: pool.map((p) => p.record).join(',') } },
-    });
-    if (resRes.error || !resRes.data) return;
-    let res = resRes.data as unknown as PlayRecordEx[];
-    for (let i = 0; i < pool.length; i++) {
-      res[i].label = `${pool[i].rks.toFixed(2)} / ${charts[i].difficulty.toFixed(2)}`;
+const recentRecords = ref<PlayRecordEx[]>();
+
+function loadRecords() {
+  api.GET('/record', { params: { query: { player: id } as any } }).then(({ data, error }) => {
+    if (error || !data) return;
+    let records = data as PlayRecordEx[];
+    if (records.length > 12) records.splice(12);
+    recentRecords.value = records;
+  });
+
+  api.GET('/record/get-pool/{id}', { params: { path: { id } } }).then(({ data, error }) => {
+    if (error || !data) return;
+    let pool = data as RecordPool;
+    async function dispatch(pool: PoolItem[], dest: Ref<PlayRecordEx[] | undefined>) {
+      const chartsRes = await api.GET('/chart/multi-get', {
+        params: { query: { ids: pool.map((p) => p.chart).join(',') } },
+      });
+      if (chartsRes.error || !chartsRes.data) return;
+      let charts = chartsRes.data as unknown as Chart[];
+      const resRes = await api.GET('/record/multi-get', {
+        params: { query: { ids: pool.map((p) => p.record).join(',') } },
+      });
+      if (resRes.error || !resRes.data) return;
+      let res = resRes.data as unknown as PlayRecordEx[];
+      for (let i = 0; i < pool.length; i++) {
+        res[i].label = `${pool[i].rks.toFixed(2)} / ${charts[i].difficulty.toFixed(2)}`;
+      }
+      dest.value = res;
     }
-    dest.value = res;
-  }
-  dispatch(pool.bestPool, bestPool);
-  dispatch(pool.recentPool, recentPool);
-});
+    dispatch(pool.bestPool, bestPool);
+    dispatch(pool.recentPool, recentPool);
+  });
+}
+loadRecords();
 
 const currentBestPool = ref(true);
 </script>
@@ -274,6 +301,9 @@ const currentBestPool = ref(true);
                       <template v-if="me && userPermissions(me).has(Permission.BAN_USER_LOGIN)">
                         <li v-if="!user.login_banned"><a @click="confirmLoginBanDialog!.showModal()" v-t="'login-ban.button'"></a></li>
                         <li v-else class="disabled"><a v-t="'login-ban.done'"></a></li>
+                      </template>
+                      <template v-if="me && userPermissions(me).has(Permission.BAN_USER)">
+                        <li><a @click="confirmCheatDialog!.showModal()" v-t="'cheat.button'"></a></li>
                       </template>
                     </ul>
                   </div>
@@ -378,6 +408,10 @@ const currentBestPool = ref(true);
   <ConfirmDialog :do="doBanLogin" ref="confirmLoginBanDialog">
     <h3 class="font-bold text-lg" v-t="'warning'"></h3>
     <p class="py-4" v-t="'login-ban.confirm'"></p>
+  </ConfirmDialog>
+  <ConfirmDialog :do="doMarkCheat" ref="confirmCheatDialog">
+    <h3 class="font-bold text-lg" v-t="'warning'"></h3>
+    <p class="py-4" v-t="'cheat.confirm'"></p>
   </ConfirmDialog>
   <ConfirmDialog :do="doModifyRoles" ref="modifyRolesDialog" :onError="cancelModifyRoles">
     <h3 class="font-bold text-lg" v-t="'roles.modify'"></h3>
