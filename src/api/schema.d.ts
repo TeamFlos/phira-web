@@ -1112,6 +1112,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/user/{id}/cheat-records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cheat_records"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/user/{id}/follow": {
         parameters: {
             query?: never;
@@ -1276,6 +1292,7 @@ export interface components {
             /** Format: float */
             difficulty: number;
             file: components["schemas"]["String"];
+            hidden?: boolean;
             /** Format: int32 */
             id: number;
             illustration: components["schemas"]["String"];
@@ -1297,6 +1314,12 @@ export interface components {
             updated: string;
             /** Format: int32 */
             uploader: number;
+        };
+        CheatRecordsR: {
+            /** Format: int64 */
+            marked: number;
+            /** Format: double */
+            rks: number;
         };
         CheckP: {
             /** @description Hex-encoded SHA-256 of the chart content file. */
@@ -1640,6 +1663,9 @@ export interface components {
         } | {
             cancelDeleteRequest?: boolean;
             refreshToken: string;
+        } | {
+            cancelDeleteRequest?: boolean;
+            webTicket: string;
         };
         LoginR: {
             /** Format: date-time */
@@ -1795,6 +1821,7 @@ export interface components {
                 /** Format: float */
                 difficulty: number;
                 file: components["schemas"]["String"];
+                hidden?: boolean;
                 /** Format: int32 */
                 id: number;
                 illustration: components["schemas"]["String"];
@@ -2334,6 +2361,10 @@ export interface operations {
                 search?: string;
                 order?: string;
                 tags?: string;
+                /** @description Filter by uploader user id */
+                uploader?: number;
+                /** @description Filter by division tag */
+                division?: string;
             };
             header?: never;
             path?: never;
@@ -4061,6 +4092,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    cheat_records: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description User ID */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheatRecordsR"];
+                };
             };
         };
     };
