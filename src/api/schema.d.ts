@@ -1284,6 +1284,7 @@ export interface components {
             name: string;
             preview: components["schemas"]["String"];
             ranked: boolean;
+            hidden: boolean;
             /** Format: float */
             rating?: number | null;
             /** Format: int32 */
